@@ -89,26 +89,18 @@ get_latest_version() {
 download_binary() {
     local version=$1
     local platform=$2
-    local download_url="https://github.com/${REPO}/releases/download/v${version}/${BINARY_NAME}"
+    # Binary names in GitHub releases include the platform suffix
+    local asset_name="${BINARY_NAME}-${platform}"
+    local download_url="https://github.com/${REPO}/releases/download/v${version}/${asset_name}"
     local temp_file="/tmp/${BINARY_NAME}-${version}"
 
     info "Downloading Databasin CLI v${version} for ${platform}..."
-
-    # Adjust URL based on platform
-    # The release has platform-specific paths in the artifacts
-    case "$platform" in
-        linux-x64)
-            download_url="https://github.com/${REPO}/releases/download/v${version}/${BINARY_NAME}"
-            ;;
-        darwin-arm64|darwin-x64)
-            download_url="https://github.com/${REPO}/releases/download/v${version}/${BINARY_NAME}"
-            ;;
-    esac
+    info "Asset: ${asset_name}"
 
     if command -v curl &> /dev/null; then
-        curl -L -o "${temp_file}" "${download_url}" || error "Failed to download binary"
+        curl -fL -o "${temp_file}" "${download_url}" || error "Failed to download binary. Check if release v${version} has asset '${asset_name}'"
     elif command -v wget &> /dev/null; then
-        wget -O "${temp_file}" "${download_url}" || error "Failed to download binary"
+        wget -O "${temp_file}" "${download_url}" || error "Failed to download binary. Check if release v${version} has asset '${asset_name}'"
     fi
 
     echo "${temp_file}"

@@ -43,9 +43,9 @@ interface GitHubAsset {
 }
 
 /**
- * Get the platform-specific asset name
+ * Get the platform identifier (e.g., linux-x64, darwin-arm64)
  */
-function getPlatformAssetName(): string {
+function getPlatformIdentifier(): string {
 	const platform = process.platform;
 	const arch = process.arch;
 
@@ -58,6 +58,14 @@ function getPlatformAssetName(): string {
 	}
 
 	throw new Error(`Unsupported platform: ${platform}-${arch}`);
+}
+
+/**
+ * Get the platform-specific asset name for GitHub releases
+ * e.g., databasin-linux-x64, databasin-darwin-arm64
+ */
+function getPlatformAssetName(): string {
+	return `databasin-${getPlatformIdentifier()}`;
 }
 
 /**
@@ -244,9 +252,9 @@ export function createUpdateCommand(): Command {
 			}
 
 			// Find the appropriate asset for this platform
-			let platformDir: string;
+			let assetName: string;
 			try {
-				platformDir = getPlatformAssetName();
+				assetName = getPlatformAssetName();
 			} catch (error) {
 				if (error instanceof Error) {
 					logError(error.message);
@@ -255,18 +263,11 @@ export function createUpdateCommand(): Command {
 			}
 
 			// Find the binary in release assets
-			// Assets are in directories like linux-x64/databasin, darwin-arm64/databasin
-			const binaryAsset = release.assets.find(
-				(asset) => asset.name === 'databasin' || asset.name === `databasin-${platformDir}`
-			);
-
-			// If not found directly, look for the directory asset or a zip/tar
-			const dirAsset = release.assets.find((asset) => asset.name.includes(platformDir));
-
-			const asset = binaryAsset || dirAsset;
+			// Assets are named like: databasin-linux-x64, databasin-darwin-arm64
+			const asset = release.assets.find((a) => a.name === assetName);
 
 			if (!asset) {
-				logError(`No binary found for platform: ${platformDir}`);
+				logError(`No binary found for platform: ${assetName}`);
 				console.log(chalk.dim('\nAvailable assets:'));
 				release.assets.forEach((a) => console.log(chalk.dim(`  - ${a.name}`)));
 				throw new Error('Platform binary not found');

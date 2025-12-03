@@ -178,6 +178,14 @@ jobs:
             echo "- Node.js compatible bundle for npm" >> release_notes.txt
           fi
 
+      - name: Rename binaries for release
+        run: |
+          # Rename binaries to include platform to avoid GitHub Release asset name conflicts
+          mv dist/linux-x64/databasin dist/databasin-linux-x64
+          mv dist/darwin-arm64/databasin dist/databasin-darwin-arm64
+          mv dist/darwin-x64/databasin dist/databasin-darwin-x64
+          echo "Renamed binaries for release upload ✓"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -188,9 +196,9 @@ jobs:
           prerelease: false
           files: |
             dist/index.js
-            dist/linux-x64/databasin
-            dist/darwin-arm64/databasin
-            dist/darwin-x64/databasin
+            dist/databasin-linux-x64
+            dist/databasin-darwin-arm64
+            dist/databasin-darwin-x64
             dist/build-info.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -208,8 +216,8 @@ jobs:
           echo "- **Binary:** Download standalone executable below (no runtime required)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Build Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/index.js\` - Node.js compatible bundle (works with Node.js and Bun)" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/linux-x64/databasin\` - Linux x64 standalone executable" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/darwin-arm64/databasin\` - macOS ARM64 standalone executable" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/darwin-x64/databasin\` - macOS x64 standalone executable" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/build-info.json\` - Build metadata" >> $GITHUB_STEP_SUMMARY
+          echo "- \`index.js\` - Node.js compatible bundle (works with Node.js and Bun)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`databasin-linux-x64\` - Linux x64 standalone executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`databasin-darwin-arm64\` - macOS ARM64 standalone executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`databasin-darwin-x64\` - macOS x64 standalone executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`build-info.json\` - Build metadata" >> $GITHUB_STEP_SUMMARY

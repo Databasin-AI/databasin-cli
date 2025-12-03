@@ -12,6 +12,16 @@ All notable changes to Databasin CLI will be documented in this file.
 - Implement bulk operations from CSV
 - Add built-in connector templates
 
+## [0.3.3] - 2025-12-03
+
+### Fixed
+
+- **GitHub Release Asset Naming**
+  - Fixed release workflow failing due to duplicate asset names
+  - Binaries now uploaded with platform suffix (e.g., `databasin-linux-x64`, `databasin-darwin-arm64`)
+  - Install script and self-update command download platform-specific binary
+  - Binary is renamed to `databasin` during installation for seamless usage
+
 ## [0.3.2] - 2025-12-03
 
 ### Added
