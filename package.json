@@ -52,28 +52,28 @@
 	"keywords": [
 		"databasin",
 		"cli",
-		"data-integration",
+		"data integration",
 		"etl",
 		"sql",
 		"pipeline",
 		"connector",
-		"data-warehouse",
+		"data warehouse",
 		"automation",
 		"bun"
 	],
-	"author": "Databasin Team",
-	"license": "MIT",
+	"author": "Databasin",
+	"license": "CC-BY-4.0",
 	"homepage": "https://github.com/databasin-ai/databasin-cli#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/databasin-ai/databasin-cli.git"
+		"url": "git+https://github.com/databasin-ai/databasin-cli.git"
 	},
 	"bugs": {
 		"url": "https://github.com/databasin-ai/databasin-cli/issues",
 		"email": "support@databasin.ai"
 	},
 	"engines": {
-		"node": ">=18.0.0",
+		"node": ">=22.0.0",
 		"bun": ">=1.0.0"
 	}
 }
