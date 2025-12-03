@@ -392,4 +392,4 @@ Once pushed, the GitHub Actions workflow will automatically:
 
 ## License
 
-This project is licensed under the CC-BY License. See LICENSE file for details.
+This project is licensed under the CC-BY-4.0 License. See LICENSE file for details.

@@ -32,6 +32,7 @@ import { createSqlCommand } from './commands/sql.ts';
 import { createAutomationsCommand } from './commands/automations.ts';
 import { createApiCommand } from './commands/api.ts';
 import { createUpdateCommand } from './commands/update.ts';
+import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
 const VERSION = packageJson.version;
@@ -68,6 +69,7 @@ Environment Variables:
   DATABASIN_TOKEN           Authentication token
   DEBUG or DATABASIN_DEBUG  Enable debug mode with stack traces
   NO_COLOR                  Disable colored output
+  DATABASIN_NO_UPDATE_CHECK Disable automatic update checks
 
 Configuration:
   Config file: ~/.databasin/config.json
@@ -91,6 +93,33 @@ For more help on a specific command:
 		.option('--verbose', 'Enable verbose logging')
 		.option('--no-color', 'Disable colored output')
 		.option('--debug', 'Enable debug mode with stack traces');
+
+	// Hook: After command execution, check for updates (non-blocking)
+	program.hook('postAction', async (thisCommand) => {
+		// Don't check for updates when running the update command itself
+		const commandName = thisCommand.args[0];
+		if (commandName === 'update') {
+			return;
+		}
+
+		// Get config to check if update checks are disabled
+		const opts = thisCommand.optsWithGlobals();
+		const config: CliConfig | undefined = opts._config;
+		const disabled = config?.noUpdateCheck;
+
+		// Check for updates in background - don't await to avoid blocking
+		checkForUpdates({ disabled })
+			.then((result) => {
+				if (result?.updateAvailable) {
+					const notification = formatUpdateNotification(result);
+					// Use stderr so it doesn't interfere with piped output
+					process.stderr.write(notification);
+				}
+			})
+			.catch(() => {
+				// Silently ignore errors - don't interrupt CLI usage
+			});
+	});
 
 	// Hook: Before each command execution, parse global options and build config
 	program.hook('preAction', (thisCommand) => {

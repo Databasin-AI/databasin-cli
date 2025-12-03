@@ -96,6 +96,12 @@ export interface CliConfig {
 	 * @default false
 	 */
 	debug: boolean;
+
+	/**
+	 * Disable automatic update checks
+	 * @default false
+	 */
+	noUpdateCheck: boolean;
 }
 
 /**
@@ -110,6 +116,7 @@ export type PartialCliConfig = Partial<{
 	tokenEfficiency: Partial<CliConfig['tokenEfficiency']>;
 	timeout: number;
 	debug: boolean;
+	noUpdateCheck: boolean;
 }>;
 
 /**
@@ -129,7 +136,8 @@ export const DEFAULT_CONFIG: CliConfig = {
 		warnThreshold: 50000
 	},
 	timeout: 30000,
-	debug: false
+	debug: false,
+	noUpdateCheck: false
 };
 
 /**
@@ -162,7 +170,10 @@ export const ENV_VARS = {
 	OUTPUT_FORMAT: 'DATABASIN_OUTPUT_FORMAT',
 
 	/** Disable colors */
-	NO_COLOR: 'NO_COLOR'
+	NO_COLOR: 'NO_COLOR',
+
+	/** Disable automatic update checks */
+	NO_UPDATE_CHECK: 'DATABASIN_NO_UPDATE_CHECK'
 } as const;
 
 /**
@@ -283,6 +294,9 @@ export function mergeConfigs(...sources: PartialCliConfig[]): CliConfig {
 		if (source.debug !== undefined) {
 			merged.debug = source.debug;
 		}
+		if (source.noUpdateCheck !== undefined) {
+			merged.noUpdateCheck = source.noUpdateCheck;
+		}
 	}
 
 	return merged;
@@ -330,6 +344,10 @@ export function configFromEnv(): PartialCliConfig {
 
 	if (process.env[ENV_VARS.NO_COLOR]) {
 		config.output = { ...config.output, colors: false };
+	}
+
+	if (process.env[ENV_VARS.NO_UPDATE_CHECK] === 'true' || process.env[ENV_VARS.NO_UPDATE_CHECK] === '1') {
+		config.noUpdateCheck = true;
 	}
 
 	return config;

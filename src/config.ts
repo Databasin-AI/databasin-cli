@@ -201,6 +201,11 @@ export function loadConfigFromEnv(): PartialCliConfig {
 		config.output = { ...config.output, colors: false };
 	}
 
+	// Disable update checks
+	if (process.env[ENV_VARS.NO_UPDATE_CHECK] === 'true' || process.env[ENV_VARS.NO_UPDATE_CHECK] === '1') {
+		config.noUpdateCheck = true;
+	}
+
 	return config;
 }
 
@@ -232,6 +237,9 @@ export function mergeConfigs(...configs: PartialCliConfig[]): CliConfig {
 		}
 		if (config.debug !== undefined) {
 			result.debug = config.debug;
+		}
+		if (config.noUpdateCheck !== undefined) {
+			result.noUpdateCheck = config.noUpdateCheck;
 		}
 
 		// Nested: output settings
@@ -349,6 +357,11 @@ export function validateConfig(config: PartialCliConfig): void {
 	// Validate debug flag
 	if (config.debug !== undefined && typeof config.debug !== 'boolean') {
 		throw new ConfigError('Debug setting must be a boolean');
+	}
+
+	// Validate noUpdateCheck flag
+	if (config.noUpdateCheck !== undefined && typeof config.noUpdateCheck !== 'boolean') {
+		throw new ConfigError('noUpdateCheck setting must be a boolean');
 	}
 
 	// Validate defaultProject

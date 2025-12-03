@@ -12,6 +12,27 @@ All notable changes to Databasin CLI will be documented in this file.
 - Implement bulk operations from CSV
 - Add built-in connector templates
 
+## [0.3.2] - 2025-12-03
+
+### Added
+
+- **Automatic Update Notifications**
+  - CLI automatically checks for new versions on GitHub (at most once per week)
+  - Displays notification box when a newer version is available
+  - Non-blocking: checks run in background with 5-second timeout
+  - Notification appears on stderr to not interfere with piped output
+  - Update state cached in `~/.databasin/update-check.json`
+
+- **Disable Update Checks**
+  - Config file option: `"noUpdateCheck": true` in `~/.databasin/config.json`
+  - Environment variable: `DATABASIN_NO_UPDATE_CHECK=true` or `=1`
+  - Skips check when running `databasin update` command (already handles updates)
+
+### Changed
+
+- Added `noUpdateCheck` field to CLI configuration schema
+- Updated help text to document `DATABASIN_NO_UPDATE_CHECK` environment variable
+
 ## [0.3.1] - 2025-12-02
 
 ### Added

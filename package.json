@@ -63,7 +63,7 @@
 	],
 	"author": "Databasin",
 	"license": "CC-BY-4.0",
-	"homepage": "https://github.com/databasin-ai/databasin-cli#readme",
+	"homepage": "https://databasin.ai/",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/databasin-ai/databasin-cli.git"

@@ -4,7 +4,7 @@ Command-line interface for the [Databasin](https://databasin.ai) data integratio
 
 ## Installation
 
-### npm (Node.js 18+ or Bun 1.0+)
+### npm (Node.js 20+ or Bun 1.3+)
 
 ```bash
 # Install globally
@@ -18,20 +18,6 @@ npx @databasin/cli --help
 
 ```bash
 bun add -g @databasin/cli
-```
-
-### Standalone Binary (No Runtime Required)
-
-Download pre-built binaries from [GitHub Releases](https://github.com/databasin-ai/databasin-cli/releases):
-
-- **Linux x64**: `databasin-linux-x64`
-- **macOS ARM64** (Apple Silicon): `databasin-darwin-arm64`
-- **macOS x64**: `databasin-darwin-x64`
-
-Or use the install script:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/databasin-ai/databasin-cli/main/install.sh | bash
 ```
 
 ## Quick Start
@@ -109,4 +95,4 @@ For complete documentation, examples, and development guides:
 
 ## License
 
-MIT
+CC-BY-4.0
