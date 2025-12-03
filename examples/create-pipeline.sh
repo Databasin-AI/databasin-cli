@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# DataBasin CLI - Programmatic Pipeline Creation Example
+# Databasin CLI - Programmatic Pipeline Creation Example
 #
 # This script demonstrates how to use individual CLI commands to gather
 # information and create a pipeline without using the interactive wizard.
@@ -351,7 +351,7 @@ echo "$PAYLOAD" | jq '{
 
 section "Step 12: Create Pipeline"
 
-info "Submitting pipeline to DataBasin API..."
+info "Submitting pipeline to Databasin API..."
 
 # Save payload to temp file
 PAYLOAD_FILE="/tmp/databasin-pipeline-$$.json"

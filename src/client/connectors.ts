@@ -1,7 +1,7 @@
 /**
- * Connectors API Client for DataBasin CLI
+ * Connectors API Client for Databasin CLI
  *
- * Manages data source and destination connections within DataBasin.
+ * Manages data source and destination connections within Databasin.
  * Provides methods for CRUD operations on connectors and fetching
  * system connector configuration.
  *
@@ -13,7 +13,7 @@
  * @module client/connectors
  */
 
-import { DataBasinClient, type TokenEfficiencyOptions, type RequestOptions } from './base.ts';
+import { DatabasinClient, type TokenEfficiencyOptions, type RequestOptions } from './base.ts';
 import type { Connector, SystemConfig } from '../types/api.ts';
 
 /**
@@ -76,7 +76,7 @@ export interface TestResult {
  * });
  * ```
  */
-export class ConnectorsClient extends DataBasinClient {
+export class ConnectorsClient extends DatabasinClient {
 	/**
 	 * List connectors with token-efficient defaults
 	 *

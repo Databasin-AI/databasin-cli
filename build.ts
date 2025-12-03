@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * Production Build Script for DataBasin CLI
+ * Production Build Script for Databasin CLI
  *
  * Creates optimized builds for distribution:
  * - Compiles TypeScript to JavaScript
@@ -113,11 +113,12 @@ async function runTests(): Promise<void> {
 }
 
 async function buildJavaScript(): Promise<void> {
-	logStep('📦 Building JavaScript bundle...');
+	logStep('📦 Building JavaScript bundle (Node.js compatible)...');
 
 	try {
-		await $`bun build src/index.ts --outdir dist --target bun`;
-		logSuccess('JavaScript bundle created');
+		// Target node for npm package compatibility (works with both Node.js and Bun)
+		await $`bun build src/index.ts --outdir dist --target node`;
+		logSuccess('JavaScript bundle created (Node.js compatible)');
 	} catch (error) {
 		logError('JavaScript build failed');
 		throw error;
@@ -234,7 +235,7 @@ async function main(): Promise<void> {
 	const startTime = Date.now();
 
 	log('╔════════════════════════════════════════╗', 'bright');
-	log('║   DataBasin CLI - Production Build     ║', 'bright');
+	log('║   Databasin CLI - Production Build     ║', 'bright');
 	log('╚════════════════════════════════════════╝', 'bright');
 
 	const options = parseArgs();

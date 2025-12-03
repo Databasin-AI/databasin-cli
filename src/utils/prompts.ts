@@ -1,5 +1,5 @@
 /**
- * Interactive Prompt Utilities for DataBasin CLI
+ * Interactive Prompt Utilities for Databasin CLI
  *
  * Provides interactive selection prompts for common CLI operations
  * using the prompts library for better user experience.

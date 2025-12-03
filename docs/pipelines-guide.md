@@ -1,6 +1,6 @@
 # Pipelines Commands
 
-Manage DataBasin data pipelines with the `databasin pipelines` command suite.
+Manage Databasin data pipelines with the `databasin pipelines` command suite.
 
 ## Overview
 
@@ -397,7 +397,7 @@ databasin pipelines logs 123 --limit 10
   Limit: 10 entries
 
 ℹ Log viewing will be available in a future release
-ℹ For now, check pipeline execution status in the DataBasin UI
+ℹ For now, check pipeline execution status in the Databasin UI
 ```
 
 ---

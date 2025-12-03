@@ -1,5 +1,5 @@
 /**
- * Type Coercion Utilities for DataBasin CLI
+ * Type Coercion Utilities for Databasin CLI
  *
  * Provides type-safe utilities for parsing and coercing values from various input types.
  * These utilities handle user input from JSON files, command-line arguments, and API responses

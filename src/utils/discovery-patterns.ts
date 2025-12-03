@@ -1,8 +1,8 @@
 /**
- * Discovery Pattern Detection Utilities for DataBasin CLI
+ * Discovery Pattern Detection Utilities for Databasin CLI
  *
  * Analyzes connector configurations to determine the correct discovery workflow.
- * DataBasin uses two main discovery patterns based on connector architecture:
+ * Databasin uses two main discovery patterns based on connector architecture:
  *
  * 1. RDBMS-Style (Screen 1): Single-level schema discovery
  *    - Used by: MySQL, Oracle, MariaDB, DB2, etc.

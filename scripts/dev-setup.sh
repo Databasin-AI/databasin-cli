@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# DataBasin CLI - Developer Setup Script
+# Databasin CLI - Developer Setup Script
 # Links/unlinks the CLI globally for development
 
 set -e

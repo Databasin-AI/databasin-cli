@@ -1,15 +1,15 @@
-# DataBasin CLI
+# Databasin CLI
 
-A command-line interface for managing DataBasin projects, connectors, pipelines, and data workflows. Execute SQL queries, manage automations, and interact with the DataBasin platform directly from your terminal.
+A command-line interface for managing Databasin projects, connectors, pipelines, and data workflows. Execute SQL queries, manage automations, and interact with the Databasin platform directly from your terminal.
 
 ## Features
 
-- **Project Management** - List and manage DataBasin projects
+- **Project Management** - List and manage Databasin projects
 - **Connector Operations** - Create, update, and manage data connectors  
 - **Pipeline Execution** - Run and monitor data pipelines
 - **SQL Interface** - Execute queries against connected data sources
 - **Automation Control** - Manage and trigger automations
-- **Generic API Access** - Call any DataBasin API endpoint
+- **Generic API Access** - Call any Databasin API endpoint
 - **Multiple Output Formats** - Table, JSON, and CSV output options
 
 ## Installation
@@ -48,7 +48,7 @@ databasin auth login
 ### Authentication
 
 ```bash
-# Login via browser - opens DataBasin web UI to authenticate
+# Login via browser - opens Databasin web UI to authenticate
 databasin auth login
 
 # View current user context
@@ -299,7 +299,7 @@ databasin connectors create connector.json
 ### Prerequisites
 
 - [Bun](https://bun.sh) runtime (v1.0 or later) - only for development
-- DataBasin API access token
+- Databasin API access token
 
 ### Building from Source
 

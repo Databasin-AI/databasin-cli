@@ -1,5 +1,5 @@
 /**
- * Progress indicator utilities for DataBasin CLI
+ * Progress indicator utilities for Databasin CLI
  *
  * Provides comprehensive progress tracking with spinners, progress bars,
  * status messages, token usage warnings, and duration tracking.

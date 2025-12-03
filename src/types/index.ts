@@ -1,5 +1,5 @@
 /**
- * DataBasin CLI Type Definitions
+ * Databasin CLI Type Definitions
  *
  * Central export point for all CLI type definitions.
  * Import types from this file in your CLI code.

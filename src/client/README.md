@@ -1,6 +1,6 @@
-# DataBasin API Client
+# Databasin API Client
 
-Production-ready HTTP client for DataBasin API with automatic authentication, token refresh, error handling, and token efficiency features.
+Production-ready HTTP client for Databasin API with automatic authentication, token refresh, error handling, and token efficiency features.
 
 ## Available Clients
 
@@ -174,7 +174,7 @@ const data = await client.get('/api/public', { skipAuth: true });
 The client uses configuration with this priority (highest to lowest):
 
 1. **Request options** (passed to get/post/put/delete)
-2. **Constructor config** (passed to `new DataBasinClient()`)
+2. **Constructor config** (passed to `new DatabasinClient()`)
 3. **Environment variables** (DATABASIN_API_URL, etc.)
 4. **Config file** (~/.databasin/config.json)
 5. **Default values**
@@ -372,9 +372,9 @@ The client is optimized for:
 
 ## Architecture
 
-The client follows patterns from the DataBasin plugin skills:
+The client follows patterns from the Databasin plugin skills:
 
-- **Base class pattern**: All API clients can extend DataBasinClient
+- **Base class pattern**: All API clients can extend DatabasinClient
 - **Token efficiency**: Matches plugin skill patterns for reducing token usage
 - **Error handling**: Consistent error types across CLI and plugins
 - **Configuration**: Same config system as plugin skills
@@ -388,6 +388,6 @@ The client follows patterns from the DataBasin plugin skills:
 
 ## References
 
-- [DataBasin API Plugin Skill](.claude-plugin/plugins/databasin/skills/databasin-api/)
+- [Databasin API Plugin Skill](.claude-plugin/plugins/databasin/skills/databasin-api/)
 - [Token Efficiency Guide](.claude-plugin/plugins/databasin/skills/databasin-api/references/token-efficiency.md)
 - [Working Endpoints](.claude-plugin/plugins/databasin/skills/databasin-api/references/working-endpoints.md)

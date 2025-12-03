@@ -1,5 +1,5 @@
 /**
- * Authentication Commands for DataBasin CLI
+ * Authentication Commands for Databasin CLI
  *
  * Provides commands for verifying and displaying authentication status:
  * - auth verify: Verify token validity by calling /api/ping
@@ -9,7 +9,8 @@
  */
 
 import { Command } from 'commander';
-import type { DataBasinClient } from '../client/index.ts';
+import { createServer, type IncomingMessage, type ServerResponse } from 'http';
+import type { DatabasinClient } from '../client/index.ts';
 import type { ProjectsClient } from '../client/projects.ts';
 import { formatOutput } from '../utils/formatters.ts';
 import {
@@ -144,7 +145,7 @@ export function createAuthCommand(): Command {
 			// Get config and clients from parent command context
 			const opts = command.optsWithGlobals();
 			const config: CliConfig = opts._config;
-			const client: DataBasinClient = opts._clients.base;
+			const client: DatabasinClient = opts._clients.base;
 
 			const spinner = startSpinner('Verifying token...');
 
@@ -359,13 +360,13 @@ export function createAuthCommand(): Command {
 		.action(async (options, command) => {
 			const opts = command.optsWithGlobals();
 			const config: CliConfig = opts._config;
-			const client: DataBasinClient = opts._clients.base;
+			const client: DatabasinClient = opts._clients.base;
 			const projectsClient: ProjectsClient = opts._clients.projects;
 
 			const port = parseInt(options.port, 10);
 			const callbackUrl = `http://localhost:${port}/callback`;
 
-			console.log(chalk.bold('\n🔐 DataBasin CLI Login\n'));
+			console.log(chalk.bold('\n🔐 Databasin CLI Login\n'));
 			console.log('Opening browser for authentication...\n');
 
 			// Track if we received a token
@@ -373,34 +374,35 @@ export function createAuthCommand(): Command {
 			let serverClosed = false;
 
 			try {
-				// Create HTTP server to receive token callback
-				const server = Bun.serve({
-					port,
-					async fetch(req) {
-						const url = new URL(req.url);
+				// Create HTTP server to receive token callback (Node.js compatible)
+				const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+					const url = new URL(req.url || '/', `http://localhost:${port}`);
 
-						if (url.pathname === '/callback') {
-							const token = url.searchParams.get('token');
+					if (url.pathname === '/callback') {
+						const token = url.searchParams.get('token');
 
-							if (token) {
-								receivedToken = token;
+						if (token) {
+							receivedToken = token;
 
-								// Return success page with embedded logo
-								return new Response(renderLoginPage(true), {
-									headers: { 'Content-Type': 'text/html' }
-								});
-							} else {
-								// No token provided
-								return new Response(renderLoginPage(false), {
-									status: 400,
-									headers: { 'Content-Type': 'text/html' }
-								});
-							}
+							// Return success page with embedded logo
+							res.writeHead(200, { 'Content-Type': 'text/html' });
+							res.end(renderLoginPage(true));
+						} else {
+							// No token provided
+							res.writeHead(400, { 'Content-Type': 'text/html' });
+							res.end(renderLoginPage(false));
 						}
-
+					} else {
 						// 404 for other paths
-						return new Response('Not Found', { status: 404 });
+						res.writeHead(404, { 'Content-Type': 'text/plain' });
+						res.end('Not Found');
 					}
+				});
+
+				// Start server with promise to ensure it's ready
+				await new Promise<void>((resolve, reject) => {
+					server.on('error', reject);
+					server.listen(port, () => resolve());
 				});
 
 				console.log(chalk.dim(`Local server started on http://localhost:${port}`));
@@ -441,7 +443,7 @@ export function createAuthCommand(): Command {
 				}
 
 				// Close server
-				server.stop();
+				server.close();
 				serverClosed = true;
 
 				if (!receivedToken) {

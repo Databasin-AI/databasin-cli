@@ -14,13 +14,13 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { Command } from 'commander';
 import { createApiCommand } from '../../src/commands/api.ts';
-import type { DataBasinClient } from '../../src/client/base.ts';
+import type { DatabasinClient } from '../../src/client/base.ts';
 import type { CliConfig } from '../../src/types/config.ts';
 
 /**
- * Mock DataBasin client for testing
+ * Mock Databasin client for testing
  */
-class MockDataBasinClient {
+class MockDatabasinClient {
 	public lastRequest: {
 		method: string;
 		endpoint: string;
@@ -92,7 +92,7 @@ function createMockProgram(): Command {
 		}
 	};
 
-	const mockClient = new MockDataBasinClient();
+	const mockClient = new MockDatabasinClient();
 
 	const program = new Command();
 	program.setOptionValue('_config', mockConfig);
@@ -186,7 +186,7 @@ describe('API Command', () => {
 
 	describe('HTTP Methods', () => {
 		it('should support GET requests', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'GET', '/api/test']);
 
@@ -196,7 +196,7 @@ describe('API Command', () => {
 		});
 
 		it('should support POST requests with body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync([
 				'node',
@@ -213,7 +213,7 @@ describe('API Command', () => {
 		});
 
 		it('should support PUT requests with body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync([
 				'node',
@@ -230,7 +230,7 @@ describe('API Command', () => {
 		});
 
 		it('should support DELETE requests', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'DELETE', '/api/test/123']);
 
@@ -245,7 +245,7 @@ describe('API Command', () => {
 		});
 
 		it('should normalize method to uppercase', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'get', '/api/test']);
 
@@ -367,7 +367,7 @@ describe('API Command', () => {
 
 	describe('Query Parameters', () => {
 		it('should handle query params via body argument for GET', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync([
 				'node',
@@ -383,7 +383,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle query params in endpoint URL', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'GET', '/api/test?existing=true']);
 
@@ -394,7 +394,7 @@ describe('API Command', () => {
 
 	describe('Request Body Parsing', () => {
 		it('should parse valid JSON body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			const validJson = JSON.stringify({ key: 'value', num: 42 });
 			await program.parseAsync(['node', 'test', 'api', 'POST', '/api/test', validJson]);
@@ -403,7 +403,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle POST without body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'POST', '/api/test']);
 
@@ -412,7 +412,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle PUT without body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'PUT', '/api/test/123']);
 
@@ -422,7 +422,7 @@ describe('API Command', () => {
 	});
 
 	describe('Integration with Base Client', () => {
-		it('should use DataBasinClient from parent context', async () => {
+		it('should use DatabasinClient from parent context', async () => {
 			const clients = program.getOptionValue('_clients');
 			expect(clients).toBeDefined();
 			expect(clients.base).toBeDefined();
@@ -469,7 +469,7 @@ describe('API Command', () => {
 
 	describe('DELETE with Body', () => {
 		it('should support DELETE requests with body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync([
 				'node',
@@ -490,7 +490,7 @@ describe('API Command', () => {
 		});
 
 		it('should support DELETE without body (backward compatibility)', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'DELETE', '/api/test/123']);
 
@@ -503,7 +503,7 @@ describe('API Command', () => {
 
 	describe('Edge Cases', () => {
 		it('should handle endpoint with trailing slash', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'GET', '/api/test/']);
 
@@ -511,7 +511,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle endpoint with multiple path segments', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'GET', '/api/v2/resources/123/items']);
 
@@ -519,7 +519,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle empty JSON object', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'POST', '/api/test', '{}']);
 
@@ -527,7 +527,7 @@ describe('API Command', () => {
 		});
 
 		it('should handle JSON array in body', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'POST', '/api/test', '[1,2,3]']);
 
@@ -537,7 +537,7 @@ describe('API Command', () => {
 
 	describe('Method Case Sensitivity', () => {
 		it('should accept lowercase method names', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'get', '/api/test']);
 
@@ -545,7 +545,7 @@ describe('API Command', () => {
 		});
 
 		it('should accept mixed case method names', async () => {
-			const mockClient = program.getOptionValue('_clients').base as MockDataBasinClient;
+			const mockClient = program.getOptionValue('_clients').base as MockDatabasinClient;
 
 			await program.parseAsync(['node', 'test', 'api', 'PoSt', '/api/test', '{}']);
 

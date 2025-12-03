@@ -6,7 +6,7 @@
  *
  * Prerequisites:
  * - Valid authentication token in ~/.databasin/token or DATABASIN_TOKEN env var
- * - Access to a DataBasin project
+ * - Access to a Databasin project
  * - API URL configured (defaults to production)
  *
  * Usage:
@@ -366,7 +366,7 @@ async function example11_errorHandling() {
  */
 async function runAllExamples() {
 	console.log('╔══════════════════════════════════════════════════════════════╗');
-	console.log('║         DataBasin Pipelines Client - Usage Examples          ║');
+	console.log('║         Databasin Pipelines Client - Usage Examples          ║');
 	console.log('╚══════════════════════════════════════════════════════════════╝');
 
 	// List of all example functions

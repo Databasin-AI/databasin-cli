@@ -1,6 +1,6 @@
 # Projects Client Documentation
 
-The `ProjectsClient` provides comprehensive access to DataBasin project-related endpoints. It extends `DataBasinClient` with automatic authentication, error handling, and token efficiency support.
+The `ProjectsClient` provides comprehensive access to Databasin project-related endpoints. It extends `DatabasinClient` with automatic authentication, error handling, and token efficiency support.
 
 ## Installation
 
@@ -381,4 +381,4 @@ Test output shows all 6 methods working correctly with token efficiency features
 
 - [Base Client Documentation](./base-client.md)
 - [API Types Reference](../src/types/api.ts)
-- [DataBasin API Reference](../../../.claude-plugin/plugins/databasin/skills/databasin-api/references/working-endpoints.md)
+- [Databasin API Reference](../../../.claude-plugin/plugins/databasin/skills/databasin-api/references/working-endpoints.md)

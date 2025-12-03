@@ -1,12 +1,12 @@
 /**
- * Automations API Client for DataBasin CLI
+ * Automations API Client for Databasin CLI
  *
  * Handles all automation-related operations including:
  * - Listing automations with project filtering
  * - Creating, updating, and deleting automations
  * - Triggering manual automation execution
  *
- * Based on DataBasin API endpoint specifications:
+ * Based on Databasin API endpoint specifications:
  * - GET /api/automations - List automations (requires internalID param)
  * - GET /api/automations/{id} - Get specific automation
  * - POST /api/automations - Create new automation
@@ -20,7 +20,7 @@
  * @module client/automations
  */
 
-import { DataBasinClient } from './base.ts';
+import { DatabasinClient } from './base.ts';
 import { ValidationError } from '../utils/errors.ts';
 import type { RequestOptions, TokenEfficiencyOptions } from './base.ts';
 import type { Automation } from '../types/api.ts';
@@ -63,7 +63,7 @@ export interface ListAutomationsOptions extends RequestOptions, TokenEfficiencyO
 /**
  * Automations API Client
  *
- * Provides type-safe interface to DataBasin automation endpoints.
+ * Provides type-safe interface to Databasin automation endpoints.
  * Handles scheduling, execution, and management of automated jobs.
  *
  * Key features:
@@ -105,7 +105,7 @@ export interface ListAutomationsOptions extends RequestOptions, TokenEfficiencyO
  * });
  * ```
  */
-export class AutomationsClient extends DataBasinClient {
+export class AutomationsClient extends DatabasinClient {
 	/**
 	 * List all automations for a project
 	 *
@@ -146,7 +146,7 @@ export class AutomationsClient extends DataBasinClient {
 		// CRITICAL: Project ID is required by the API
 		if (!projectId) {
 			throw new ValidationError('Project ID is required for listing automations', 'projectId', [
-				'The DataBasin API requires internalID parameter',
+				'The Databasin API requires internalID parameter',
 				'Provide a project ID via --project flag'
 			]);
 		}

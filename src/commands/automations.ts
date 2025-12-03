@@ -1,7 +1,7 @@
 /**
  * Automations Command Implementation
  *
- * Provides CLI commands for managing DataBasin automations:
+ * Provides CLI commands for managing Databasin automations:
  * - list: List automations (with required project filtering)
  * - get: Get detailed automation information
  * - run: Execute an automation immediately

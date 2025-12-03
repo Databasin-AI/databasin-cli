@@ -1,5 +1,5 @@
 /**
- * Configuration Cache System for DataBasin CLI
+ * Configuration Cache System for Databasin CLI
  *
  * Provides local caching of API responses to improve wizard performance
  * and reduce API calls. Cache entries have configurable TTL (time-to-live)

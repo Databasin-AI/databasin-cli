@@ -1,5 +1,5 @@
 /**
- * Projects API Client for DataBasin CLI
+ * Projects API Client for Databasin CLI
  *
  * Provides comprehensive access to project-related endpoints including:
  * - Project listing and details
@@ -8,19 +8,19 @@
  * - Project user membership
  * - Project statistics
  *
- * All methods extend DataBasinClient with automatic authentication,
+ * All methods extend DatabasinClient with automatic authentication,
  * error handling, and token efficiency support.
  *
  * @module client/projects
  */
 
-import { DataBasinClient, TokenEfficiencyOptions, RequestOptions } from './base.ts';
+import { DatabasinClient, TokenEfficiencyOptions, RequestOptions } from './base.ts';
 import type { Project, Organization, User, ProjectStats } from '../types/api.ts';
 
 /**
  * Projects API Client
  *
- * Handles all project-related operations for DataBasin CLI.
+ * Handles all project-related operations for Databasin CLI.
  * Extends base client with project-specific methods for managing
  * projects, organizations, users, and statistics.
  *
@@ -38,7 +38,7 @@ import type { Project, Organization, User, ProjectStats } from '../types/api.ts'
  * const user = await client.getCurrentUser();
  * ```
  */
-export class ProjectsClient extends DataBasinClient {
+export class ProjectsClient extends DatabasinClient {
 	/**
 	 * List all accessible projects
 	 *

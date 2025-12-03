@@ -1,5 +1,5 @@
 /**
- * Pipeline Template Generator for DataBasin CLI
+ * Pipeline Template Generator for Databasin CLI
  *
  * Provides commands for generating and validating pipeline configuration templates.
  * Templates help users quickly create pipelines with example configurations and

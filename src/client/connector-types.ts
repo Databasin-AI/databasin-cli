@@ -1,5 +1,5 @@
 /**
- * Connector Type Mapping for DataBasin CLI
+ * Connector Type Mapping for Databasin CLI
  *
  * Maps connector subtypes to artifact type IDs used by the backend API.
  * This module provides type-safe conversion from connector subtype strings
@@ -14,7 +14,7 @@
 /**
  * Connector Artifact Type IDs
  *
- * Numeric identifiers used by the DataBasin backend to categorize connectors.
+ * Numeric identifiers used by the Databasin backend to categorize connectors.
  * Each connector belongs to one of these types which determines:
  * - Available artifact configurations
  * - Supported data formats

@@ -1,7 +1,7 @@
 /**
  * Connectors Command Implementation
  *
- * Provides CLI commands for managing DataBasin data connectors:
+ * Provides CLI commands for managing Databasin data connectors:
  * - list: List connectors (count mode by default for token efficiency)
  * - get: Get detailed connector information
  * - create: Create new connector from file or interactive wizard

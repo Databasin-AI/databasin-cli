@@ -2,7 +2,7 @@
 
 set -e
 
-# DataBasin CLI Installation Script
+# Databasin CLI Installation Script
 # Downloads and installs the latest release binary for your platform
 
 # Colors for output
@@ -92,7 +92,7 @@ download_binary() {
     local download_url="https://github.com/${REPO}/releases/download/v${version}/${BINARY_NAME}"
     local temp_file="/tmp/${BINARY_NAME}-${version}"
 
-    info "Downloading DataBasin CLI v${version} for ${platform}..."
+    info "Downloading Databasin CLI v${version} for ${platform}..."
 
     # Adjust URL based on platform
     # The release has platform-specific paths in the artifacts
@@ -153,7 +153,7 @@ verify_installation() {
 
     if command -v ${BINARY_NAME} &> /dev/null; then
         local installed_version=$(${BINARY_NAME} --version 2>&1 | head -n1 || echo "unknown")
-        info "DataBasin CLI installed successfully!"
+        info "Databasin CLI installed successfully!"
         echo ""
         echo "  Version: ${installed_version}"
         echo "  Location: $(which ${BINARY_NAME})"
@@ -172,7 +172,7 @@ verify_installation() {
 main() {
     echo ""
     echo "╔═══════════════════════════════════════╗"
-    echo "║   DataBasin CLI Installation Script  ║"
+    echo "║   Databasin CLI Installation Script  ║"
     echo "╚═══════════════════════════════════════╝"
     echo ""
 

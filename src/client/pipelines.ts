@@ -1,5 +1,5 @@
 /**
- * Pipelines Client for DataBasin CLI
+ * Pipelines Client for Databasin CLI
  *
  * Provides full CRUD operations for pipeline management with automatic
  * authentication, validation, and error handling.
@@ -15,7 +15,7 @@
  * @module client/pipelines
  */
 
-import { DataBasinClient } from './base.ts';
+import { DatabasinClient } from './base.ts';
 import type { RequestOptions, TokenEfficiencyOptions } from './base.ts';
 import type { Pipeline, PipelineArtifact, Connector, JobDetails } from '../types/api.ts';
 import { ValidationError, ApiError } from '../utils/errors.ts';
@@ -126,7 +126,7 @@ export interface PipelineData {
 /**
  * Pipelines API Client
  *
- * Manages all pipeline-related operations in DataBasin.
+ * Manages all pipeline-related operations in Databasin.
  * Provides type-safe methods for creating, reading, updating,
  * deleting, and executing pipelines.
  *
@@ -185,7 +185,7 @@ export interface PipelineData {
  * });
  * ```
  */
-export class PipelinesClient extends DataBasinClient {
+export class PipelinesClient extends DatabasinClient {
 	/**
 	 * In-memory connector cache (cleared per operation)
 	 *

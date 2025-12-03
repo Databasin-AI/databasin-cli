@@ -1,5 +1,5 @@
 /**
- * Authentication and Token Management for DataBasin CLI
+ * Authentication and Token Management for Databasin CLI
  *
  * Provides secure JWT token storage, retrieval, and validation.
  * Tokens are loaded with priority order: ENV > PROJECT_FILE > USER_FILE
@@ -23,7 +23,7 @@ import { ENV_VARS } from '../types/config.ts';
 /**
  * JWT Token payload structure (decoded token body)
  *
- * Standard JWT claims plus custom DataBasin claims.
+ * Standard JWT claims plus custom Databasin claims.
  * Used for validation and metadata extraction.
  */
 export interface JwtPayload {
@@ -289,7 +289,7 @@ export function parseJwt(token: string): JwtPayload {
 	} catch (error) {
 		throw new AuthError(
 			`Invalid JWT token: ${error instanceof Error ? error.message : String(error)}`,
-			'Ensure you have a valid JWT token from DataBasin'
+			'Ensure you have a valid JWT token from Databasin'
 		);
 	}
 }

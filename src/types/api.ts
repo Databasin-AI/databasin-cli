@@ -1,15 +1,15 @@
 /**
- * DataBasin API Type Definitions
+ * Databasin API Type Definitions
  *
  * Comprehensive types matching backend API response structures.
- * Based on DataBasin API v2 endpoint specifications.
+ * Based on Databasin API v2 endpoint specifications.
  *
  * @see .claude-plugin/plugins/databasin/skills/databasin-api/references/working-endpoints.md
  */
 
 /**
  * Project entity returned by /api/my/projects
- * Represents a data integration project within DataBasin
+ * Represents a data integration project within Databasin
  */
 export interface Project {
 	/** Numeric project identifier */
@@ -84,7 +84,7 @@ export interface Organization {
 
 /**
  * User entity returned by /api/my/account and /api/users
- * Represents a DataBasin user account
+ * Represents a Databasin user account
  */
 export interface User {
 	/** Numeric user identifier */
@@ -480,7 +480,7 @@ export interface Module {
 
 /**
  * API error response structure
- * Standard error format returned by DataBasin API
+ * Standard error format returned by Databasin API
  */
 export interface ApiErrorResponse {
 	/** HTTP status code */

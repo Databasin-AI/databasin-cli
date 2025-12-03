@@ -95,7 +95,7 @@ describe('PipelinesClient', () => {
 	});
 
 	describe('inheritance', () => {
-		test('extends DataBasinClient', () => {
+		test('extends DatabasinClient', () => {
 			const client = new PipelinesClient();
 
 			// Should have base client methods

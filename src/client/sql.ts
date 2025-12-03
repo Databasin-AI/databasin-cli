@@ -1,5 +1,5 @@
 /**
- * SQL Client for DataBasin CLI
+ * SQL Client for Databasin CLI
  *
  * Provides comprehensive SQL and schema operations including:
  * - Schema hierarchy navigation (catalogs → schemas → tables → columns)
@@ -15,7 +15,7 @@
  * @module client/sql
  */
 
-import { DataBasinClient } from './base.ts';
+import { DatabasinClient } from './base.ts';
 import type { QueryResult, ColumnInfo, CatalogsResponse, SchemasResponse } from '../types/api.ts';
 import type { RequestOptions } from './base.ts';
 import chalk from 'chalk';
@@ -173,7 +173,7 @@ export interface IngestionRecommendation {
 }
 
 /**
- * SQL Client for DataBasin
+ * SQL Client for Databasin
  *
  * Extends base client with specialized SQL and schema operations.
  * Handles complex warehouse proxying and schema hierarchy navigation.
@@ -209,7 +209,7 @@ export interface IngestionRecommendation {
  * }
  * ```
  */
-export class SqlClient extends DataBasinClient {
+export class SqlClient extends DatabasinClient {
 	/**
 	 * List available catalogs for a connector
 	 *
@@ -718,7 +718,7 @@ export class SqlClient extends DataBasinClient {
 	/**
 	 * Execute SQL query via warehouse proxy
 	 *
-	 * Executes SQL queries against Trino/Databricks via DataBasin's connector
+	 * Executes SQL queries against Trino/Databricks via Databasin's connector
 	 * query endpoint. Handles warehouse authentication and proxying automatically.
 	 *
 	 * Endpoint: POST /api/connector/:id/query

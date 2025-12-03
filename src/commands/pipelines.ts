@@ -1,7 +1,7 @@
 /**
  * Pipelines Command Implementation
  *
- * Provides CLI commands for managing DataBasin pipelines:
+ * Provides CLI commands for managing Databasin pipelines:
  * - list: List pipelines in a project (requires projectId)
  * - get: Get detailed pipeline information
  * - create: Create new pipeline (from file or interactive)
@@ -622,7 +622,7 @@ async function logsCommand(
 		}
 		console.log();
 		logInfo('Log viewing will be available in a future release');
-		logInfo('For now, check pipeline execution status in the DataBasin UI');
+		logInfo('For now, check pipeline execution status in the Databasin UI');
 	} catch (error) {
 		if (error instanceof Error) {
 			logError('Error fetching logs', error);

@@ -206,7 +206,7 @@ async function demonstrateTokenEfficiency() {
  */
 async function main() {
 	console.log('='.repeat(60));
-	console.log('DataBasin Connectors Client Examples');
+	console.log('Databasin Connectors Client Examples');
 	console.log('='.repeat(60));
 	console.log('\n');
 

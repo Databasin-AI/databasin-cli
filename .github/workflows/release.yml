@@ -87,6 +87,28 @@ jobs:
           VERSION=${{ needs.check-context.outputs.version }}
           echo "Extracting release notes for version $VERSION"
 
+          # Start with installation section
+          cat > release_notes.txt << 'INSTALL_EOF'
+          ## Installation
+
+          ### Option 1: Standalone Binary (No Runtime Required)
+          Download the binary for your platform from the assets below and add to your PATH.
+
+          ### Option 2: npm/npx (Requires Node.js 18+ or Bun 1.0+)
+          ```bash
+          # Install globally
+          npm install -g @databasin/cli
+
+          # Or run directly with npx
+          npx @databasin/cli --help
+          ```
+
+          📦 **npm package:** https://www.npmjs.com/package/@databasin/cli
+
+          ---
+
+          INSTALL_EOF
+
           # Try to extract from CHANGELOG.md if it exists
           if [ -f CHANGELOG.md ]; then
             # Extract the section for this version
@@ -99,20 +121,19 @@ jobs:
 
             if [ -n "$NOTES" ]; then
               echo "Found release notes in CHANGELOG.md"
-              # Save to file for multiline content
-              echo "$NOTES" > release_notes.txt
+              echo "## Changes" >> release_notes.txt
+              echo "" >> release_notes.txt
+              echo "$NOTES" >> release_notes.txt
             else
-              echo "No specific version notes found, using default" > release_notes.txt
               echo "" >> release_notes.txt
               echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> release_notes.txt
             fi
           else
-            echo "Release for version $VERSION" > release_notes.txt
+            echo "## Build Info" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo "Built with:" >> release_notes.txt
             echo "- TypeScript compilation" >> release_notes.txt
             echo "- Multi-platform executables (Linux x64, macOS ARM64, macOS x64)" >> release_notes.txt
-            echo "- Published to npm as @databasin/cli" >> release_notes.txt
+            echo "- Node.js compatible bundle for npm" >> release_notes.txt
           fi
 
       - name: Create GitHub Release
@@ -137,12 +158,16 @@ jobs:
           echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Version: ${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Published to npm: @databasin/cli@${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Published to npm: [@databasin/cli@${{ needs.check-context.outputs.version }}](https://www.npmjs.com/package/@databasin/cli)" >> $GITHUB_STEP_SUMMARY
           echo "✅ GitHub Release created: v${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Installation" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm:** \`npm install -g @databasin/cli\` (requires Node.js 18+ or Bun 1.0+)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Binary:** Download standalone executable below (no runtime required)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Build Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/index.js\` - Node.js bundle" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/linux-x64/databasin\` - Linux x64 executable" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/darwin-arm64/databasin\` - macOS ARM64 executable" >> $GITHUB_STEP_SUMMARY
-          echo "- \`dist/darwin-x64/databasin\` - macOS x64 executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/index.js\` - Node.js compatible bundle (works with Node.js and Bun)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/linux-x64/databasin\` - Linux x64 standalone executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/darwin-arm64/databasin\` - macOS ARM64 standalone executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/darwin-x64/databasin\` - macOS x64 standalone executable" >> $GITHUB_STEP_SUMMARY
           echo "- \`dist/build-info.json\` - Build metadata" >> $GITHUB_STEP_SUMMARY

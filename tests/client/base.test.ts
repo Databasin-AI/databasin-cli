@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
-import { DataBasinClient, createClient } from '../../src/client/base.ts';
+import { DatabasinClient, createClient } from '../../src/client/base.ts';
 import { loadConfig } from '../../src/config.ts';
 import type { CliConfig } from '../../src/types/config.ts';
 import { ApiError, NetworkError, AuthError } from '../../src/utils/errors.ts';
@@ -37,8 +37,8 @@ function createMockResponse(status: number, body: any, statusText: string = 'OK'
 	} as Response;
 }
 
-describe('DataBasinClient', () => {
-	let client: DataBasinClient;
+describe('DatabasinClient', () => {
+	let client: DatabasinClient;
 	let mockFetch: any;
 	let testConfig: CliConfig;
 
@@ -54,7 +54,7 @@ describe('DataBasinClient', () => {
 		});
 
 		// Create client with test config
-		client = new DataBasinClient(testConfig);
+		client = new DatabasinClient(testConfig);
 
 		// Setup fetch mock
 		mockFetch = mock(() => Promise.resolve(createMockResponse(200, { success: true })));
@@ -72,12 +72,12 @@ describe('DataBasinClient', () => {
 	describe('Constructor and Configuration', () => {
 		it('should initialize with provided config', () => {
 			const config = loadConfig({ apiUrl: 'https://api.test.databasin.ai' });
-			const client = new DataBasinClient(config);
+			const client = new DatabasinClient(config);
 			expect(client.getBaseUrl()).toBe('https://api.test.databasin.ai');
 		});
 
 		it('should use default config if none provided', () => {
-			const client = new DataBasinClient();
+			const client = new DatabasinClient();
 			expect(client.getBaseUrl()).toBeDefined();
 		});
 	});
@@ -301,7 +301,7 @@ describe('DataBasinClient', () => {
 				timeout: 100,
 				debug: false
 			});
-			const timeoutClient = new DataBasinClient(timeoutConfig);
+			const timeoutClient = new DatabasinClient(timeoutConfig);
 
 			// Mock slow response
 			mockFetch = mock(
@@ -580,13 +580,13 @@ describe('DataBasinClient', () => {
 	describe('Factory Function', () => {
 		it('should create client with createClient factory', () => {
 			const client = createClient(testConfig);
-			expect(client).toBeInstanceOf(DataBasinClient);
+			expect(client).toBeInstanceOf(DatabasinClient);
 			expect(client.getBaseUrl()).toBe('https://api.test.databasin.ai');
 		});
 
 		it('should create client with default config', () => {
 			const client = createClient();
-			expect(client).toBeInstanceOf(DataBasinClient);
+			expect(client).toBeInstanceOf(DatabasinClient);
 		});
 	});
 
@@ -604,13 +604,13 @@ describe('DataBasinClient', () => {
 			// 2. OR manually test CLI with DEBUG=true npm run dev
 		});
 
-		it('should initialize DataBasinClient regardless of debug settings', async () => {
+		it('should initialize DatabasinClient regardless of debug settings', async () => {
 			const debugConfig = loadConfig({
 				apiUrl: 'https://api.test.databasin.ai',
 				timeout: 5000,
 				debug: true
 			});
-			const debugClient = new DataBasinClient(debugConfig);
+			const debugClient = new DatabasinClient(debugConfig);
 
 			mockFetch = mock(() => Promise.resolve(createMockResponse(200, { success: true })));
 			global.fetch = mockFetch;

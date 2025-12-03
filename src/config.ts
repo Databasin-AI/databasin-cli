@@ -1,5 +1,5 @@
 /**
- * Configuration Management for DataBasin CLI
+ * Configuration Management for Databasin CLI
  *
  * Manages CLI configuration with priority cascade:
  * 1. CLI arguments (highest priority)

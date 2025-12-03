@@ -1,8 +1,8 @@
 /**
- * Discovery Pattern Types for DataBasin CLI
+ * Discovery Pattern Types for Databasin CLI
  *
  * Defines types for connector discovery workflows (schema/catalog selection).
- * Based on the two discovery patterns used by DataBasin:
+ * Based on the two discovery patterns used by Databasin:
  * 1. RDBMS-style: Single-level schema discovery (Screen 1)
  * 2. Lakehouse-style: Two-level catalog→schema discovery (Screens 6→7)
  *
@@ -11,7 +11,7 @@
  */
 
 /**
- * Discovery pattern types supported by DataBasin
+ * Discovery pattern types supported by Databasin
  *
  * - `lakehouse`: Two-phase discovery (database/catalog → schema)
  *   - Used by: Postgres, MSSQL, Databricks, Snowflake

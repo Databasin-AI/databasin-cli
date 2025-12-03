@@ -1,10 +1,10 @@
-# DataBasin CLI Type Definitions
+# Databasin CLI Type Definitions
 
-Comprehensive TypeScript type definitions for the DataBasin CLI tool.
+Comprehensive TypeScript type definitions for the Databasin CLI tool.
 
 ## Overview
 
-This directory contains all type definitions used across the DataBasin CLI:
+This directory contains all type definitions used across the Databasin CLI:
 
 - **`api.ts`** - API entity types matching backend responses
 - **`config.ts`** - CLI configuration schema and utilities
@@ -30,7 +30,7 @@ import type {
 
 ### API Entity Types (`api.ts`)
 
-Types that match DataBasin API response structures:
+Types that match Databasin API response structures:
 
 **Core Entities:**
 

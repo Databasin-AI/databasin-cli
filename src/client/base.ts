@@ -1,7 +1,7 @@
 /**
- * Base API Client for DataBasin CLI
+ * Base API Client for Databasin CLI
  *
- * Handles all HTTP operations with the DataBasin API including:
+ * Handles all HTTP operations with the Databasin API including:
  * - Automatic token injection and refresh on 401
  * - Comprehensive error handling with typed errors
  * - Request/response logging for debugging
@@ -97,7 +97,7 @@ export interface ResponseMetadata {
 }
 
 /**
- * Base API Client for DataBasin
+ * Base API Client for Databasin
  *
  * Central HTTP client for all API interactions. Provides:
  * - Automatic authentication with token injection
@@ -108,24 +108,24 @@ export interface ResponseMetadata {
  *
  * @example
  * ```typescript
- * const client = new DataBasinClient();
+ * const client = new DatabasinClient();
  * const projects = await client.get<Project[]>('/api/my/projects');
  * ```
  *
  * @example With token efficiency
  * ```typescript
- * const client = new DataBasinClient();
+ * const client = new DatabasinClient();
  * const count = await client.get('/api/my/projects', { count: true });
  * // Returns: { count: 42 }
  * ```
  */
-export class DataBasinClient {
+export class DatabasinClient {
 	private baseUrl: string;
 	private token: string | null = null;
 	protected config: CliConfig;
 
 	/**
-	 * Create a new DataBasin API client
+	 * Create a new Databasin API client
 	 *
 	 * @param config - Optional full configuration (defaults loaded if not provided)
 	 */
@@ -548,7 +548,7 @@ export class DataBasinClient {
 	/**
 	 * Verify API connectivity
 	 *
-	 * Tests connection to DataBasin API by calling /api/ping endpoint.
+	 * Tests connection to Databasin API by calling /api/ping endpoint.
 	 * Useful for health checks and validating configuration.
 	 *
 	 * @returns True if API is reachable, false otherwise
@@ -608,13 +608,13 @@ export class DataBasinClient {
 }
 
 /**
- * Create a new DataBasin API client instance
+ * Create a new Databasin API client instance
  *
  * Factory function for creating configured client instances.
  * Recommended over direct constructor usage.
  *
  * @param config - Optional full configuration (defaults loaded if not provided)
- * @returns Configured DataBasinClient instance
+ * @returns Configured DatabasinClient instance
  *
  * @example
  * ```typescript
@@ -628,6 +628,6 @@ export class DataBasinClient {
  * const client = createClient(customConfig);
  * ```
  */
-export function createClient(config?: CliConfig): DataBasinClient {
-	return new DataBasinClient(config);
+export function createClient(config?: CliConfig): DatabasinClient {
+	return new DatabasinClient(config);
 }

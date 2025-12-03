@@ -1,7 +1,7 @@
 {
 	"name": "@databasin/cli",
 	"version": "0.2.0",
-	"description": "Command-line interface for DataBasin data integration platform - manage projects, connectors, pipelines, and execute SQL queries",
+	"description": "Command-line interface for Databasin data integration platform - manage projects, connectors, pipelines, and execute SQL queries",
 	"type": "module",
 	"main": "./dist/index.js",
 	"bin": {
@@ -10,7 +10,7 @@
 	"scripts": {
 		"dev": "bun run src/index.ts",
 		"build": "bun run build.ts",
-		"build:quick": "bun build src/index.ts --outdir dist --target bun",
+		"build:quick": "bun build src/index.ts --outdir dist --target node",
 		"build:exe": "bun build src/index.ts --compile --outfile dist/databasin --minify",
 		"start": "bun run dist/index.js",
 		"typecheck": "tsc --noEmit",
@@ -61,7 +61,7 @@
 		"automation",
 		"bun"
 	],
-	"author": "DataBasin Team",
+	"author": "Databasin Team",
 	"license": "MIT",
 	"homepage": "https://github.com/databasin/cli#readme",
 	"repository": {

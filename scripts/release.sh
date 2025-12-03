@@ -2,7 +2,7 @@
 
 set -e
 
-# DataBasin CLI Release Script
+# Databasin CLI Release Script
 # Bumps version, creates a commit and tag, then pushes to remote
 
 # Colors for output
@@ -247,7 +247,7 @@ push_to_remote() {
 main() {
     echo ""
     echo "╔═══════════════════════════════════════╗"
-    echo "║   DataBasin CLI Release Script        ║"
+    echo "║   Databasin CLI Release Script        ║"
     echo "╚═══════════════════════════════════════╝"
     echo ""
 

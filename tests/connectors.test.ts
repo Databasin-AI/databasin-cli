@@ -109,7 +109,7 @@ describe('ConnectorsClient', () => {
 	});
 
 	describe('client creation', () => {
-		test('extends DataBasinClient', () => {
+		test('extends DatabasinClient', () => {
 			expect(client).toBeInstanceOf(ConnectorsClient);
 			// Should have base client methods
 			expect(client.ping).toBeDefined();

@@ -1,8 +1,8 @@
 /**
- * Error Handling Utilities for DataBasin CLI
+ * Error Handling Utilities for Databasin CLI
  *
  * Provides custom error classes and formatting for user-friendly error messages.
- * Follows patterns from the DataBasin API plugin skills for consistency.
+ * Follows patterns from the Databasin API plugin skills for consistency.
  *
  * @module utils/errors
  */
@@ -98,7 +98,7 @@ export class ApiError extends CliError {
 			case 502:
 			case 503:
 			case 504:
-				return 'The DataBasin API is experiencing issues. Please try again later.';
+				return 'The Databasin API is experiencing issues. Please try again later.';
 			default:
 				return 'Check the error message above for details.';
 		}

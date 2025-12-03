@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DataBasin CLI is a command-line interface for the DataBasin data integration platform. Built with Bun and TypeScript, it provides commands for managing projects, connectors, pipelines, SQL queries, and automations.
+Databasin CLI is a command-line interface for the Databasin data integration platform. Built with Bun and TypeScript, it provides commands for managing projects, connectors, pipelines, SQL queries, and automations.
 
 ## Development Commands
 
@@ -43,7 +43,7 @@ src/
 ├── index.ts              # CLI entry point, Commander.js setup
 ├── config.ts             # Configuration management (file, env, CLI priority)
 ├── client/               # API client layer
-│   ├── base.ts          # DataBasinClient - core HTTP client with auth
+│   ├── base.ts          # DatabasinClient - core HTTP client with auth
 │   ├── projects.ts      # ProjectsClient
 │   ├── connectors.ts    # ConnectorsClient
 │   ├── pipelines.ts     # PipelinesClient
@@ -75,7 +75,7 @@ src/
 3. Config file (~/.databasin/config.json)
 4. Defaults (lowest)
 
-**Client Pattern**: All API clients extend the base `DataBasinClient`:
+**Client Pattern**: All API clients extend the base `DatabasinClient`:
 ```typescript
 // src/client/base.ts - Core HTTP client with:
 // - Automatic token injection
@@ -153,7 +153,7 @@ Build artifacts are also copied to `../../static/downloads/cli/` for the parent 
 ## Adding New Commands
 
 1. Create command file in `src/commands/{resource}.ts`
-2. Create API client in `src/client/{resource}.ts` extending DataBasinClient
+2. Create API client in `src/client/{resource}.ts` extending DatabasinClient
 3. Export client factory from `src/client/index.ts`
 4. Register command in `src/index.ts` via `registerCommands()`
 5. Add types to `src/types/api.ts`

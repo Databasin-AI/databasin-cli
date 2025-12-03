@@ -1,6 +1,6 @@
 # Pipelines Commands - Quick Start Guide
 
-Fast reference for using DataBasin CLI pipeline commands.
+Fast reference for using Databasin CLI pipeline commands.
 
 ## Quick Commands
 

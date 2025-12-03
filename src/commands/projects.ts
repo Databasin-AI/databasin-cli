@@ -1,7 +1,7 @@
 /**
  * Projects Command Implementation
  *
- * Provides CLI commands for managing DataBasin projects:
+ * Provides CLI commands for managing Databasin projects:
  * - list: List all accessible projects
  * - get: Get detailed project information
  * - users: List users in a project
@@ -394,7 +394,7 @@ async function statsCommand(id: string | undefined, options: {}, command: Comman
  * @returns Configured Commander Command instance
  */
 export function createProjectsCommand(): Command {
-	const projects = new Command('projects').description('Manage DataBasin projects');
+	const projects = new Command('projects').description('Manage Databasin projects');
 
 	// List command
 	projects

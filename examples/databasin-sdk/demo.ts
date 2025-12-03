@@ -1,5 +1,5 @@
 /**
- * Demo script for DataBasinClient
+ * Demo script for DatabasinClient
  *
  * Tests basic functionality and shows usage examples.
  */
@@ -12,7 +12,7 @@ import type { Project } from '../../src/types/api.ts';
 process.env.DATABASIN_TOKEN = 'demo-jwt-token';
 
 async function demo() {
-	console.log('DataBasin API Client Demo\n');
+	console.log('Databasin API Client Demo\n');
 
 	// Create client with custom config
 	const config = loadConfig({
@@ -82,7 +82,7 @@ async function demo() {
 
 	console.log('Demo completed!');
 	console.log('\nNote: All requests failed because we are using a demo token.');
-	console.log('In production, use a real JWT token from DataBasin.');
+	console.log('In production, use a real JWT token from Databasin.');
 }
 
 // Run demo if executed directly

@@ -1,5 +1,5 @@
 /**
- * Configuration Client for DataBasin CLI
+ * Configuration Client for Databasin CLI
  *
  * Fetches connector and pipeline screen configurations from static JSON files.
  * Enables configuration-driven discovery patterns by determining the correct
@@ -15,7 +15,7 @@
  * @module client/configuration
  */
 
-import { DataBasinClient } from './base.ts';
+import { DatabasinClient } from './base.ts';
 import type {
 	ConnectorConfiguration,
 	PipelineScreenConfiguration,
@@ -78,7 +78,7 @@ interface CategoryLoadError {
 }
 
 /**
- * Configuration Client for DataBasin
+ * Configuration Client for Databasin
  *
  * Fetches and caches connector and pipeline configurations from the server.
  * Provides configuration-driven discovery by determining workflow patterns
@@ -111,7 +111,7 @@ interface CategoryLoadError {
  * }
  * ```
  */
-export class ConfigurationClient extends DataBasinClient {
+export class ConfigurationClient extends DatabasinClient {
 	/**
 	 * In-memory cache for configurations
 	 *

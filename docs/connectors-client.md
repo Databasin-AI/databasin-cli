@@ -8,7 +8,7 @@
 
 ## Overview
 
-The Connectors Client manages data source and destination connections within DataBasin. It provides methods for CRUD operations on connectors and fetching system connector configuration.
+The Connectors Client manages data source and destination connections within Databasin. It provides methods for CRUD operations on connectors and fetching system connector configuration.
 
 ### Critical Token Warning
 
@@ -491,7 +491,7 @@ bun run examples/connectors-example.ts
 
 ## Implementation Checklist
 
-- ✅ Extends DataBasinClient
+- ✅ Extends DatabasinClient
 - ✅ All 6 methods implemented
 - ✅ **Defaults to count mode for list()**
 - ✅ Type-safe with generics

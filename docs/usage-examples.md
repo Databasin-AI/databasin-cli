@@ -1,6 +1,6 @@
-# DataBasin CLI - Usage Examples
+# Databasin CLI - Usage Examples
 
-Real-world examples and common workflows for the DataBasin CLI.
+Real-world examples and common workflows for the Databasin CLI.
 
 ## Table of Contents
 
@@ -352,9 +352,9 @@ done
 
 ```bash
 #!/bin/bash
-# health-check.sh - Check DataBasin CLI and API health
+# health-check.sh - Check Databasin CLI and API health
 
-echo "DataBasin CLI Health Check"
+echo "Databasin CLI Health Check"
 echo "=========================="
 
 # Check CLI version
@@ -398,7 +398,7 @@ echo "Health check passed ✓"
 ```yaml
 # .github/workflows/databasin-deploy.yml
 
-name: Deploy DataBasin Resources
+name: Deploy Databasin Resources
 
 on:
   push:
@@ -414,7 +414,7 @@ jobs:
         with:
           bun-version: latest
       
-      - name: Install DataBasin CLI
+      - name: Install Databasin CLI
         run: bun install -g @databasin/cli
       
       - name: Verify Authentication

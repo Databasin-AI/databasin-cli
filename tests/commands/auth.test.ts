@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
 import { Command } from 'commander';
 import { createAuthCommand } from '../../src/commands/auth.ts';
-import type { DataBasinClient } from '../../src/client/base.ts';
+import type { DatabasinClient } from '../../src/client/base.ts';
 import type { ProjectsClient } from '../../src/client/projects.ts';
 import type { CliConfig } from '../../src/types/config.ts';
 import type { User } from '../../src/types/api.ts';
@@ -71,9 +71,9 @@ const mockProjects = [
 ];
 
 /**
- * Mock DataBasin client
+ * Mock Databasin client
  */
-class MockDataBasinClient {
+class MockDatabasinClient {
 	public shouldFailPing = false;
 
 	async ping(): Promise<boolean> {
@@ -127,7 +127,7 @@ class MockProjectsClient {
  */
 function createMockProgram(): {
 	program: Command;
-	mockBaseClient: MockDataBasinClient;
+	mockBaseClient: MockDatabasinClient;
 	mockProjectsClient: MockProjectsClient;
 } {
 	const mockConfig: CliConfig = {
@@ -147,7 +147,7 @@ function createMockProgram(): {
 		}
 	};
 
-	const mockBaseClient = new MockDataBasinClient();
+	const mockBaseClient = new MockDatabasinClient();
 	const mockProjectsClient = new MockProjectsClient();
 
 	const program = new Command();

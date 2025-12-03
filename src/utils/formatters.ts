@@ -1,5 +1,5 @@
 /**
- * Output Formatting Utilities for DataBasin CLI
+ * Output Formatting Utilities for Databasin CLI
  *
  * Provides consistent output formatting across table, JSON, and CSV formats.
  * Supports token efficiency warnings, syntax highlighting, and flexible field filtering.

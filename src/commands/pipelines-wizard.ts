@@ -1,5 +1,5 @@
 /**
- * Interactive Pipeline Creation Wizard for DataBasin CLI
+ * Interactive Pipeline Creation Wizard for Databasin CLI
  *
  * Provides guided step-by-step pipeline creation matching the frontend wizard UX.
  * Includes smart defaults, auto-detection, validation, and preview before submission.
@@ -553,7 +553,7 @@ async function wizardCommand(
 	};
 
 	console.log(chalk.bold.cyan('\n════════════════════════════════════════════════════'));
-	console.log(chalk.bold.cyan('   DataBasin Pipeline Creation Wizard'));
+	console.log(chalk.bold.cyan('   Databasin Pipeline Creation Wizard'));
 	console.log(chalk.bold.cyan('════════════════════════════════════════════════════\n'));
 
 	try {

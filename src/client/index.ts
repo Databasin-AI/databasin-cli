@@ -1,11 +1,11 @@
 /**
- * DataBasin CLI - Client Library
+ * Databasin CLI - Client Library
  * Barrel export for all API clients
  */
 
 // Base client
 export {
-	DataBasinClient,
+	DatabasinClient,
 	createClient,
 	type RequestOptions,
 	type TokenEfficiencyOptions,

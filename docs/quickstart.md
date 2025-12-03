@@ -1,11 +1,11 @@
-# DataBasin CLI - Quick Start Guide
+# Databasin CLI - Quick Start Guide
 
 ## Installation
 
 ### Option 1: Download Pre-built Binary
 
 ```bash
-# Download for your platform from the DataBasin web interface
+# Download for your platform from the Databasin web interface
 # Or build from source (see below)
 
 # Verify installation
@@ -47,12 +47,12 @@ bun run dev projects list
 The easiest way to authenticate is via browser:
 
 ```bash
-# Opens your browser to sign in to DataBasin
+# Opens your browser to sign in to Databasin
 databasin auth login
 ```
 
 This will:
-1. Open the DataBasin login page in your browser
+1. Open the Databasin login page in your browser
 2. After you sign in, redirect the token back to the CLI
 3. Save the token to `~/.databasin/.token`
 

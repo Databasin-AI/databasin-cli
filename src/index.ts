@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
 /**
- * DataBasin CLI - Main Entry Point
+ * Databasin CLI - Main Entry Point
  *
- * Command-line interface for DataBasin API operations.
+ * Command-line interface for Databasin API operations.
  * Uses Commander.js for command parsing and routing.
  *
  * Configuration Priority:
@@ -50,7 +50,7 @@ function createProgram(): Command {
 	program
 		.name('databasin')
 		.version(VERSION, '-V, --version', 'Display CLI version')
-		.description('DataBasin CLI - Manage your data integration platform from the command line')
+		.description('Databasin CLI - Manage your data integration platform from the command line')
 		.addHelpText(
 			'after',
 			`
@@ -83,7 +83,7 @@ For more help on a specific command:
 
 	// Global options (apply to all commands)
 	program
-		.option('--api-url <url>', 'DataBasin API base URL')
+		.option('--api-url <url>', 'Databasin API base URL')
 		.option('--token <token>', 'Authentication token (overrides stored token)')
 		.option('--json', 'Output in JSON format')
 		.option('--csv', 'Output in CSV format')

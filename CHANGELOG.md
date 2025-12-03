@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DataBasin CLI will be documented in this file.
+All notable changes to Databasin CLI will be documented in this file.
 
 ## [Unreleased]
 
@@ -191,7 +191,7 @@ All notable changes to DataBasin CLI will be documented in this file.
 
 Thank you to all contributors who made this release possible!
 
-- Development team at DataBasin
+- Development team at Databasin
 - Beta testers who provided valuable feedback
 - Community members who reported issues
 

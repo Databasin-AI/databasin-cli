@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `projects` command group provides comprehensive project management capabilities for the DataBasin CLI. Use these commands to list, inspect, and analyze your DataBasin projects.
+The `projects` command group provides comprehensive project management capabilities for the Databasin CLI. Use these commands to list, inspect, and analyze your Databasin projects.
 
 ## Quick Start
 
@@ -583,7 +583,7 @@ For issues, questions, or feature requests:
 2. Review error messages for suggestions
 3. Use `--debug` flag for detailed error information
 4. Consult the API documentation
-5. Contact DataBasin support
+5. Contact Databasin support
 
 ---
 

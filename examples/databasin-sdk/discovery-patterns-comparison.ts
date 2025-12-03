@@ -3,7 +3,7 @@
  * Discovery Patterns Comparison Example
  *
  * Demonstrates the difference between RDBMS-style and Lakehouse-style
- * schema discovery patterns in the DataBasin CLI.
+ * schema discovery patterns in the Databasin CLI.
  *
  * This is a code example - not meant to be executed.
  * Shows how to use both discovery patterns.

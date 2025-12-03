@@ -1,7 +1,7 @@
 /**
  * Generic API Command Implementation
  *
- * Provides a universal endpoint caller supporting ANY DataBasin API endpoint.
+ * Provides a universal endpoint caller supporting ANY Databasin API endpoint.
  * This command enables direct API access without creating specialized commands.
  *
  * Features:
@@ -58,7 +58,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import type { DataBasinClient } from '../client/base.ts';
+import type { DatabasinClient } from '../client/base.ts';
 import type { CliConfig, OutputFormat } from '../types/config.ts';
 import {
 	formatOutput,
@@ -362,9 +362,9 @@ function getErrorSuggestion(statusCode: number, endpoint: string, method: string
 		case 503:
 		case 504:
 			return (
-				'DataBasin API is experiencing issues.\n' +
+				'Databasin API is experiencing issues.\n' +
 				'  • Try again in a few moments\n' +
-				'  • Check DataBasin status page\n' +
+				'  • Check Databasin status page\n' +
 				'  • Contact support if issue persists'
 			);
 
@@ -433,10 +433,10 @@ function validateApiRequest(
 /**
  * Execute API request via appropriate client method
  *
- * Routes the request to the correct HTTP method on the DataBasin client.
+ * Routes the request to the correct HTTP method on the Databasin client.
  * Handles GET query parameters and POST/PUT/DELETE bodies.
  *
- * @param client - DataBasin API client
+ * @param client - Databasin API client
  * @param httpMethod - HTTP method (GET, POST, PUT, DELETE)
  * @param endpoint - API endpoint path
  * @param bodyOrParams - Request body or query parameters
@@ -453,7 +453,7 @@ function validateApiRequest(
  * ```
  */
 async function executeApiRequest(
-	client: DataBasinClient,
+	client: DatabasinClient,
 	httpMethod: string,
 	endpoint: string,
 	bodyOrParams: string | undefined,
@@ -580,7 +580,7 @@ function outputApiResult(
  * @param endpoint - API endpoint that failed
  * @param method - HTTP method used
  * @param config - CLI configuration
- * @param client - DataBasin client (for base URL in network errors)
+ * @param client - Databasin client (for base URL in network errors)
  * @throws {Error} Re-throws the original error after logging
  *
  * @example
@@ -597,7 +597,7 @@ function handleApiError(
 	endpoint: string,
 	method: string,
 	config: CliConfig,
-	client: DataBasinClient
+	client: DatabasinClient
 ): never {
 	if (error instanceof ApiError) {
 		console.error();
@@ -671,7 +671,7 @@ async function apiCommand(
 ): Promise<void> {
 	const opts = command.optsWithGlobals();
 	const config: CliConfig = opts._config;
-	const client: DataBasinClient = opts._clients.base;
+	const client: DatabasinClient = opts._clients.base;
 
 	let spinner: Ora | undefined;
 
@@ -736,7 +736,7 @@ async function apiCommand(
  */
 export function createApiCommand(): Command {
 	const api = new Command('api')
-		.description('Call any DataBasin API endpoint directly')
+		.description('Call any Databasin API endpoint directly')
 		.argument('<method>', 'HTTP method (GET, POST, PUT, DELETE)')
 		.argument('<endpoint>', 'API endpoint path (e.g., /api/connector)')
 		.argument('[body]', 'Request body for POST/PUT/DELETE or query params for GET')

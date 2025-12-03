@@ -1,6 +1,6 @@
 # Connectors Commands
 
-Manage DataBasin data connectors through the CLI.
+Manage Databasin data connectors through the CLI.
 
 ## Critical Token Efficiency Notice
 
