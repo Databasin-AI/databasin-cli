@@ -1,0 +1,192 @@
+<!doctype html>
+<html
+	lang="en"
+	data-theme="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>DataBasin CLI - {{STATUS_TITLE}}</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.amber.min.css" />
+		<link
+			rel="preconnect"
+			href="https://fonts.googleapis.com" />
+		<link
+			rel="preconnect"
+			href="https://fonts.gstatic.com"
+			crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+			rel="stylesheet" />
+		<style>
+			:root[data-theme='dark'] {
+				--pico-primary: #ffbf00;
+				--pico-primary-hover: #e8ae01;
+				--pico-primary-focus: rgba(255, 191, 0, 0.25);
+				--pico-primary-inverse: #000;
+			}
+
+			* {
+				font-family:
+					'Roboto',
+					-apple-system,
+					BlinkMacSystemFont,
+					'Oxygen',
+					'Ubuntu',
+					'Cantarell',
+					'Helvetica Neue',
+					Arial,
+					sans-serif;
+			}
+
+			body {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				padding: 1rem;
+			}
+
+			main {
+				max-width: 600px;
+				width: 100%;
+				padding: 0;
+			}
+
+			article {
+				margin: 0;
+				animation: slideIn 0.3s ease-out;
+			}
+
+			@keyframes slideIn {
+				from {
+					opacity: 0;
+					transform: translateY(-20px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			header {
+				text-align: center;
+				padding-bottom: 1rem;
+			}
+
+			.icon {
+				font-size: 5rem;
+				margin: 1rem 0;
+				animation: scaleIn 0.4s ease-out 0.1s both;
+				display: inline-block;
+			}
+
+			@keyframes scaleIn {
+				from {
+					opacity: 0;
+					transform: scale(0.5);
+				}
+				to {
+					opacity: 1;
+					transform: scale(1);
+				}
+			}
+
+			.icon.success {
+				color: var(--pico-ins-color);
+			}
+
+			.icon.error {
+				color: var(--pico-del-color);
+			}
+
+			h1 {
+				font-weight: 300;
+				font-size: 2rem;
+				margin: 0.5rem 0 1rem 0;
+			}
+
+			h1.success {
+				color: var(--pico-ins-color);
+			}
+
+			h1.error {
+				color: var(--pico-del-color);
+			}
+
+			article > p {
+				text-align: center;
+				color: var(--pico-muted-color);
+				margin: 1rem 0;
+			}
+
+			.message-box {
+				background: var(--pico-card-background-color);
+				border-left: 4px solid var(--pico-primary);
+				padding: 1rem;
+				margin: 1.5rem 0;
+				border-radius: var(--pico-border-radius);
+			}
+
+			.message-box.error {
+				border-left-color: var(--pico-del-color);
+			}
+
+			.message-box p {
+				margin: 0;
+				text-align: left;
+			}
+
+			footer {
+				text-align: center;
+				padding-top: 1rem;
+				border-top: 1px solid var(--pico-muted-border-color);
+				color: var(--pico-muted-color);
+				font-size: 0.875rem;
+			}
+
+			code {
+				background: var(--pico-code-background-color);
+				padding: 0.2rem 0.4rem;
+				border-radius: var(--pico-border-radius);
+				font-family: 'Monaco', 'Courier New', monospace;
+				font-size: 0.85em;
+			}
+
+			@media (max-width: 600px) {
+				h1 {
+					font-size: 1.5rem;
+				}
+
+				.icon {
+					font-size: 4rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main class="container">
+			<article>
+				<header>
+					<img
+						src="{{LOGO_URL}}"
+						alt="DataBasin Logo"
+						style="max-width: 200px; height: auto; margin: 0 auto 1.5rem auto; display: block" />
+
+					<div class="icon {{STATUS_CLASS}}">{{ICON}}</div>
+
+					<h1 class="{{STATUS_CLASS}}">{{HEADING}}</h1>
+				</header>
+
+				<p>{{MESSAGE}}</p>
+
+				{{EXTRA_CONTENT}}
+
+				<footer>You can close this window and return to your terminal</footer>
+			</article>
+		</main>
+	</body>
+</html>

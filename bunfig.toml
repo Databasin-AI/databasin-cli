@@ -1,0 +1,12 @@
+[install]
+optional = false
+dev = true
+peer = true
+production = false
+
+[install.cache]
+disable = false
+#dir = "~/.bun/install/cache"
+
+[test]
+# Test configuration

@@ -1,0 +1,76 @@
+{
+	"name": "@databasin/cli",
+	"version": "0.2.0",
+	"description": "Command-line interface for DataBasin data integration platform - manage projects, connectors, pipelines, and execute SQL queries",
+	"type": "module",
+	"main": "./dist/index.js",
+	"bin": {
+		"databasin": "./dist/index.js"
+	},
+	"scripts": {
+		"dev": "bun run src/index.ts",
+		"build": "bun run build.ts",
+		"build:quick": "bun build src/index.ts --outdir dist --target bun",
+		"build:exe": "bun build src/index.ts --compile --outfile dist/databasin",
+		"start": "bun run dist/index.js",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test",
+		"test:integration": "bun test test/integration/",
+		"test:all": "bun test && bun test test/integration/",
+		"lint": "echo 'Linting not configured yet'",
+		"format": "echo 'Formatting not configured yet'",
+		"clean": "rm -rf dist"
+	},
+	"dependencies": {
+		"commander": "^12.1.0",
+		"prompts": "^2.4.2",
+		"cli-table3": "^0.6.5",
+		"chalk": "^5.3.0",
+		"ora": "^8.1.1"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/prompts": "^2.4.9",
+		"typescript": "^5.7.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"dist/index.js",
+		"dist/linux/",
+		"dist/macos/",
+		"dist/build-info.json",
+		"README.md",
+		"CHANGELOG.md",
+		"EXAMPLES.md",
+		"LICENSE"
+	],
+	"keywords": [
+		"databasin",
+		"cli",
+		"data-integration",
+		"etl",
+		"sql",
+		"pipeline",
+		"connector",
+		"data-warehouse",
+		"automation",
+		"bun"
+	],
+	"author": "DataBasin Team",
+	"license": "MIT",
+	"homepage": "https://github.com/databasin/cli#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/databasin/cli.git"
+	},
+	"bugs": {
+		"url": "https://github.com/databasin/cli/issues",
+		"email": "support@databasin.com"
+	},
+	"engines": {
+		"node": ">=18.0.0",
+		"bun": ">=1.0.0"
+	}
+}
