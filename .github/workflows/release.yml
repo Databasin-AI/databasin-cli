@@ -1,0 +1,148 @@
+name: Release and Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - main
+
+jobs:
+  # Only run if it's a tag push to main
+  check-context:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      version: ${{ steps.extract.outputs.version }}
+    steps:
+      - name: Check if tag and on main
+        id: check
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]] && [[ "${{ github.ref_name }}" == v*.*.* ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract version from tag
+        id: extract
+        if: steps.check.outputs.should_run == 'true'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build-and-publish:
+    needs: check-context
+    if: needs.check-context.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run type checking
+        run: bun run typecheck
+
+      - name: Run tests
+        run: bun test
+
+      - name: Build CLI
+        run: bun run build.ts
+
+      - name: Verify build artifacts
+        run: |
+          echo "Checking for build artifacts..."
+          ls -la dist/
+          test -f dist/index.js || (echo "dist/index.js not found" && exit 1)
+          test -f dist/linux-x64/databasin || (echo "Linux binary not found" && exit 1)
+          test -f dist/darwin-arm64/databasin || (echo "macOS ARM64 binary not found" && exit 1)
+          test -f dist/darwin-x64/databasin || (echo "macOS x64 binary not found" && exit 1)
+          test -f dist/build-info.json || (echo "build-info.json not found" && exit 1)
+          echo "All build artifacts verified ✓"
+
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Extract release notes
+        id: release_notes
+        run: |
+          VERSION=${{ needs.check-context.outputs.version }}
+          echo "Extracting release notes for version $VERSION"
+
+          # Try to extract from CHANGELOG.md if it exists
+          if [ -f CHANGELOG.md ]; then
+            # Extract the section for this version
+            NOTES=$(sed -n "/## \[${VERSION}\]/,/## \[/p" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+
+            if [ -z "$NOTES" ]; then
+              # Fallback: try without brackets
+              NOTES=$(sed -n "/## ${VERSION}/,/## /p" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+            fi
+
+            if [ -n "$NOTES" ]; then
+              echo "Found release notes in CHANGELOG.md"
+              # Save to file for multiline content
+              echo "$NOTES" > release_notes.txt
+            else
+              echo "No specific version notes found, using default" > release_notes.txt
+              echo "" >> release_notes.txt
+              echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> release_notes.txt
+            fi
+          else
+            echo "Release for version $VERSION" > release_notes.txt
+            echo "" >> release_notes.txt
+            echo "Built with:" >> release_notes.txt
+            echo "- TypeScript compilation" >> release_notes.txt
+            echo "- Multi-platform executables (Linux x64, macOS ARM64, macOS x64)" >> release_notes.txt
+            echo "- Published to npm as @databasin/cli" >> release_notes.txt
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-context.outputs.version }}
+          name: Release v${{ needs.check-context.outputs.version }}
+          body_path: release_notes.txt
+          draft: false
+          prerelease: false
+          files: |
+            dist/index.js
+            dist/linux-x64/databasin
+            dist/darwin-arm64/databasin
+            dist/darwin-x64/databasin
+            dist/build-info.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Version: ${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Published to npm: @databasin/cli@${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ GitHub Release created: v${{ needs.check-context.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/index.js\` - Node.js bundle" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/linux-x64/databasin\` - Linux x64 executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/darwin-arm64/databasin\` - macOS ARM64 executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/darwin-x64/databasin\` - macOS x64 executable" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/build-info.json\` - Build metadata" >> $GITHUB_STEP_SUMMARY

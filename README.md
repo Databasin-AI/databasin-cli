@@ -14,37 +14,33 @@ A command-line interface for managing DataBasin projects, connectors, pipelines,
 
 ## Installation
 
-### Prerequisites
+### Quick Install (Recommended)
 
-- [Bun](https://bun.sh) runtime (v1.0 or later)
-- DataBasin API access token
-
-### Install from Source
+Install the latest release with a single command:
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd databasin-cli
-
-# Install dependencies
-bun install
-
-# Create global command (recommended)
-bun run build
-sudo ln -s $(pwd)/dist/databasin /usr/local/bin/databasin
-
-# Verify installation
-databasin --version
+curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh | bash
 ```
 
-### Quick Setup
+Or download and inspect first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh -o install.sh
+chmod +x install.sh
+./install.sh
+```
+
+The installer will:
+- Detect your platform (Linux x64, macOS ARM64, macOS x64)
+- Download the appropriate binary from the latest GitHub release
+- Install to `/usr/local/bin/databasin`
+- Make the binary executable
+
+### Logging In
 
 ```bash
 # Login via browser (recommended)
 databasin auth login
-
-# Or set token manually via environment variable
-export DATABASIN_TOKEN="your-api-token-here"
 ```
 
 ## Usage
@@ -297,6 +293,83 @@ databasin connectors create connector.json
 - **Project not found**: Use `databasin projects list` to verify project IDs  
 - **Connector issues**: Check `databasin connectors get <id>` for connection status
 - **Permission denied**: Verify your user has access with `databasin projects users <project-id>`
+
+## Development
+
+### Prerequisites
+
+- [Bun](https://bun.sh) runtime (v1.0 or later) - only for development
+- DataBasin API access token
+
+### Building from Source
+
+```bash
+# Install dependencies
+bun install
+
+# Run type checking
+bun run typecheck
+
+# Run tests
+bun test
+
+# Build for all platforms
+bun run build.ts
+```
+
+### Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/Databasin-AI/databasin-cli.git
+cd databasin-cli
+
+# Install dependencies
+bun install
+
+# Create global command (recommended)
+bun run build
+sudo ln -s $(pwd)/dist/databasin /usr/local/bin/databasin
+
+# Verify installation
+databasin --version
+```
+
+### Creating a Release
+
+Use the release script to automate version bumping and releasing:
+
+```bash
+# Bump patch version (0.2.0 -> 0.2.1)
+./scripts/release.sh patch
+
+# Bump minor version (0.2.0 -> 0.3.0)
+./scripts/release.sh minor
+
+# Bump major version (0.2.0 -> 1.0.0)
+./scripts/release.sh major
+
+# Release a specific version
+./scripts/release.sh 1.2.3
+
+# Dry run to see what would happen
+./scripts/release.sh patch --dry-run
+
+# Create version and tag but don't push
+./scripts/release.sh patch --no-push
+```
+
+The release script will:
+1. Update the version in `package.json`
+2. Create a commit with the version bump
+3. Create a git tag (e.g., `v0.2.1`)
+4. Push the commit and tag to the remote repository
+
+Once pushed, the GitHub Actions workflow will automatically:
+- Build the CLI for all platforms
+- Run tests and type checking
+- Publish to npm as `@databasin/cli`
+- Create a GitHub release with build artifacts
 
 ## Support
 
