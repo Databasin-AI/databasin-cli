@@ -58,6 +58,19 @@ databasin auth whoami
 databasin auth verify
 ```
 
+### Self-Update
+
+```bash
+# Check for updates
+databasin update --check
+
+# Update to latest version
+databasin update
+
+# Force update (even if on latest)
+databasin update --force
+```
+
 ### Project Management
 
 ```bash

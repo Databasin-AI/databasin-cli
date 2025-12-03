@@ -17,7 +17,7 @@
 		"test": "bun test",
 		"test:unit": "bun test tests/unit tests/client tests/utils",
 		"test:integration": "bun test tests/integration/",
-		"test:smoke": "dist/databasin --version && dist/databasin --help && dist/databasin auth --help && dist/databasin projects --help && dist/databasin connectors --help && dist/databasin pipelines --help && dist/databasin sql --help && dist/databasin automations --help",
+		"test:smoke": "dist/databasin --version && dist/databasin --help && dist/databasin auth --help && dist/databasin projects --help && dist/databasin connectors --help && dist/databasin pipelines --help && dist/databasin sql --help && dist/databasin automations --help && dist/databasin update --help",
 		"test:all": "bun run typecheck && bun run test:unit && bun run build:exe && bun run test:smoke",
 		"verify": "bun run typecheck && bun run test && bun run build:exe && bun run test:smoke",
 		"lint": "echo 'Linting not configured yet'",

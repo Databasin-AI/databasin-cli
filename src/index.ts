@@ -31,6 +31,7 @@ import { createPipelinesCommand } from './commands/pipelines.ts';
 import { createSqlCommand } from './commands/sql.ts';
 import { createAutomationsCommand } from './commands/automations.ts';
 import { createApiCommand } from './commands/api.ts';
+import { createUpdateCommand } from './commands/update.ts';
 
 // Get package.json version for --version flag (embedded at build time)
 const VERSION = packageJson.version;
@@ -196,6 +197,9 @@ function registerCommands(program: Command): void {
 
 	// API commands - IMPLEMENTED
 	program.addCommand(createApiCommand());
+
+	// Update command - Self-update functionality
+	program.addCommand(createUpdateCommand());
 }
 
 /**
