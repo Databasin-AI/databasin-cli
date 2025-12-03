@@ -76,6 +76,14 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Prepare npm package
+        run: |
+          # Use concise README for npm (full docs on GitHub)
+          echo "Swapping README for npm package..."
+          rm -f README.md
+          mv .github/README.npm.md README.md
+          echo "README prepared for npm ✓"
+
       - name: Publish to npm
         run: npm publish --access public
         env:

@@ -63,14 +63,14 @@
 	],
 	"author": "Databasin Team",
 	"license": "MIT",
-	"homepage": "https://github.com/databasin/cli#readme",
+	"homepage": "https://github.com/databasin-ai/databasin-cli#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/databasin/cli.git"
+		"url": "https://github.com/databasin-ai/databasin-cli.git"
 	},
 	"bugs": {
-		"url": "https://github.com/databasin/cli/issues",
-		"email": "support@databasin.com"
+		"url": "https://github.com/databasin-ai/databasin-cli/issues",
+		"email": "support@databasin.ai"
 	},
 	"engines": {
 		"node": ">=18.0.0",
