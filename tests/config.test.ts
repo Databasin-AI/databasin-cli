@@ -28,9 +28,9 @@ import {
 	getConfigValue,
 	configFileExists,
 	deleteConfigFile
-} from './config.ts';
-import { DEFAULT_CONFIG, ENV_VARS } from './types/config.ts';
-import { ConfigError } from './utils/errors.ts';
+} from '../src/config.ts';
+import { DEFAULT_CONFIG, ENV_VARS } from '../src/types/config.ts';
+import { ConfigError } from '../src/utils/errors.ts';
 
 // Test config path (use temp directory to avoid conflicts)
 const TEST_CONFIG_DIR = join(process.cwd(), '.test-databasin');

@@ -14,7 +14,7 @@ import {
 	flattenObject,
 	detectFormat,
 	checkTokenEfficiency
-} from './formatters';
+} from '../../src/utils/formatters';
 
 // Sample test data
 const sampleData = [

@@ -24,7 +24,7 @@ import {
 	getGlobalFlags,
 	type SpinnerOptions,
 	type LogOptions
-} from './progress';
+} from '../../src/utils/progress';
 
 describe('progress utilities', () => {
 	beforeEach(() => {

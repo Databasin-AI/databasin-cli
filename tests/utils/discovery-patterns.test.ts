@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, test } from 'bun:test';
-import { validateConnectorConfiguration, assertValidConfiguration } from './discovery-patterns.js';
-import { SCREEN_CATALOGS, SCREEN_DATABASE, SCREEN_SCHEMA, SCREEN_ARTIFACTS } from '../constants/screens.js';
+import { validateConnectorConfiguration, assertValidConfiguration } from '../../src/utils/discovery-patterns.js';
+import { SCREEN_CATALOGS, SCREEN_DATABASE, SCREEN_SCHEMA, SCREEN_ARTIFACTS } from '../../src/constants/screens.js';
 
 describe('Configuration Validation', () => {
 	test('Valid RDBMS configuration passes', () => {

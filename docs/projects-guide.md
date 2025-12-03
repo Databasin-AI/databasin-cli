@@ -539,14 +539,17 @@ bun run src/index.ts projects list
 
 ### Authentication Errors
 
-Check your token is valid:
+Re-authenticate or check your token:
 
 ```bash
-# View stored token (first 20 chars)
-head -c 20 ~/.databasin/token && echo "..."
+# Re-authenticate via browser
+databasin auth login
 
-# Verify token works
+# Or verify existing token
 databasin auth verify
+
+# View current user
+databasin auth whoami
 ```
 
 ### Connection Errors
@@ -586,7 +589,9 @@ For issues, questions, or feature requests:
 
 ## Related Commands
 
-- `databasin auth` - Manage authentication
-- `databasin connectors` - Manage project connectors (coming soon)
-- `databasin pipelines` - Manage project pipelines (coming soon)
-- `databasin automations` - Manage project automations (coming soon)
+- `databasin auth login` - Authenticate via browser
+- `databasin auth verify` - Check token validity
+- `databasin auth whoami` - View current user context
+- `databasin connectors` - Manage project connectors
+- `databasin pipelines` - Manage project pipelines
+- `databasin automations` - Manage project automations

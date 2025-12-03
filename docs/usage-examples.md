@@ -19,15 +19,16 @@ Real-world examples and common workflows for the DataBasin CLI.
 ### Initial Setup
 
 ```bash
-# Get your token from the DataBasin web interface
-# Settings → API Access → Generate Token
+# Method 1: Browser login (recommended)
+databasin auth login
+# Opens browser, authenticates, and saves token to ~/.databasin/.token
 
-# Method 1: Environment variable (recommended for development)
+# Method 2: Environment variable (for CI/CD or scripting)
 export DATABASIN_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-# Method 2: Save to token file (recommended for production)
+# Method 3: Manual token file
 mkdir -p ~/.databasin
-echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." > ~/.databasin/.token
+echo "your-jwt-token" > ~/.databasin/.token
 chmod 600 ~/.databasin/.token
 
 # Verify authentication works

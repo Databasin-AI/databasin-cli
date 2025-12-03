@@ -2,57 +2,61 @@
 
 ## Installation
 
-### Option 1: Install from Local Build (Development)
+### Option 1: Download Pre-built Binary
 
 ```bash
-# Navigate to CLI directory
-cd /home/founder3/code/tpi/databasin-sv/src/cli
-
-# Run the installation script
-./scripts/install-local.sh
+# Download for your platform from the DataBasin web interface
+# Or build from source (see below)
 
 # Verify installation
 databasin --version
 ```
 
-### Option 2: Build and Run Manually
+### Option 2: Build from Source
 
 ```bash
-# Build the CLI
-./scripts/build.sh
+# Clone and install dependencies
+git clone <repository-url>
+cd databasin-cli
+bun install
 
-# Run directly from dist folder
-./dist/databasin --help
+# Build executable
+bun run build:exe
+
+# Link globally for development
+./scripts/dev-setup.sh link
+
+# Verify installation
+databasin --version
 ```
 
 ### Option 3: Development Mode (No Build)
 
 ```bash
 # Run directly from source
-./scripts/dev.sh --help
+bun run dev --help
 
 # Example command
-./scripts/dev.sh projects list
+bun run dev projects list
 ```
 
 ## First Steps
 
-### 1. Set Up Authentication
+### 1. Authenticate
 
-Create a `.token` file in your home directory or project directory:
+The easiest way to authenticate is via browser:
 
 ```bash
-# In your home directory
-mkdir -p ~/.databasin
-echo "your-jwt-token-here" > ~/.databasin/.token
-chmod 600 ~/.databasin/.token
-
-# OR in your project directory
-echo "your-jwt-token-here" > .token
-chmod 600 .token
+# Opens your browser to sign in to DataBasin
+databasin auth login
 ```
 
-Alternatively, use an environment variable:
+This will:
+1. Open the DataBasin login page in your browser
+2. After you sign in, redirect the token back to the CLI
+3. Save the token to `~/.databasin/.token`
+
+Alternatively, set a token manually:
 
 ```bash
 export DATABASIN_TOKEN="your-jwt-token-here"
@@ -64,7 +68,7 @@ export DATABASIN_TOKEN="your-jwt-token-here"
 # Check token validity
 databasin auth verify
 
-# View current user
+# View current user and accessible projects
 databasin auth whoami
 ```
 
@@ -315,18 +319,20 @@ databasin sql exec conn-123 "SELECT * FROM sales" --csv > sales.csv
 databasin connectors list --full --json | jq 'length'
 ```
 
-## Scripts
-
-### Create Build Scripts Directory
+## Development Scripts
 
 ```bash
-cd /home/founder3/code/tpi/databasin-sv/src/cli
+# Build and link globally
+./scripts/dev-setup.sh link
 
-# Available scripts
-./scripts/build.sh           # Build the CLI
-./scripts/install-local.sh   # Install globally
-./scripts/dev.sh --help      # Run from source
-./scripts/test-all.sh        # Run all tests
+# Unlink when done
+./scripts/dev-setup.sh unlink
+
+# Run tests
+bun run test
+
+# Full verification
+bun run verify
 ```
 
 ## Troubleshooting
@@ -337,7 +343,7 @@ cd /home/founder3/code/tpi/databasin-sv/src/cli
 ✖ No authentication token found
 ```
 
-**Solution**: Set `DATABASIN_TOKEN` env var or create `.token` file
+**Solution**: Run `databasin auth login` to authenticate via browser
 
 ### Connection Refused
 

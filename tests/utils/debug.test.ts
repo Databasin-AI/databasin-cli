@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from 'bun:test';
-import { logger, LogLevel, createLogger } from './debug.js';
+import { logger, LogLevel, createLogger } from '../../src/utils/debug.ts';
 
 describe('Debug Logger', () => {
     let originalDebug: string | undefined;

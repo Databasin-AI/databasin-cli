@@ -40,11 +40,11 @@ databasin --version
 ### Quick Setup
 
 ```bash
-# Set your API token
-export DATABASIN_TOKEN="your-api-token-here"
+# Login via browser (recommended)
+databasin auth login
 
-# Or configure interactively
-databasin auth whoami
+# Or set token manually via environment variable
+export DATABASIN_TOKEN="your-api-token-here"
 ```
 
 ## Usage
@@ -52,7 +52,10 @@ databasin auth whoami
 ### Authentication
 
 ```bash
-# Verify your authentication
+# Login via browser - opens DataBasin web UI to authenticate
+databasin auth login
+
+# View current user context
 databasin auth whoami
 
 # Check token validity
@@ -163,14 +166,14 @@ databasin api PUT /pipelines/pipeline-123 @updated-config.json
 ### Environment Variables
 
 ```bash
-# Required: Your DataBasin API token
+# Authentication token (set automatically by `databasin auth login`)
 export DATABASIN_TOKEN="your-token-here"
 
-# Optional: API base URL (defaults to DataBasin production)
-export DATABASIN_BASE_URL="https://api.databasin.com"
+# Optional: API base URL (default: http://localhost:9000)
+export DATABASIN_API_URL="https://api.databasin.com"
 
 # Optional: Enable debug output
-export DEBUG=true
+export DATABASIN_DEBUG=true
 ```
 
 ### Configuration File
@@ -179,12 +182,16 @@ Create `~/.databasin/config.json`:
 
 ```json
 {
-  "token": "your-token-here",
-  "baseUrl": "https://api.databasin.com",
+  "apiUrl": "https://api.databasin.com",
   "defaultProject": "proj-123",
-  "outputFormat": "table"
+  "output": {
+    "format": "table",
+    "colors": true
+  }
 }
 ```
+
+**Note:** Authentication tokens are stored separately in `~/.databasin/.token` (created by `databasin auth login`).
 
 ## Output Formats
 
@@ -261,14 +268,14 @@ databasin sql exec conn-123 "DESCRIBE users" --csv > user_schema.csv
 ### Authentication Issues
 
 ```bash
+# Re-authenticate via browser
+databasin auth login
+
 # Verify your token is valid
 databasin auth verify
 
 # Check your current user context
 databasin auth whoami
-
-# Re-export your token if needed
-export DATABASIN_TOKEN="your-new-token"
 ```
 
 ### Enable Debug Mode
@@ -276,17 +283,17 @@ export DATABASIN_TOKEN="your-new-token"
 For detailed diagnostic information:
 
 ```bash
-# Enable debug output
-DEBUG=true databasin pipelines run pipeline-123
+# Enable debug output for a single command
+DATABASIN_DEBUG=true databasin pipelines run pipeline-123
 
-# Enable verbose logging
-export DEBUG=true
+# Or enable globally
+export DATABASIN_DEBUG=true
 databasin connectors create connector.json
 ```
 
 ### Common Error Solutions
 
-- **Token expired**: Run `databasin auth verify` and update your token
+- **Token expired**: Run `databasin auth login` to re-authenticate
 - **Project not found**: Use `databasin projects list` to verify project IDs  
 - **Connector issues**: Check `databasin connectors get <id>` for connection status
 - **Permission denied**: Verify your user has access with `databasin projects users <project-id>`
