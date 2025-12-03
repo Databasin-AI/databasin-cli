@@ -453,7 +453,7 @@ export class ConfigurationClient extends DatabasinClient {
 
 		for (const categoryFile of this.categoryFiles) {
 			try {
-				const categoryConfig = await this.get<ConnectorTypeConfiguration>(
+				const categoryConfig = await this.fetchStaticFile<ConnectorTypeConfiguration>(
 					categoryFile,
 					options
 				);

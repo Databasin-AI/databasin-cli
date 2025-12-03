@@ -12,6 +12,66 @@ All notable changes to Databasin CLI will be documented in this file.
 - Implement bulk operations from CSV
 - Add built-in connector templates
 
+## [0.3.1] - 2025-12-02
+
+### Added
+
+- **Self-Update Command** (`databasin update`)
+  - Check for updates with `databasin update --check`
+  - Auto-download and install latest release from GitHub
+  - Platform detection (linux-x64, darwin-arm64, darwin-x64)
+  - Safe installation with backup and rollback on failure
+  - Detects npm installs and suggests `npm update` instead
+  - Force update option (`--force`) to reinstall current version
+
+### Changed
+
+- Updated README with self-update documentation
+- Added update command to smoke tests
+
+## [0.3.0] - 2025-12-02
+
+### Added
+
+- **Node.js Compatibility**
+  - CLI now works with both Node.js 18+ and Bun 1.0+
+  - `npm install -g @databasin/cli` now supported
+  - `npx @databasin/cli` for one-off usage
+  - Standalone binaries still available (no runtime required)
+
+- **npm Publishing**
+  - Published to npm as `@databasin/cli`
+  - Concise npm-specific README with quick start guide
+  - Full documentation remains on GitHub
+
+- **GitHub Actions Release Workflow**
+  - Automated releases on version tags
+  - Multi-platform binary builds (Linux x64, macOS ARM64, macOS x64)
+  - Automatic npm publishing
+  - GitHub Release creation with assets
+  - Release notes extraction from CHANGELOG
+
+- **Installation Script**
+  - One-line install: `curl -fsSL .../install.sh | bash`
+  - Platform auto-detection
+  - Installs to `/usr/local/bin/databasin`
+
+- **Release Automation Script**
+  - `./scripts/release.sh patch|minor|major`
+  - Version bumping with validation
+  - Git tag creation and push
+  - Dry-run mode for testing
+
+### Changed
+
+- Replaced `Bun.serve()` with Node.js `http.createServer()` for cross-runtime compatibility
+- Build target changed from `bun` to `node` for npm package
+- Updated package.json with npm registry configuration
+
+### Fixed
+
+- Auth login callback server now works in Node.js environment
+
 ## [0.2.0] - 2025-11-24
 
 ### Added
