@@ -36,37 +36,11 @@ The installer will:
 - Install to `/usr/local/bin/databasin`
 - Make the binary executable
 
-### Prerequisites
-
-- [Bun](https://bun.sh) runtime (v1.0 or later) - only for development
-- DataBasin API access token
-
-### Install from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/Databasin-AI/databasin-cli.git
-cd databasin-cli
-
-# Install dependencies
-bun install
-
-# Create global command (recommended)
-bun run build
-sudo ln -s $(pwd)/dist/databasin /usr/local/bin/databasin
-
-# Verify installation
-databasin --version
-```
-
-### Quick Setup
+### Logging In
 
 ```bash
 # Login via browser (recommended)
 databasin auth login
-
-# Or set token manually via environment variable
-export DATABASIN_TOKEN="your-api-token-here"
 ```
 
 ## Usage
@@ -322,6 +296,11 @@ databasin connectors create connector.json
 
 ## Development
 
+### Prerequisites
+
+- [Bun](https://bun.sh) runtime (v1.0 or later) - only for development
+- DataBasin API access token
+
 ### Building from Source
 
 ```bash
@@ -336,6 +315,24 @@ bun test
 
 # Build for all platforms
 bun run build.ts
+```
+
+### Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/Databasin-AI/databasin-cli.git
+cd databasin-cli
+
+# Install dependencies
+bun install
+
+# Create global command (recommended)
+bun run build
+sudo ln -s $(pwd)/dist/databasin /usr/local/bin/databasin
+
+# Verify installation
+databasin --version
 ```
 
 ### Creating a Release
