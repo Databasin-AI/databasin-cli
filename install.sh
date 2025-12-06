@@ -9,12 +9,17 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
 REPO="Databasin-AI/databasin-cli"
 BINARY_NAME="databasin"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+
+# Default to user installation (no sudo required)
+GLOBAL_INSTALL=false
+DEFAULT_USER_DIR="${HOME}/.local/bin"
+DEFAULT_SYSTEM_DIR="/usr/local/bin"
 
 # Helper functions
 info() {
@@ -28,6 +33,80 @@ warn() {
 error() {
     echo -e "${RED}[ERROR]${NC} $1" >&2
     exit 1
+}
+
+highlight() {
+    echo -e "${BLUE}$1${NC}" >&2
+}
+
+# Show usage
+usage() {
+    cat << EOF
+Databasin CLI Installation Script
+
+Installs the Databasin CLI to your system. By default, installs to ~/.local/bin
+which doesn't require sudo. Use --global to install system-wide.
+
+Usage:
+  curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh | bash -s -- --global
+
+Options:
+  --global          Install system-wide to /usr/local/bin (requires sudo)
+  --dir <path>      Install to custom directory
+  -h, --help        Show this help message
+
+Examples:
+  # User installation (default, no sudo)
+  curl -fsSL https://[...]/install.sh | bash
+
+  # System-wide installation (requires sudo)
+  curl -fsSL https://[...]/install.sh | bash -s -- --global
+
+  # Custom directory
+  curl -fsSL https://[...]/install.sh | bash -s -- --dir ~/bin
+
+Environment Variables:
+  INSTALL_DIR       Override installation directory
+
+EOF
+    exit 0
+}
+
+# Parse command line arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --global)
+                GLOBAL_INSTALL=true
+                shift
+                ;;
+            --dir)
+                CUSTOM_INSTALL_DIR="$2"
+                shift 2
+                ;;
+            -h|--help)
+                usage
+                ;;
+            *)
+                error "Unknown option: $1. Use --help for usage information."
+                ;;
+        esac
+    done
+}
+
+# Determine installation directory
+get_install_dir() {
+    # Priority: Custom dir > Environment variable > Global flag > Default user dir
+    if [ -n "$CUSTOM_INSTALL_DIR" ]; then
+        echo "$CUSTOM_INSTALL_DIR"
+    elif [ -n "$INSTALL_DIR" ]; then
+        echo "$INSTALL_DIR"
+    elif [ "$GLOBAL_INSTALL" = true ]; then
+        echo "$DEFAULT_SYSTEM_DIR"
+    else
+        echo "$DEFAULT_USER_DIR"
+    fi
 }
 
 # Detect OS and Architecture
@@ -109,23 +188,32 @@ download_binary() {
 # Install binary
 install_binary() {
     local temp_file=$1
-    local install_path="${INSTALL_DIR}/${BINARY_NAME}"
+    local install_dir=$2
+    local install_path="${install_dir}/${BINARY_NAME}"
 
     info "Installing to ${install_path}..."
 
-    # Check if install directory exists and is writable
-    if [ ! -d "$INSTALL_DIR" ]; then
-        error "Install directory ${INSTALL_DIR} does not exist. Please create it or run with sudo."
+    # Create install directory if it doesn't exist
+    if [ ! -d "$install_dir" ]; then
+        if [ "$GLOBAL_INSTALL" = true ]; then
+            info "Creating system directory ${install_dir} (requires sudo)..."
+            sudo mkdir -p "$install_dir"
+        else
+            info "Creating user directory ${install_dir}..."
+            mkdir -p "$install_dir"
+        fi
     fi
 
-    # Try to install, use sudo if necessary
-    if [ -w "$INSTALL_DIR" ]; then
-        cp "${temp_file}" "${install_path}"
-        chmod +x "${install_path}"
-    else
-        warn "Install directory requires elevated privileges. Using sudo..."
+    # Install based on permissions
+    if [ "$GLOBAL_INSTALL" = true ] || [ ! -w "$install_dir" ]; then
+        if [ "$GLOBAL_INSTALL" = false ]; then
+            warn "Install directory requires elevated privileges. Using sudo..."
+        fi
         sudo cp "${temp_file}" "${install_path}"
         sudo chmod +x "${install_path}"
+    else
+        cp "${temp_file}" "${install_path}"
+        chmod +x "${install_path}"
     fi
 
     # Verify installation
@@ -141,6 +229,8 @@ install_binary() {
 
 # Verify installation
 verify_installation() {
+    local install_dir=$1
+
     info "Verifying installation..."
 
     if command -v ${BINARY_NAME} &> /dev/null; then
@@ -153,20 +243,55 @@ verify_installation() {
         info "Run '${BINARY_NAME} --help' to get started"
     else
         warn "Binary installed but not found in PATH"
-        warn "You may need to add ${INSTALL_DIR} to your PATH"
-        echo ""
-        echo "Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
-        echo "  export PATH=\"${INSTALL_DIR}:\$PATH\""
+
+        if [ "$GLOBAL_INSTALL" = false ]; then
+            echo ""
+            highlight "To use the Databasin CLI, add ${install_dir} to your PATH:"
+            echo ""
+
+            # Detect shell and provide specific instructions
+            if [ -n "$BASH_VERSION" ]; then
+                echo "  For Bash, add to ~/.bashrc:"
+                echo "    echo 'export PATH=\"${install_dir}:\$PATH\"' >> ~/.bashrc"
+                echo "    source ~/.bashrc"
+            elif [ -n "$ZSH_VERSION" ]; then
+                echo "  For Zsh, add to ~/.zshrc:"
+                echo "    echo 'export PATH=\"${install_dir}:\$PATH\"' >> ~/.zshrc"
+                echo "    source ~/.zshrc"
+            else
+                echo "  Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+                echo "    export PATH=\"${install_dir}:\$PATH\""
+            fi
+
+            echo ""
+            highlight "Or run directly:"
+            echo "  ${install_dir}/${BINARY_NAME} --help"
+        else
+            echo ""
+            echo "Add ${install_dir} to your PATH or verify that it's already included."
+        fi
     fi
 }
 
 # Main installation flow
 main() {
+    # Parse command line arguments
+    parse_args "$@"
+
     echo ""
     echo "╔═══════════════════════════════════════╗"
     echo "║   Databasin CLI Installation Script  ║"
     echo "╚═══════════════════════════════════════╝"
     echo ""
+
+    # Determine installation directory
+    local install_dir=$(get_install_dir)
+
+    if [ "$GLOBAL_INSTALL" = true ]; then
+        info "Installing globally to ${install_dir} (requires sudo)"
+    else
+        info "Installing for current user to ${install_dir} (no sudo required)"
+    fi
 
     # Detect platform
     local platform=$(detect_platform)
@@ -180,15 +305,15 @@ main() {
     local temp_file=$(download_binary "${version}" "${platform}")
 
     # Install binary
-    install_binary "${temp_file}"
+    install_binary "${temp_file}" "${install_dir}"
 
     # Verify
-    verify_installation
+    verify_installation "${install_dir}"
 
     echo ""
     info "Installation complete! 🎉"
     echo ""
 }
 
-# Run main function
-main
+# Run main function with all script arguments
+main "$@"
