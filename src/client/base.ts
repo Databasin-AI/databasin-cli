@@ -271,7 +271,7 @@ export class DatabasinClient {
 		// Debug logging
 		const debug = options.debug ?? this.config.debug;
 		if (debug) {
-			this.logRequest(method, endpoint, body);
+			this.logRequest(method, url, body);
 		}
 
 		// Retry loop for network failures

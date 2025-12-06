@@ -125,7 +125,25 @@ export class ConnectorsClient extends DatabasinClient {
 		};
 
 		// Build params with optional project filter
-		const params = projectId ? { internalID: projectId } : undefined;
+		// If projectId provided, also fetch institutionID for better filtering
+		let params: Record<string, string | number> | undefined = undefined;
+
+		if (projectId) {
+			try {
+				// Fetch project to get institutionID
+				const project = await this.get<any>(`/api/project/${projectId}`);
+				params = {
+					internalID: projectId
+				};
+				// Add institutionID if available (improves filtering precision)
+				if (project.institutionId) {
+					params.institutionID = project.institutionId;
+				}
+			} catch (error) {
+				// If project fetch fails, just use projectId alone
+				params = { internalID: projectId };
+			}
+		}
 
 		return await this.get('/api/connector', {
 			...defaultOptions,

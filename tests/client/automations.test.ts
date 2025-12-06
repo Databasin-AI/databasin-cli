@@ -56,6 +56,7 @@ class MockAutomationsClient extends AutomationsClient {
 			return {
 				automationID: 1,
 				internalID: 'auto1',
+				institutionID: 1,
 				automationName: 'Daily ETL',
 				isActive: true
 			} as T;
@@ -183,11 +184,16 @@ describe('AutomationsClient', () => {
 	});
 
 	describe('run()', () => {
-		it('should POST to run endpoint', async () => {
-			const result = await client.run('auto123');
+		it('should POST to run endpoint with correct body', async () => {
+			const result = await client.run('1');
 
 			expect(client.lastRequest?.method).toBe('POST');
-			expect(client.lastRequest?.endpoint).toBe('/api/automations/auto123/run');
+			expect(client.lastRequest?.endpoint).toBe('/api/automations/run');
+			expect(client.lastRequest?.body).toEqual({
+				automationID: 1,
+				institutionID: 1,
+				internalID: 'auto1'
+			});
 			expect(result.status).toBe('started');
 			expect(result.jobId).toBe('job123');
 		});

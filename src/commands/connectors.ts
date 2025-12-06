@@ -43,6 +43,7 @@ import {
 import { promptForProject, promptConfirm, promptInput, promptSelect } from '../utils/prompts.ts';
 import { parseFields, readJsonFile, formatSingleObject } from '../utils/command-helpers.ts';
 import { ApiError, ValidationError } from '../utils/errors.ts';
+import { resolveProjectId } from '../utils/project-id-mapper.ts';
 
 /**
  * Prompt user to select a connector from available connectors
@@ -237,10 +238,17 @@ async function listCommand(
 	const opts = command.optsWithGlobals();
 	const config: CliConfig = opts._config;
 	const client: ConnectorsClient = opts._clients.connectors;
+	const projectsClient: ProjectsClient = opts._clients.projects;
 
 	let spinner: Ora | undefined;
 
 	try {
+		// Resolve project ID if provided (map numeric ID to internal ID)
+		let projectId = options.project;
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
+		}
+
 		// Determine output format
 		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
 		const format = detectFormat(cliFormat, config.output.format);
@@ -270,7 +278,7 @@ async function listCommand(
 		}
 
 		// Fetch connectors
-		const result = await client.list(options.project, requestOptions);
+		const result = await client.list(projectId, requestOptions);
 
 		// Handle count mode
 		if (typeof result === 'object' && 'count' in result) {
@@ -352,10 +360,17 @@ async function getCommand(
 	const opts = command.optsWithGlobals();
 	const config: CliConfig = opts._config;
 	const client: ConnectorsClient = opts._clients.connectors;
+	const projectsClient: ProjectsClient = opts._clients.projects;
 
 	let spinner: Ora | undefined;
 
 	try {
+		// Resolve project ID if provided (map numeric ID to internal ID)
+		let projectId = options.project;
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
+		}
+
 		// Determine output format
 		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
 		const format = detectFormat(cliFormat, config.output.format);
@@ -363,7 +378,7 @@ async function getCommand(
 		// Prompt for connector ID if not provided
 		let connectorId = id;
 		if (!connectorId) {
-			connectorId = await promptForConnector(client, options.project, 'Select a connector');
+			connectorId = await promptForConnector(client, projectId, 'Select a connector');
 		}
 
 		// Start spinner
@@ -450,6 +465,12 @@ async function createCommand(
 	let spinner: Ora | undefined;
 
 	try {
+		// Resolve project ID if provided (map numeric ID to internal ID)
+		let projectId = options.project;
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
+		}
+
 		let connectorData: Partial<Connector>;
 
 		if (file) {
@@ -458,8 +479,8 @@ async function createCommand(
 			connectorData = readJsonFile(file);
 
 			// Override project ID if specified via flag
-			if (options.project) {
-				connectorData.internalID = options.project;
+			if (projectId) {
+				connectorData.internalID = projectId;
 			}
 
 			// Validate required fields
@@ -471,7 +492,7 @@ async function createCommand(
 			}
 		} else {
 			// Interactive mode
-			connectorData = await interactiveCreateConnector(client, projectsClient, options.project);
+			connectorData = await interactiveCreateConnector(client, projectsClient, projectId);
 		}
 
 		// Confirm creation

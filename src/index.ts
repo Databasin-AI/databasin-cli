@@ -24,7 +24,7 @@ import { createAllClients } from './client/index.ts';
 import { formatError, getExitCode, CliError } from './utils/errors.ts';
 import type { CliConfig, PartialCliConfig } from './types/config.ts';
 import { setGlobalFlags } from './utils/progress.ts';
-import { createAuthCommand } from './commands/auth.ts';
+import { createAuthCommand, loginAction } from './commands/auth.ts';
 import { createProjectsCommand } from './commands/projects.ts';
 import { createConnectorsCommand } from './commands/connectors.ts';
 import { createPipelinesCommand } from './commands/pipelines.ts';
@@ -51,7 +51,7 @@ function createProgram(): Command {
 	// Program metadata
 	program
 		.name('databasin')
-		.version(VERSION, '-V, --version', 'Display CLI version')
+		.version(VERSION, '-v, --version', 'Display CLI version')
 		.description('Databasin CLI - Manage your data integration platform from the command line')
 		.addHelpText(
 			'after',
@@ -208,6 +208,14 @@ For more help on a specific command:
 function registerCommands(program: Command): void {
 	// Auth commands
 	program.addCommand(createAuthCommand());
+
+	// Login command (top-level alias for `auth login`)
+	program
+		.command('login')
+		.description('Login via browser and save authentication token (alias for auth login)')
+		.option('--port <port>', 'Local server port for callback (default: 3333)', '3333')
+		.option('--no-verify', 'Skip token verification after login')
+		.action(loginAction);
 
 	// Projects commands - IMPLEMENTED
 	program.addCommand(createProjectsCommand());

@@ -333,7 +333,18 @@ export class AutomationsClient extends DatabasinClient {
 	 * ```
 	 */
 	async run(id: string, options?: RequestOptions): Promise<AutomationRunResponse> {
-		return super.post<AutomationRunResponse>(`/api/automations/${id}/run`, undefined, options);
+		// Fetch automation details to get institutionID and internalID
+		const automation = await this.getById(id);
+
+		// Build request body with required and optional parameters
+		const body = {
+			automationID: Number(id),
+			institutionID: automation.institutionID,
+			internalID: automation.internalID
+		};
+
+		// API endpoint is /api/automations/run (NOT /api/automations/{id}/run)
+		return super.post<AutomationRunResponse>('/api/automations/run', body, options);
 	}
 
 	/**
@@ -367,7 +378,18 @@ export class AutomationsClient extends DatabasinClient {
 	 * ```
 	 */
 	async stop(id: string, options?: RequestOptions): Promise<AutomationRunResponse> {
-		return super.post<AutomationRunResponse>(`/api/automations/${id}/stop`, undefined, options);
+		// Fetch automation details to get institutionID and internalID
+		const automation = await this.getById(id);
+
+		// Build request body with required parameters
+		const body = {
+			automationID: Number(id),
+			institutionID: automation.institutionID,
+			internalID: automation.internalID
+		};
+
+		// API endpoint is /api/automations/stop (NOT /api/automations/{id}/stop)
+		return super.post<AutomationRunResponse>('/api/automations/stop', body, options);
 	}
 }
 

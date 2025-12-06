@@ -209,8 +209,14 @@ export interface Pipeline {
 	/** Short internal pipeline code */
 	internalID?: string;
 
+	/** Institution/organization identifier */
+	institutionID?: number;
+
+	/** Pipeline owner user ID */
+	ownerID?: number;
+
 	/** Human-readable pipeline name */
-	pipelineName: string;
+	pipelineName?: string;
 
 	/** Source connector identifier */
 	sourceConnectorId?: string;
@@ -222,10 +228,10 @@ export interface Pipeline {
 	configuration?: Record<string, unknown>;
 
 	/** Pipeline operational status */
-	status: PipelineStatus;
+	status?: PipelineStatus;
 
 	/** Whether pipeline is enabled */
-	enabled: boolean;
+	enabled?: boolean;
 
 	/** ISO timestamp of last run */
 	lastRunDate?: string;

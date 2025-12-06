@@ -46,6 +46,7 @@ import {
 import { createConfigurationClient } from '../client/configuration.ts';
 import { getDiscoveryPattern, requiresDatabaseSelection, requiresSchemaSelection, validateConnectorConfiguration } from '../utils/discovery-patterns.ts';
 import { logger } from '../utils/debug.ts';
+import { resolveProjectId } from '../utils/project-id-mapper.ts';
 
 /**
  * Magic number constants for pipeline configuration
@@ -559,8 +560,12 @@ async function wizardCommand(
 	try {
 		// STEP 1: Select project
 		console.log(chalk.bold('Step 1: Select Project'));
-		const projectId =
+		let projectId =
 			options.project || (await promptForProject(clients.projects, 'Select project:'));
+
+		// Resolve project ID (map numeric ID to internal ID)
+		projectId = await resolveProjectId(projectId, clients.projects);
+
 		console.log(chalk.green(`✓ Project: ${projectId}\n`));
 
 		// STEP 2: Pipeline name

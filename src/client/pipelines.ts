@@ -242,9 +242,27 @@ export class PipelinesClient extends DatabasinClient {
 			]);
 		}
 
-		// Build query parameters
+		// Fetch project details to get institutionID
+		const project = await this.get<any>(`/api/project/${projectId.trim()}`);
+		if (!project.institutionId) {
+			throw new ValidationError('Project is missing institutionID', 'institutionId', [
+				'The project does not have a valid institution ID'
+			]);
+		}
+
+		// Fetch current user to get ownerID
+		const user = await this.get<any>('/api/my/account');
+		if (!user.id) {
+			throw new ValidationError('User account is missing ID', 'userId', [
+				'Cannot determine current user ID'
+			]);
+		}
+
+		// Build query parameters (API requires ALL THREE)
 		const params: Record<string, string | number | boolean> = {
-			internalID: projectId.trim()
+			internalID: projectId.trim(),
+			institutionID: project.institutionId,
+			ownerID: user.id
 		};
 
 		// Add optional filters to params
@@ -498,7 +516,35 @@ export class PipelinesClient extends DatabasinClient {
 	 * ```
 	 */
 	async run(id: string, options?: RequestOptions): Promise<PipelineRunResponse> {
-		return await this.post<PipelineRunResponse>(`/api/pipeline/${id}/run`, undefined, options);
+		// Fetch pipeline details to get required parameters
+		const pipeline = await this.getById(id);
+		if (!pipeline.institutionID) {
+			throw new ValidationError('Pipeline is missing institutionID', 'institutionID', [
+				'The pipeline does not have a valid institution ID'
+			]);
+		}
+		if (!pipeline.internalID) {
+			throw new ValidationError('Pipeline is missing internalID', 'internalID', [
+				'The pipeline does not have a valid project ID'
+			]);
+		}
+		if (!pipeline.ownerID) {
+			throw new ValidationError('Pipeline is missing ownerID', 'ownerID', [
+				'The pipeline does not have a valid owner ID'
+			]);
+		}
+
+		// Build request body with required parameters
+		const body = {
+			pipelineID: Number(id),
+			institutionID: pipeline.institutionID,
+			internalID: pipeline.internalID,
+			ownerID: pipeline.ownerID,
+			jobName: pipeline.pipelineName || `Pipeline_${id}`,
+			runType: 'manual'
+		};
+
+		return await this.post<PipelineRunResponse>('/api/pipeline/run', body, options);
 	}
 
 	/**

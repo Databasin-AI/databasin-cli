@@ -42,6 +42,7 @@ import { ValidationError, ApiError } from '../utils/errors.ts';
 import { parseFields, formatSingleObject } from '../utils/command-helpers.ts';
 import { createPipelineWizardCommand } from './pipelines-wizard.ts';
 import { createPipelineTemplateCommand } from './pipelines-template.ts';
+import { resolveProjectId } from '../utils/project-id-mapper.ts';
 
 /**
  * Prompt user to select a pipeline from a list
@@ -97,7 +98,7 @@ async function listCommand(
 	let spinner: Ora | undefined;
 
 	try {
-		// Get projectId (from option or prompt)
+		// Get projectId (from option or prompt, resolving numeric IDs to internal IDs)
 		let projectId = options.project;
 		if (!projectId) {
 			try {
@@ -107,6 +108,11 @@ async function listCommand(
 					'Use --project flag to specify project ID'
 				]);
 			}
+		}
+
+		// Resolve project ID (map numeric ID to internal ID)
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
 		}
 
 		// Validate projectId before API call (CRITICAL)

@@ -40,6 +40,7 @@ import {
 import { promptForProject, promptConfirm, promptInput, promptSelect } from '../utils/prompts.ts';
 import { parseFields, readJsonFile, formatSingleObject } from '../utils/command-helpers.ts';
 import { ApiError, ValidationError } from '../utils/errors.ts';
+import { resolveProjectId } from '../utils/project-id-mapper.ts';
 
 /**
  * Format cron schedule for human-readable display
@@ -115,6 +116,11 @@ async function listCommand(
 					throw error;
 				}
 			}
+		}
+
+		// Resolve project ID if provided (map numeric ID to internal ID)
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
 		}
 
 		// Start spinner (only for table format)

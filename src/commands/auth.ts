@@ -357,189 +357,200 @@ export function createAuthCommand(): Command {
 		.description('Login via browser and save authentication token')
 		.option('--port <port>', 'Local server port for callback (default: 3333)', '3333')
 		.option('--no-verify', 'Skip token verification after login')
-		.action(async (options, command) => {
-			const opts = command.optsWithGlobals();
-			const config: CliConfig = opts._config;
-			const client: DatabasinClient = opts._clients.base;
-			const projectsClient: ProjectsClient = opts._clients.projects;
+		.action(loginAction);
 
-			const port = parseInt(options.port, 10);
-			const callbackUrl = `http://localhost:${port}/callback`;
+	return auth;
+}
 
-			console.log(chalk.bold('\n🔐 Databasin CLI Login\n'));
-			console.log('Opening browser for authentication...\n');
+/**
+ * Shared login action handler
+ *
+ * Used by both `databasin login` and `databasin auth login` commands.
+ * Opens browser for authentication, receives token via callback, and saves it.
+ *
+ * @param options - Command options
+ * @param command - Commander command instance
+ */
+export async function loginAction(options: any, command: Command): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const client: DatabasinClient = opts._clients.base;
+	const projectsClient: ProjectsClient = opts._clients.projects;
 
-			// Track if we received a token
-			let receivedToken: string | null = null;
-			let serverClosed = false;
+	const port = parseInt(options.port, 10);
+	const callbackUrl = `http://localhost:${port}/callback`;
 
-			try {
-				// Create HTTP server to receive token callback (Node.js compatible)
-				const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-					const url = new URL(req.url || '/', `http://localhost:${port}`);
+	console.log(chalk.bold('\n🔐 Databasin CLI Login\n'));
+	console.log('Opening browser for authentication...\n');
 
-					if (url.pathname === '/callback') {
-						const token = url.searchParams.get('token');
+	// Track if we received a token
+	let receivedToken: string | null = null;
+	let serverClosed = false;
 
-						if (token) {
-							receivedToken = token;
+	try {
+		// Create HTTP server to receive token callback (Node.js compatible)
+		const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+			const url = new URL(req.url || '/', `http://localhost:${port}`);
 
-							// Return success page with embedded logo
-							res.writeHead(200, { 'Content-Type': 'text/html' });
-							res.end(renderLoginPage(true));
-						} else {
-							// No token provided
-							res.writeHead(400, { 'Content-Type': 'text/html' });
-							res.end(renderLoginPage(false));
-						}
-					} else {
-						// 404 for other paths
-						res.writeHead(404, { 'Content-Type': 'text/plain' });
-						res.end('Not Found');
-					}
-				});
+			if (url.pathname === '/callback') {
+				const token = url.searchParams.get('token');
 
-				// Start server with promise to ensure it's ready
-				await new Promise<void>((resolve, reject) => {
-					server.on('error', reject);
-					server.listen(port, () => resolve());
-				});
+				if (token) {
+					receivedToken = token;
 
-				console.log(chalk.dim(`Local server started on http://localhost:${port}`));
-
-				// Open browser to login page with callback URL
-				const loginUrl = `${config.webUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}`;
-
-				// Open browser (cross-platform)
-				const { spawn } = await import('child_process');
-				const platform = process.platform;
-
-				let browserCommand: string;
-				let browserArgs: string[];
-
-				if (platform === 'darwin') {
-					browserCommand = 'open';
-					browserArgs = [loginUrl];
-				} else if (platform === 'win32') {
-					browserCommand = 'cmd';
-					browserArgs = ['/c', 'start', loginUrl];
+					// Return success page with embedded logo
+					res.writeHead(200, { 'Content-Type': 'text/html' });
+					res.end(renderLoginPage(true));
 				} else {
-					browserCommand = 'xdg-open';
-					browserArgs = [loginUrl];
+					// No token provided
+					res.writeHead(400, { 'Content-Type': 'text/html' });
+					res.end(renderLoginPage(false));
 				}
-
-				spawn(browserCommand, browserArgs, { detached: true, stdio: 'ignore' }).unref();
-
-				console.log(chalk.dim(`Opening: ${loginUrl}\n`));
-				console.log('Waiting for authentication...');
-				console.log(chalk.dim('(Press Ctrl+C to cancel)\n'));
-
-				// Wait for token with timeout (5 minutes)
-				const timeout = 5 * 60 * 1000;
-				const startTime = Date.now();
-
-				while (!receivedToken && Date.now() - startTime < timeout) {
-					await new Promise((resolve) => setTimeout(resolve, 100));
-				}
-
-				// Close server
-				server.close();
-				serverClosed = true;
-
-				if (!receivedToken) {
-					logError('Login timeout - no response received within 5 minutes');
-					throw new Error('Login timeout - no response received within 5 minutes');
-				}
-
-				// Save token
-				const spinner = startSpinner('Saving authentication token...');
-
-				try {
-					saveToken(receivedToken);
-					succeedSpinner(spinner, 'Token saved successfully');
-					console.log(chalk.dim(`  Location: ~/.databasin/.token\n`));
-				} catch (error) {
-					failSpinner(spinner, 'Failed to save token');
-					if (error instanceof Error) {
-						logError(error.message);
-						throw error;
-					}
-					throw new Error('Failed to save token');
-				}
-
-				// Verify token if requested
-				if (options.verify !== false) {
-					const verifySpinner = startSpinner('Verifying token...');
-
-					try {
-						// Temporarily override token for verification
-						process.env.DATABASIN_TOKEN = receivedToken;
-
-						const isValid = await client.ping();
-
-						if (isValid) {
-							succeedSpinner(verifySpinner, 'Token verified successfully');
-
-							// Try to get user info
-							try {
-								const user = await projectsClient.getCurrentUser();
-								const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-
-								console.log(chalk.green('\n✓ Successfully authenticated!\n'));
-								console.log(`  User: ${chalk.bold(user.email)}`);
-								if (userName) {
-									console.log(`  Name: ${userName}`);
-								}
-
-								if (user.organizationMemberships && user.organizationMemberships.length > 0) {
-									const orgName = user.organizationMemberships[0].organizationName;
-									if (orgName) {
-										console.log(`  Organization: ${orgName}`);
-									}
-								}
-
-								console.log();
-							} catch (userError) {
-								// Ping succeeded but couldn't get user - still OK
-								console.log(chalk.green('\n✓ Successfully authenticated!\n'));
-							}
-
-							return;
-						} else {
-							failSpinner(verifySpinner, 'Token verification failed');
-							console.error('  The token was saved but could not be verified.');
-							console.error('  You may need to obtain a new token.');
-							throw new Error('Token verification failed');
-						}
-					} catch (error) {
-						failSpinner(verifySpinner, 'Token verification failed');
-						if (error instanceof Error) {
-							logError(error.message);
-							throw error;
-						}
-						throw new Error('Token verification failed');
-					}
-				} else {
-					console.log(chalk.green('\n✓ Login successful!\n'));
-					return;
-				}
-			} catch (error) {
-				if (!serverClosed) {
-					// Ensure server is stopped on error
-					console.log('\nShutting down local server...');
-				}
-
-				logError('Login failed');
-				if (error instanceof Error) {
-					console.error(error.message);
-					if (config.debug && error.stack) {
-						console.error(error.stack);
-					}
-					throw error;
-				}
-				throw new Error('Login failed');
+			} else {
+				// 404 for other paths
+				res.writeHead(404, { 'Content-Type': 'text/plain' });
+				res.end('Not Found');
 			}
 		});
 
-	return auth;
+		// Start server with promise to ensure it's ready
+		await new Promise<void>((resolve, reject) => {
+			server.on('error', reject);
+			server.listen(port, () => resolve());
+		});
+
+		console.log(chalk.dim(`Local server started on http://localhost:${port}`));
+
+		// Open browser to login page with callback URL
+		const loginUrl = `${config.webUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}`;
+
+		// Open browser (cross-platform)
+		const { spawn } = await import('child_process');
+		const platform = process.platform;
+
+		let browserCommand: string;
+		let browserArgs: string[];
+
+		if (platform === 'darwin') {
+			browserCommand = 'open';
+			browserArgs = [loginUrl];
+		} else if (platform === 'win32') {
+			browserCommand = 'cmd';
+			browserArgs = ['/c', 'start', loginUrl];
+		} else {
+			browserCommand = 'xdg-open';
+			browserArgs = [loginUrl];
+		}
+
+		spawn(browserCommand, browserArgs, { detached: true, stdio: 'ignore' }).unref();
+
+		console.log(chalk.dim(`Opening: ${loginUrl}\n`));
+		console.log('Waiting for authentication...');
+		console.log(chalk.dim('(Press Ctrl+C to cancel)\n'));
+
+		// Wait for token with timeout (5 minutes)
+		const timeout = 5 * 60 * 1000;
+		const startTime = Date.now();
+
+		while (!receivedToken && Date.now() - startTime < timeout) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+
+		// Close server
+		server.close();
+		serverClosed = true;
+
+		if (!receivedToken) {
+			logError('Login timeout - no response received within 5 minutes');
+			throw new Error('Login timeout - no response received within 5 minutes');
+		}
+
+		// Save token
+		const spinner = startSpinner('Saving authentication token...');
+
+		try {
+			saveToken(receivedToken);
+			succeedSpinner(spinner, 'Token saved successfully');
+			console.log(chalk.dim(`  Location: ~/.databasin/.token\n`));
+		} catch (error) {
+			failSpinner(spinner, 'Failed to save token');
+			if (error instanceof Error) {
+				logError(error.message);
+				throw error;
+			}
+			throw new Error('Failed to save token');
+		}
+
+		// Verify token if requested
+		if (options.verify !== false) {
+			const verifySpinner = startSpinner('Verifying token...');
+
+			try {
+				// Temporarily override token for verification
+				process.env.DATABASIN_TOKEN = receivedToken;
+
+				const isValid = await client.ping();
+
+				if (isValid) {
+					succeedSpinner(verifySpinner, 'Token verified successfully');
+
+					// Try to get user info
+					try {
+						const user = await projectsClient.getCurrentUser();
+						const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+
+						console.log(chalk.green('\n✓ Successfully authenticated!\n'));
+						console.log(`  User: ${chalk.bold(user.email)}`);
+						if (userName) {
+							console.log(`  Name: ${userName}`);
+						}
+
+						if (user.organizationMemberships && user.organizationMemberships.length > 0) {
+							const orgName = user.organizationMemberships[0].organizationName;
+							if (orgName) {
+								console.log(`  Organization: ${orgName}`);
+							}
+						}
+
+						console.log();
+					} catch (userError) {
+						// Ping succeeded but couldn't get user - still OK
+						console.log(chalk.green('\n✓ Successfully authenticated!\n'));
+					}
+
+					return;
+				} else {
+					failSpinner(verifySpinner, 'Token verification failed');
+					console.error('  The token was saved but could not be verified.');
+					console.error('  You may need to obtain a new token.');
+					throw new Error('Token verification failed');
+				}
+			} catch (error) {
+				failSpinner(verifySpinner, 'Token verification failed');
+				if (error instanceof Error) {
+					logError(error.message);
+					throw error;
+				}
+				throw new Error('Token verification failed');
+			}
+		} else {
+			console.log(chalk.green('\n✓ Login successful!\n'));
+			return;
+		}
+	} catch (error) {
+		if (!serverClosed) {
+			// Ensure server is stopped on error
+			console.log('\nShutting down local server...');
+		}
+
+		logError('Login failed');
+		if (error instanceof Error) {
+			console.error(error.message);
+			if (config.debug && error.stack) {
+				console.error(error.stack);
+			}
+			throw error;
+		}
+		throw new Error('Login failed');
+	}
 }
