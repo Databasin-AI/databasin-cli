@@ -21,6 +21,7 @@ import type { Pipeline, PipelineArtifact, Connector, JobDetails } from '../types
 import { ValidationError, ApiError } from '../utils/errors.ts';
 import { getArtifactTypeFromConnectorSubType, ConnectorArtifactType } from './connector-types.ts';
 import { parseBool, parseIntSafe, ensureString } from '../utils/type-coercion.ts';
+import { logger } from '../utils/debug.ts';
 
 /**
  * Pipeline list options
@@ -242,8 +243,19 @@ export class PipelinesClient extends DatabasinClient {
 			]);
 		}
 
-		// Fetch project details to get institutionID
-		const project = await this.get<any>(`/api/project/${projectId.trim()}`);
+		// Fetch all projects to find the requested one
+		const projects = await this.get<any[]>('/api/my/projects');
+		const project = projects.find(
+			(p) => String(p.id) === projectId.trim() || p.internalId === projectId.trim()
+		);
+
+		if (!project) {
+			throw new ValidationError(`Project not found: ${projectId}`, 'projectId', [
+				'The specified project does not exist or you do not have access to it',
+				'Run "databasin projects list" to see available projects'
+			]);
+		}
+
 		if (!project.institutionId) {
 			throw new ValidationError('Project is missing institutionID', 'institutionId', [
 				'The project does not have a valid institution ID'
@@ -259,8 +271,9 @@ export class PipelinesClient extends DatabasinClient {
 		}
 
 		// Build query parameters (API requires ALL THREE)
+		// CRITICAL: Use project.internalId (NOT the projectId parameter which could be numeric)
 		const params: Record<string, string | number | boolean> = {
-			internalID: projectId.trim(),
+			internalID: project.internalId,
 			institutionID: project.institutionId,
 			ownerID: user.id
 		};

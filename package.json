@@ -22,7 +22,8 @@
 		"verify": "bun run typecheck && bun run test && bun run build:exe && bun run test:smoke",
 		"lint": "echo 'Linting not configured yet'",
 		"format": "echo 'Formatting not configured yet'",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"dev:install": "cp dist/linux-x64/databasin ~/.local/bin/databasin"
 	},
 	"dependencies": {
 		"commander": "^12.1.0",

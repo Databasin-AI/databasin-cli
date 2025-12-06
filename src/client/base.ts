@@ -217,7 +217,20 @@ export class DatabasinClient {
 	 * @param body - Optional request body
 	 */
 	private logRequest(method: string, url: string, body?: unknown): void {
-		logger.debug(`[API] ${method} ${url}`);
+		// Parse URL to show endpoint and params separately for clarity
+		try {
+			const urlObj = new URL(url);
+			const endpoint = urlObj.pathname;
+			const params = urlObj.searchParams.toString();
+			if (params) {
+				logger.debug(`[API] ${method} ${endpoint}?${params}`);
+			} else {
+				logger.debug(`[API] ${method} ${endpoint}`);
+			}
+		} catch {
+			// Fallback if URL parsing fails
+			logger.debug(`[API] ${method} ${url}`);
+		}
 		if (body) {
 			logger.debug('[API] Body:', JSON.stringify(body, null, 2));
 		}
@@ -319,10 +332,32 @@ export class DatabasinClient {
 
 				const data = await response.json();
 
-				logger.debug(`[API] Parsed data type: ${typeof data}`);
+				logger.debug(`[API] Parsed data type: ${typeof data}, isArray: ${Array.isArray(data)}`);
+
+				// Handle double-encoded JSON strings from backend bug
+				// The backend sometimes returns JSON.stringify(data) which gets double-encoded
 				if (typeof data === 'string') {
 					logger.debug(`[API] WARNING: response.json() returned a string instead of object!`);
-					logger.debug(`[API] First 100 chars: ${data.substring(0, 100)}`);
+					logger.debug(`[API] Attempting to parse double-encoded JSON...`);
+					try {
+						const parsed = JSON.parse(data);
+						logger.debug(`[API] Successfully parsed double-encoded JSON`);
+						if (Array.isArray(parsed)) {
+							logger.debug(`[API] Parsed array length: ${parsed.length}`);
+						}
+						return parsed as T;
+					} catch (parseError) {
+						logger.debug(`[API] Failed to parse double-encoded JSON: ${parseError}`);
+						// Return as-is if parsing fails
+						return data as T;
+					}
+				}
+
+				if (Array.isArray(data)) {
+					logger.debug(`[API] Array length: ${data.length}`);
+					if (data.length > 0) {
+						logger.debug(`[API] First element: ${JSON.stringify(data[0]).substring(0, 200)}`);
+					}
 				}
 
 				return data as T;

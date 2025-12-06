@@ -82,10 +82,12 @@ export class ProjectsClient extends DatabasinClient {
 	 * Get specific project details
 	 *
 	 * Retrieves full details for a single project by ID or internal ID.
+	 * Fetches all projects and filters by the provided ID.
 	 *
 	 * @param id - Project ID (numeric) or internal ID (e.g., "N1r8Do")
 	 * @param options - Request options
 	 * @returns Project details
+	 * @throws {Error} If project not found
 	 *
 	 * @example
 	 * ```typescript
@@ -100,7 +102,19 @@ export class ProjectsClient extends DatabasinClient {
 	 * ```
 	 */
 	async getById(id: string, options?: RequestOptions): Promise<Project> {
-		return await this.get(`/api/project/${id}`, options);
+		// Fetch all projects
+		const projects = await this.get<Project[]>('/api/my/projects', options);
+
+		// Filter by ID (could be numeric id or internalId)
+		const project = projects.find(
+			(p) => String(p.id) === id || p.internalId === id
+		);
+
+		if (!project) {
+			throw new Error(`Project not found: ${id}`);
+		}
+
+		return project;
 	}
 
 	/**
