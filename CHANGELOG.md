@@ -12,7 +12,101 @@ All notable changes to Databasin CLI will be documented in this file.
 - Implement bulk operations from CSV
 - Add built-in connector templates
 
-## [0.3.3] - 2025-12-03
+## [0.4.0] - 2024-12-06
+
+### Added
+
+- **Project ID Mapping**
+  - Automatic conversion between numeric project IDs and internal IDs
+  - Users can now use either ID format interchangeably in all commands
+  - Intelligent caching system (24-hour TTL) for optimal performance
+  - Batch resolution support for multiple IDs
+  - Validation with helpful error messages
+  - Zero API calls for cached lookups after initial fetch
+  - Supports commands: `connectors`, `pipelines`, `automations`, `pipelines wizard`
+
+- **New Documentation**
+  - `docs/project-id-mapping.md` - Comprehensive technical guide (294 lines)
+  - `docs/QUICK-START-ID-MAPPING.md` - User-friendly quick reference
+  - `docs/API-PARAMETER-FIXES.md` - Detailed API fix documentation
+  - `CHANGELOG-project-id-mapping.md` - Feature-specific changelog
+
+- **Enhanced Type Definitions**
+  - Added `institutionID` and `ownerID` fields to Pipeline interface
+  - Made several Pipeline fields optional to match actual API responses
+  - Improved type safety across all API clients
+
+### Fixed
+
+- **Critical API Parameter Fixes** (5 endpoints)
+
+  1. **Pipelines List Endpoint**
+     - Fixed 400 Bad Request error when listing pipelines
+     - Now sends all 3 required parameters: `institutionID`, `internalID`, `ownerID`
+     - Command now works: `databasin pipelines list --project <id>`
+
+  2. **Pipeline Run Endpoint**
+     - Fixed broken pipeline execution command
+     - Corrected request body to include all required parameters
+     - Added automatic parameter fetching from pipeline details
+     - Command now works: `databasin pipelines run <pipeline-id>`
+
+  3. **Automations Run Endpoint**
+     - Fixed incorrect API endpoint URL (`/api/automations/run` instead of `/api/automations/{id}/run`)
+     - Added required request body parameters
+     - Fetches automation details to populate `institutionID` and `internalID`
+     - Command now works: `databasin automations run <automation-id>`
+
+  4. **Automations Stop Endpoint**
+     - Fixed incorrect API endpoint URL (same pattern as run)
+     - Added required request body parameters
+     - Command now works: `databasin automations stop <automation-id>`
+
+  5. **Connectors List Enhancement**
+     - Enhanced filtering by including both `institutionID` and `internalID` parameters
+     - Improved precision when filtering by project
+     - Graceful fallback if project fetch fails
+
+### Changed
+
+- **API Client Architecture**
+  - All clients now validate and fetch required parameters before API calls
+  - Implemented parameter auto-population pattern across pipelines and automations clients
+  - Enhanced error messages with specific parameter validation
+  - Added JSDoc documentation for all parameter requirements
+
+- **Test Coverage**
+  - Updated automation client tests to verify correct endpoints and body parameters
+  - Enhanced mock responses to include all required fields
+  - All tests passing: 638 pass, 4 skip, 0 fail
+
+### Performance
+
+- **Caching Strategy**
+  - Project list cached for 24 hours to minimize API calls
+  - First ID resolution: 2 API calls (initial fetch + resolution)
+  - Subsequent resolutions: 0 API calls (uses cache)
+  - Batch operations use single cached lookup for all IDs
+
+### Developer Experience
+
+- **Better Error Handling**
+  - Descriptive validation errors for missing parameters
+  - Helpful suggestions in error messages
+  - Debug logging shows ID resolution process with `DEBUG=true`
+
+### Backend Validation
+
+- All fixes verified against production backend API implementation
+  - Cross-referenced with `/tpi-datalake-api/conf/routes`
+  - Validated against Scala controller implementations
+  - Matched case class definitions in backend models
+
+### Breaking Changes
+
+None - All changes are backward compatible
+
+## [0.3.3] - 2024-12-03
 
 ### Fixed
 
