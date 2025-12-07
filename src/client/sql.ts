@@ -230,13 +230,17 @@ export class SqlClient extends DatabasinClient {
 	 * ```
 	 */
 	async listCatalogs(connectorId: string | number, options?: RequestOptions): Promise<Catalog[]> {
-		const response = await this.get<{ catalogs: string[] }>(
+		const response = await this.get<any>(
 			`/api/v2/connector/catalogs/${connectorId}`,
 			options
 		);
 
+		// Handle backend field name mismatch: 'objects' vs 'catalogs'
+		// Backend returns 'objects' but we expect 'catalogs'
+		const catalogNames = response.catalogs || response.objects || [];
+
 		// Transform string array to Catalog objects
-		return response.catalogs.map((name) => ({ name }));
+		return catalogNames.map((name: string) => ({ name }));
 	}
 
 	/**
@@ -511,13 +515,17 @@ export class SqlClient extends DatabasinClient {
 		const params = catalog ? { catalog } : undefined;
 		const mergedOptions = { ...options, params: { ...options?.params, ...params } };
 
-		const response = await this.get<{ schemas: string[] }>(
+		const response = await this.get<any>(
 			`/api/v2/connector/schemas/${connectorId}`,
 			mergedOptions
 		);
 
+		// Handle backend field name mismatch: 'objects' vs 'schemas'
+		// Backend returns 'objects' but we expect 'schemas'
+		const schemaNames = response.schemas || response.objects || [];
+
 		// Transform string array to Schema objects with catalog context
-		return response.schemas.map((name) => ({
+		return schemaNames.map((name: string) => ({
 			name,
 			catalog
 		}));
@@ -631,9 +639,12 @@ export class SqlClient extends DatabasinClient {
 			logger.debug(`First object keys:`, Object.keys(parsedResponse.objects[0] || {}));
 		}
 
+		// Handle backend field name variations: 'objects' or 'tables'
+		const tableData = parsedResponse.objects || (parsedResponse as any).tables || [];
+
 		// Transform response to Table objects with context
 		// Objects can be either strings (table names) or objects with name/type properties
-		return parsedResponse.objects.map((table) => {
+		return tableData.map((table: any) => {
 			if (typeof table === 'string') {
 				// Simple string table name
 				return {

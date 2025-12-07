@@ -309,6 +309,8 @@ export class PipelinesClient extends DatabasinClient {
 	 *
 	 * Retrieves full pipeline details including configuration and artifacts.
 	 *
+	 * **Note:** Uses `/api/pipeline/v2/:id` endpoint as `/api/pipeline/:id` doesn't exist.
+	 *
 	 * @param id - Pipeline ID (pipelineID)
 	 * @param options - Optional request options
 	 * @returns Pipeline object
@@ -323,7 +325,8 @@ export class PipelinesClient extends DatabasinClient {
 	 * ```
 	 */
 	async getById(id: string, options?: RequestOptions): Promise<Pipeline> {
-		return await this.get(`/api/pipeline/${id}`, options);
+		// Use /v2 endpoint - /api/pipeline/:id doesn't exist in backend
+		return await this.get(`/api/pipeline/v2/${id}`, options);
 	}
 
 	/**
