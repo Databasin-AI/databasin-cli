@@ -10,7 +10,7 @@ A command-line interface for managing Databasin projects, connectors, pipelines,
 curl -fsSL https://raw.githubusercontent.com/Databasin-AI/databasin-cli/main/install.sh | bash
 ```
 
-The installer detects your platform (Linux x64, macOS ARM64/x64) and installs to `/usr/local/bin/databasin`.
+The installer detects your platform (Linux x64, macOS ARM64/x64) and installs to the user bin location. No framework or prerequisites. Copy, paste, and go!
 
 ### Build from Source
 
@@ -18,10 +18,11 @@ The installer detects your platform (Linux x64, macOS ARM64/x64) and installs to
 git clone https://github.com/Databasin-AI/databasin-cli.git
 cd databasin-cli
 bun install && bun run build
-sudo ln -s $(pwd)/dist/databasin /usr/local/bin/databasin
+
+# Copy the databasin file from the appropriate ./dist/ folder into your bin location
 ```
 
-Requires [Bun](https://bun.sh) v1.0+.
+Requires [Bun](https://bun.sh) v1.3+.
 
 ## Getting Started
 
