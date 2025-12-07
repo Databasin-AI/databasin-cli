@@ -5,10 +5,12 @@ A command-line interface for managing Databasin projects, connectors, pipelines,
 ## Features
 
 - **Project Management** - List and manage Databasin projects
-- **Connector Operations** - Create, update, and manage data connectors  
+- **Connector Operations** - Create, update, and manage data connectors
 - **Pipeline Execution** - Run and monitor data pipelines
+- **Pipeline Observability** - View pipeline history, artifact logs, and execution details
 - **SQL Interface** - Execute queries against connected data sources
 - **Automation Control** - Manage and trigger automations
+- **Automation Observability** - Monitor automation runs, task logs, and execution history
 - **Generic API Access** - Call any Databasin API endpoint
 - **Multiple Output Formats** - Table, JSON, and CSV output options
 
@@ -123,6 +125,15 @@ databasin pipelines run pipeline-456
 
 # View pipeline logs
 databasin pipelines logs pipeline-456
+
+# View pipeline run history
+databasin pipelines history pipeline-456
+
+# View artifact execution logs
+databasin pipelines artifacts logs artifact-789
+
+# View artifact execution history
+databasin pipelines artifacts history artifact-789
 ```
 
 ### SQL Interface
@@ -155,6 +166,18 @@ databasin automations get auto-456
 
 # Run an automation
 databasin automations run auto-456
+
+# View automation execution logs
+databasin automations logs auto-456
+
+# View automation run history
+databasin automations history auto-456
+
+# View automation task logs
+databasin automations tasks logs task-789
+
+# View automation task execution history
+databasin automations tasks history task-789
 ```
 
 ### Generic API Access
@@ -254,6 +277,24 @@ databasin pipelines get pipeline-789
 
 # View recent logs
 databasin pipelines logs pipeline-789
+
+# View pipeline run history (see all executions)
+databasin pipelines history pipeline-789
+
+# View pipeline history with count only
+databasin pipelines history pipeline-789 --count
+
+# View pipeline history as JSON
+databasin pipelines history pipeline-789 --json
+
+# Filter history to specific fields
+databasin pipelines history pipeline-789 --fields timestamp,status,duration
+
+# Monitor automation execution
+databasin automations logs auto-456
+
+# View automation run history
+databasin automations history auto-456 --limit 10
 
 # List all automations
 databasin automations list --project proj-123
