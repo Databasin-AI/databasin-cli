@@ -6,6 +6,16 @@ All notable changes to Databasin CLI will be documented in this file.
 
 ## [0.6.0] - TBD
 
+### Planned
+
+- Bulk operations from CSV
+- Built-in connector templates
+- Request batching support
+- Config file validation
+- Real-time log streaming
+
+## [0.5.1] - 2025-12-07
+
 ### Added
 
 - **Shell Completions** (3 shells supported)
@@ -15,13 +25,14 @@ All notable changes to Databasin CLI will be documented in this file.
   - Automatic completion installation: `databasin completion install`
   - Dynamic completion generation from live CLI structure
 
-### Planned
+### Changed
 
-- Bulk operations from CSV
-- Built-in connector templates
-- Request batching support
-- Config file validation
-- Real-time log streaming
+- **Documentation Updates**
+  - Added Developer Guide for local setup and usage
+  - Updated connector examples to use `dbserver.example.com` instead of localhost
+  - Updated configuration URLs to point to production API
+  - Improved command examples and authentication flow comments
+  - Added real-time log streaming gap analysis document
 
 ## [0.5.0] - 2024-12-07
 
