@@ -6,68 +6,43 @@ All notable changes to Databasin CLI will be documented in this file.
 
 ### Added
 
-- **Pipeline Observability Commands** (3 new commands)
-  - `pipelines history <id>` - View pipeline run history and status changes
-  - `pipelines artifacts logs <id>` - View artifact execution logs
-  - `pipelines artifacts history <id>` - View artifact execution history
-  - Full support for JSON, CSV, and table output formats
-  - Token efficiency options: `--count`, `--limit`, `--fields`
-  - Type-safe count mode with proper type guards
+- **Observability Commands** (8 new commands)
+  - Pipeline: `history`, `artifacts logs`, `artifacts history`
+  - Automation: `logs`, `tasks logs`, `history`, `tasks history`
+  - Full format support: JSON, CSV, table
+  - Token efficiency: `--count`, `--limit`, `--fields`
 
-- **Automation Observability Commands** (4 new commands)
-  - `automations logs <id>` - View automation execution logs
-  - `automations tasks logs <id>` - View task execution logs
-  - `automations history <id>` - View automation run history
-  - `automations tasks history <id>` - View task execution history
-  - Consistent parameter mapping with clear documentation
-  - Proper error handling with helpful suggestions
+- **Type Definitions** (7 new interfaces)
+  - Pipeline/Artifact/Automation history and log entry types
+  - Comprehensive JSDoc documentation
 
-- **New Type Definitions**
-  - Added 7 new interfaces with comprehensive JSDoc documentation
-  - `PipelineHistoryEntry` - Pipeline run history entries
-  - `ArtifactLogEntry` - Artifact execution log entries
-  - `ArtifactHistoryEntry` - Artifact execution history entries
-  - `AutomationLogEntry` - Automation execution log entries
-  - `AutomationTaskLogEntry` - Automation task log entries
-  - `AutomationHistoryEntry` - Automation run history entries
-  - `AutomationTaskHistoryEntry` - Automation task history entries
+- **Complete Documentation** (10 new/updated files)
+  - Automations guide + quickstart + client doc
+  - Pipelines client documentation
+  - Connectors quickstart guide
+  - Observability guide + quickstart
+  - Real-world usage examples
+  - 1,200+ lines of new documentation
 
-- **Documentation**
-  - `OBSERVABILITY_IMPLEMENTATION.md` - Complete implementation report (556 lines)
-  - Architecture review results (PASS, 8.0/10)
-  - Code quality review results (PASS, 8.5/10)
-  - Comprehensive testing verification
-  - Lessons learned and best practices
+- **Documentation Standardization**
+  - All command groups: guide, quickstart, client doc
+  - Consistent naming and structure
+  - Professional API documentation
 
 ### Fixed
 
-- **Log Command Format Handling** (Critical)
-  - All log commands now respect `--json` and `--csv` global flags
-  - Replaced raw console output with `formatOutput()` utility
-  - Consistent output format across all observability commands
-
-- **Parameter Naming Alignment** (Critical)
-  - Added explicit mapping between CLI (`--run-id`) and API (`currentRunID`)
-  - Clear documentation explaining parameter conversions
-  - Applied to all log commands (3 total)
-
-- **Count Mode Type Safety** (Critical)
-  - Added proper type guards to handle API returning `{ count: number }` vs array
-  - Prevents runtime errors when response type changes
-  - Applied to all history commands (4 total)
-
-- **Token Efficiency Implementation** (Medium)
-  - Properly passes `--fields` and `--limit` through `RequestOptions.params`
-  - Reduces API response sizes when filtering or limiting results
-  - Applied to all history commands (4 total)
+- Log commands now respect `--json` and `--csv` flags (C1)
+- Parameter mapping: CLI `--run-id` → API `currentRunID` (C2)
+- Type guards for count mode responses (C3)
+- Token efficiency options properly passed to API (M3)
 
 ### Planned
 
+- Shell completions (bash/zsh/fish)
+- Bulk operations from CSV
+- Connector templates
 - Config file validation
-- Watch mode for real-time log streaming
-- Add shell completions (bash/zsh/fish)
-- Implement bulk operations from CSV
-- Add built-in connector templates
+- Real-time log streaming
 
 ## [0.4.0] - 2024-12-06
 
