@@ -58,12 +58,20 @@ function createProgram(): Command {
 			'after',
 			`
 Examples:
-  $ databasin auth whoami
-  $ databasin projects list
-  $ databasin connectors list --full --fields id,name,type
-  $ databasin pipelines list --project proj-123
-  $ databasin sql exec conn-123 "SELECT * FROM users LIMIT 10"
-  $ databasin automations run auto-456
+  $ databasin login                                    # Authenticate via browser
+  $ databasin auth whoami                              # Show current user context
+  $ databasin projects list                            # List all projects
+  $ databasin connectors list --full                   # List connectors with details
+  $ databasin connectors test <id>                     # Test connector connection
+  $ databasin pipelines list --project <id>            # List pipelines in project
+  $ databasin pipelines wizard                         # Interactive pipeline creator
+  $ databasin pipelines run <id>                       # Execute a pipeline
+  $ databasin sql exec <connector-id> "SELECT ..."     # Run SQL query
+  $ databasin sql tables <connector-id>                # List tables in connector
+  $ databasin automations list --project <id>          # List automations
+  $ databasin api GET /api/health                      # Call any API endpoint
+  $ databasin update                                   # Update CLI to latest version
+  $ databasin completion install bash                  # Install shell completions
 
 Environment Variables:
   DATABASIN_API_URL         Override API base URL
@@ -77,8 +85,7 @@ Configuration:
   Token file: ~/.databasin/.token or ./.token
 
 Documentation:
-  https://github.com/databasin/cli#readme
-  https://docs.databasin.com/cli
+  https://github.com/Databasin-AI/databasin-cli#readme
 
 For more help on a specific command:
   databasin <command> --help

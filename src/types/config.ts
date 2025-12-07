@@ -25,15 +25,15 @@ export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'debug';
 export interface CliConfig {
 	/**
 	 * Databasin API base URL
-	 * @default "http://localhost:9000"
-	 * @example "https://api.databasin.com"
+	 * @example "http://localhost:9000"
+	 * @default "https://api.databasin.ai"
 	 */
 	apiUrl: string;
 
 	/**
 	 * Databasin Web UI base URL (for browser-based login)
-	 * @default "http://localhost:3000"
-	 * @example "https://starling.test.databasin.co"
+	 * @example "http://localhost:3000"
+	 * @default "https://app.databasin.ai"
 	 */
 	webUrl: string;
 
@@ -124,8 +124,8 @@ export type PartialCliConfig = Partial<{
  * Used when no config file exists or values not set
  */
 export const DEFAULT_CONFIG: CliConfig = {
-	apiUrl: 'http://localhost:9000',
-	webUrl: 'http://localhost:3000',
+	apiUrl: 'https://api.databasin.ai',
+	webUrl: 'https://app.databasin.ai',
 	output: {
 		format: 'table',
 		colors: true,

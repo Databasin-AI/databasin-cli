@@ -155,7 +155,7 @@ export class ConfigurationClient extends DatabasinClient {
 	 * @param options - Request options
 	 * @returns Parsed JSON response
 	 *
-	 * @example Development
+	 * @example Local Development
 	 * ```typescript
 	 * // Web app: http://localhost:3000
 	 * // Fetches: http://localhost:3000/config/connectors/v2/types/RDBMS.json
@@ -164,8 +164,8 @@ export class ConfigurationClient extends DatabasinClient {
 	 *
 	 * @example Production
 	 * ```typescript
-	 * // Web app: https://starling.test.databasin.co
-	 * // Fetches: https://starling.test.databasin.co/config/connectors/v2/types/RDBMS.json
+	 * // Web app: https://app.databasin.ai
+	 * // Fetches: https://app.databasin.ai/config/connectors/v2/types/RDBMS.json
 	 * const config = await this.fetchStaticFile('config/connectors/v2/types/RDBMS.json');
 	 * ```
 	 */

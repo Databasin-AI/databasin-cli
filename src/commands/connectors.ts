@@ -121,7 +121,7 @@ async function interactiveCreateConnector(
 
 	// Common fields based on connector type
 	if (connectorType === 'database') {
-		configuration.host = await promptInput('Host', 'localhost');
+		configuration.host = await promptInput('Host', 'dbserver');
 		configuration.port = await promptInput('Port', '5432');
 		configuration.database = await promptInput('Database name');
 		configuration.username = await promptInput('Username');

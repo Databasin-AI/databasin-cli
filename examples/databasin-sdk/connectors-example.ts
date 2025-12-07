@@ -91,7 +91,7 @@ async function createDatabaseConnector() {
 			internalID: 'N1r8Do', // Replace with your project ID
 			status: 'active',
 			configuration: {
-				host: 'localhost',
+				host: 'dbserver.example.com',
 				port: 5432,
 				database: 'mydb',
 				username: 'app_user'

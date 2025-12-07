@@ -69,7 +69,7 @@ export interface TestResult {
  *   connectorType: 'database',
  *   internalID: 'N1r8Do',
  *   configuration: {
- *     host: 'localhost',
+ *     host: 'dbserver.example.com',
  *     port: 5432,
  *     database: 'mydb'
  *   }

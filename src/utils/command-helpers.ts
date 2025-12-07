@@ -186,7 +186,7 @@ export function filterFields(data: any, fields: string | string[]): any {
  *   connectorID: '123',
  *   connectorName: 'My DB',
  *   status: 'active',
- *   configuration: { host: 'localhost', port: 5432 }
+ *   configuration: { host: 'dbserver', port: 5432 }
  * };
  *
  * console.log(formatSingleObject(connector));
@@ -198,7 +198,7 @@ export function filterFields(data: any, fields: string | string[]): any {
  * // │ connectorName │ My DB                │
  * // │ status        │ active               │
  * // │ configuration │ {                    │
- * // │               │   "host": "localhost"│
+ * // │               │   "host": "dbserver"│
  * // │               │   "port": 5432       │
  * // │               │ }                    │
  * // └───────────────┴──────────────────────┘

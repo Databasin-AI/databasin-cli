@@ -378,6 +378,7 @@ export async function loginAction(options: any, command: Command): Promise<void>
 	const projectsClient: ProjectsClient = opts._clients.projects;
 
 	const port = parseInt(options.port, 10);
+	// MUST REMAIN LOCALHOST - enables local authentication flow
 	const callbackUrl = `http://localhost:${port}/callback`;
 
 	console.log(chalk.bold('\n🔐 Databasin CLI Login\n'));
@@ -390,6 +391,7 @@ export async function loginAction(options: any, command: Command): Promise<void>
 	try {
 		// Create HTTP server to receive token callback (Node.js compatible)
 		const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+			// MUST REMAIN LOCALHOST - enables local authentication flow
 			const url = new URL(req.url || '/', `http://localhost:${port}`);
 
 			if (url.pathname === '/callback') {
@@ -419,6 +421,7 @@ export async function loginAction(options: any, command: Command): Promise<void>
 			server.listen(port, () => resolve());
 		});
 
+		// MUST REMAIN LOCALHOST - enables local authentication flow
 		console.log(chalk.dim(`Local server started on http://localhost:${port}`));
 
 		// Open browser to login page with callback URL
