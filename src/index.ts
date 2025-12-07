@@ -32,6 +32,7 @@ import { createSqlCommand } from './commands/sql.ts';
 import { createAutomationsCommand } from './commands/automations.ts';
 import { createApiCommand } from './commands/api.ts';
 import { createUpdateCommand } from './commands/update.ts';
+import { createCompletionCommand } from './commands/completion.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
@@ -237,6 +238,9 @@ function registerCommands(program: Command): void {
 
 	// Update command - Self-update functionality
 	program.addCommand(createUpdateCommand());
+
+	// Completion command - Shell completion support
+	program.addCommand(createCompletionCommand());
 }
 
 /**

@@ -1,6 +1,6 @@
 ## Next Steps (v0.6.0)
 
-1. Add shell completions (bash/zsh/fish)
+1. ✅ Add shell completions (bash/zsh/fish) - IMPLEMENTED
 2. Implement bulk operations from CSV
 3. Add built-in connector templates
 4. Request batching support

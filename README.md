@@ -60,6 +60,25 @@ databasin auth whoami
 databasin auth verify
 ```
 
+### Shell Completions
+
+Auto-complete commands, options, and arguments in bash, zsh, and fish:
+
+```bash
+# Auto-install completions for your shell
+databasin completion install
+
+# Or install for a specific shell
+databasin completion install --shell bash
+databasin completion install --shell zsh
+databasin completion install --shell fish
+
+# Source completions dynamically (for testing)
+source <(databasin completion bash)
+```
+
+For detailed setup instructions, see [docs/shell-completion.md](./docs/shell-completion.md).
+
 ### Self-Update
 
 ```bash

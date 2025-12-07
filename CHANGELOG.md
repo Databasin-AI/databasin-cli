@@ -4,6 +4,25 @@ All notable changes to Databasin CLI will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - TBD
+
+### Added
+
+- **Shell Completions** (3 shells supported)
+  - Bash completion script with intelligent option filtering
+  - Zsh completion with grouped options and descriptions
+  - Fish completion with context-aware suggestions
+  - Automatic completion installation: `databasin completion install`
+  - Dynamic completion generation from live CLI structure
+
+### Planned
+
+- Bulk operations from CSV
+- Built-in connector templates
+- Request batching support
+- Config file validation
+- Real-time log streaming
+
 ## [0.5.0] - 2024-12-07
 
 ### Added
