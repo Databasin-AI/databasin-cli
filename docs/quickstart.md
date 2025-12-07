@@ -182,6 +182,27 @@ databasin automations get auto-789
 databasin automations run auto-789
 ```
 
+### Pipeline & Automation Observability
+
+```bash
+# Pipeline observability
+databasin pipelines history pipeline-456                    # View pipeline execution history
+databasin pipelines artifacts logs artifact-789             # View artifact logs
+databasin pipelines artifacts history artifact-789          # View artifact execution history
+
+# Automation observability
+databasin automations logs auto-123                         # View automation logs
+databasin automations tasks logs task-456                   # View task logs
+databasin automations history auto-123                      # View automation execution history
+databasin automations tasks history task-456                # View task execution history
+
+# Monitor with options
+databasin pipelines history pipeline-456 --limit 10         # Recent 10 runs
+databasin pipelines history pipeline-456 --count            # Count total runs
+databasin automations history auto-123 --json               # Export as JSON
+databasin automations logs auto-123 --run-id run-789        # Specific run logs
+```
+
 ## Output Formats
 
 ### Table (Default)

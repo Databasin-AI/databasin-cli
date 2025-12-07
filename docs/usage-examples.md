@@ -473,6 +473,270 @@ deploy_pipelines:
       done
 ```
 
+## Pipeline & Automation Observability
+
+### Monitor Pipeline Execution
+
+```bash
+# View recent pipeline runs
+databasin pipelines history pipeline-123 --limit 10
+
+# Check for failures
+databasin pipelines history pipeline-123 --json | \
+  jq '.[] | select(.status == "failed")'
+
+# Calculate success rate
+HISTORY=$(databasin pipelines history pipeline-123 --limit 50 --json)
+TOTAL=$(echo "$HISTORY" | jq 'length')
+SUCCESS=$(echo "$HISTORY" | jq '[.[] | select(.status == "success")] | length')
+RATE=$(echo "scale=2; $SUCCESS * 100 / $TOTAL" | bc)
+echo "Success rate: ${RATE}%"
+```
+
+### Debug Failed Pipeline Run
+
+```bash
+# Get recent pipeline history
+databasin pipelines history pipeline-123 --limit 10
+
+# Identify failed run and get its ID
+FAILED_RUN=$(databasin pipelines history pipeline-123 --json | \
+  jq -r '.[] | select(.status == "failed") | .id' | head -1)
+
+# View artifact logs for that run
+databasin pipelines artifacts logs artifact-456 --run-id "$FAILED_RUN"
+
+# Check artifact execution history
+databasin pipelines artifacts history artifact-456 --limit 10
+```
+
+### Monitor Automation Tasks
+
+```bash
+# View automation execution history
+databasin automations history auto-123 --limit 20
+
+# View current automation logs
+databasin automations logs auto-123
+
+# Monitor specific task execution
+databasin automations tasks logs task-789
+
+# Check task execution history
+databasin automations tasks history task-789 --limit 10
+```
+
+### Real-Time Log Monitoring
+
+```bash
+#!/bin/bash
+# monitor-logs.sh - Real-time log monitoring
+
+AUTO_ID="auto-123"
+
+echo "Monitoring automation logs..."
+echo "Press Ctrl+C to stop"
+echo ""
+
+while true; do
+  clear
+  echo "=== Automation Logs ($(date +%H:%M:%S)) ==="
+  databasin automations logs "$AUTO_ID" --limit 20
+  sleep 5
+done
+```
+
+### Export Observability Data
+
+```bash
+#!/bin/bash
+# export-observability.sh - Export all observability data
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+OUTPUT_DIR="./observability-exports/$TIMESTAMP"
+
+mkdir -p "$OUTPUT_DIR"
+
+# Pipeline observability
+echo "Exporting pipeline data..."
+databasin pipelines history pipeline-123 --json > "$OUTPUT_DIR/pipeline-history.json"
+databasin pipelines artifacts logs artifact-456 --json > "$OUTPUT_DIR/artifact-logs.json"
+databasin pipelines artifacts history artifact-456 --json > "$OUTPUT_DIR/artifact-history.json"
+
+# Automation observability
+echo "Exporting automation data..."
+databasin automations logs auto-123 --json > "$OUTPUT_DIR/automation-logs.json"
+databasin automations history auto-123 --json > "$OUTPUT_DIR/automation-history.json"
+databasin automations tasks logs task-789 --json > "$OUTPUT_DIR/task-logs.json"
+databasin automations tasks history task-789 --json > "$OUTPUT_DIR/task-history.json"
+
+# Compress
+tar -czf "observability-$TIMESTAMP.tar.gz" "$OUTPUT_DIR"
+echo "Data exported to observability-$TIMESTAMP.tar.gz"
+```
+
+### Performance Analysis
+
+```bash
+#!/bin/bash
+# analyze-performance.sh - Analyze pipeline performance
+
+PIPELINE_ID="pipeline-123"
+
+# Get execution history
+HISTORY=$(databasin pipelines history "$PIPELINE_ID" --limit 100 --json)
+
+# Calculate statistics
+echo "Pipeline Performance Analysis"
+echo "=============================="
+echo ""
+
+# Total runs
+TOTAL=$(echo "$HISTORY" | jq 'length')
+echo "Total runs: $TOTAL"
+
+# Success/failure counts
+SUCCESS=$(echo "$HISTORY" | jq '[.[] | select(.status == "success")] | length')
+FAILED=$(echo "$HISTORY" | jq '[.[] | select(.status == "failed")] | length')
+echo "Successes: $SUCCESS"
+echo "Failures: $FAILED"
+
+# Success rate
+RATE=$(echo "scale=2; $SUCCESS * 100 / $TOTAL" | bc)
+echo "Success rate: ${RATE}%"
+echo ""
+
+# Duration statistics
+AVG=$(echo "$HISTORY" | jq '[.[] | .duration] | add / length')
+MIN=$(echo "$HISTORY" | jq '[.[] | .duration] | min')
+MAX=$(echo "$HISTORY" | jq '[.[] | .duration] | max')
+echo "Duration (seconds):"
+echo "  Average: $AVG"
+echo "  Minimum: $MIN"
+echo "  Maximum: $MAX"
+echo ""
+
+# Recent trend (last 10 vs previous 10)
+RECENT_AVG=$(echo "$HISTORY" | jq '[.[0:10] | .[] | .duration] | add / length')
+PREVIOUS_AVG=$(echo "$HISTORY" | jq '[.[10:20] | .[] | .duration] | add / length')
+echo "Recent trend:"
+echo "  Last 10 avg: $RECENT_AVG"
+echo "  Previous 10 avg: $PREVIOUS_AVG"
+
+# Find slowest runs
+echo ""
+echo "Top 5 slowest runs:"
+echo "$HISTORY" | jq -r 'sort_by(.duration) | reverse | .[0:5] | .[] | "  \(.timestamp): \(.duration)s"'
+```
+
+### Health Monitoring Dashboard
+
+```bash
+#!/bin/bash
+# health-dashboard.sh - Continuous health monitoring
+
+PIPELINES=("pipeline-123" "pipeline-456")
+AUTOMATIONS=("auto-123" "auto-789")
+
+while true; do
+  clear
+  echo "========================================="
+  echo " Databasin Observability Dashboard"
+  echo " $(date)"
+  echo "========================================="
+  echo ""
+
+  # Pipeline health
+  echo "📊 PIPELINES"
+  echo "-----------------------------------------"
+  for pipeline in "${PIPELINES[@]}"; do
+    RECENT=$(databasin pipelines history "$pipeline" --limit 5 --json)
+    SUCCESS=$(echo "$RECENT" | jq '[.[] | select(.status == "success")] | length')
+    TOTAL=$(echo "$RECENT" | jq 'length')
+
+    if [ "$SUCCESS" -eq "$TOTAL" ]; then
+      STATUS="✅ HEALTHY"
+    elif [ "$SUCCESS" -eq 0 ]; then
+      STATUS="❌ FAILING"
+    else
+      STATUS="⚠️  DEGRADED"
+    fi
+
+    echo "$pipeline: $STATUS ($SUCCESS/$TOTAL successes)"
+  done
+  echo ""
+
+  # Automation health
+  echo "🤖 AUTOMATIONS"
+  echo "-----------------------------------------"
+  for automation in "${AUTOMATIONS[@]}"; do
+    RECENT=$(databasin automations history "$automation" --limit 5 --json)
+    SUCCESS=$(echo "$RECENT" | jq '[.[] | select(.status == "success")] | length')
+    TOTAL=$(echo "$RECENT" | jq 'length')
+
+    if [ "$SUCCESS" -eq "$TOTAL" ]; then
+      STATUS="✅ HEALTHY"
+    elif [ "$SUCCESS" -eq 0 ]; then
+      STATUS="❌ FAILING"
+    else
+      STATUS="⚠️  DEGRADED"
+    fi
+
+    echo "$automation: $STATUS ($SUCCESS/$TOTAL successes)"
+  done
+  echo ""
+
+  echo "Refreshing in 30s... (Ctrl+C to stop)"
+  sleep 30
+done
+```
+
+### Alert on Failures
+
+```bash
+#!/bin/bash
+# alert-failures.sh - Monitor for failures and send alerts
+
+SLACK_WEBHOOK="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+check_resource() {
+  local type=$1
+  local id=$2
+  local name=$3
+
+  case $type in
+    pipeline)
+      RECENT=$(databasin pipelines history "$id" --limit 5 --json)
+      ;;
+    automation)
+      RECENT=$(databasin automations history "$id" --limit 5 --json)
+      ;;
+  esac
+
+  FAILURES=$(echo "$RECENT" | jq '[.[] | select(.status == "failed")]')
+  COUNT=$(echo "$FAILURES" | jq 'length')
+
+  if [ "$COUNT" -gt 0 ]; then
+    # Extract error messages
+    ERRORS=$(echo "$FAILURES" | jq -r '.[] | "\(.timestamp): \(.errorMessage // "Unknown error")"')
+
+    # Send alert
+    MESSAGE="⚠️ $name ($type $id) has $COUNT recent failures:\n$ERRORS"
+    echo "$MESSAGE"
+
+    # Uncomment to send Slack notification
+    # curl -X POST "$SLACK_WEBHOOK" \
+    #   -H 'Content-Type: application/json' \
+    #   -d "{\"text\":\"$MESSAGE\"}"
+  fi
+}
+
+# Check resources
+check_resource pipeline pipeline-123 "Daily ETL"
+check_resource pipeline pipeline-456 "CDC Sync"
+check_resource automation auto-123 "Nightly Automation"
+```
+
 ## Advanced Workflows
 
 ### Incremental Data Sync
