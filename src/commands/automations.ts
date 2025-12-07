@@ -17,7 +17,7 @@ import chalk from 'chalk';
 import type { AutomationsClient } from '../client/automations.ts';
 import type { ProjectsClient } from '../client/projects.ts';
 import type { CliConfig } from '../types/config.ts';
-import type { Automation } from '../types/api.ts';
+import type { Automation, AutomationLogEntry, AutomationTaskLogEntry } from '../types/api.ts';
 import {
 	formatOutput,
 	formatTable,
@@ -816,6 +816,170 @@ async function stopCommand(id: string, options: {}, command: Command): Promise<v
 }
 
 /**
+ * Logs Command
+ * View automation execution logs
+ */
+async function logsCommand(
+	id: string,
+	options: {
+		limit?: number;
+		runId?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const automationsClient: AutomationsClient = opts._clients.automations;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format (C1: Fix format flag support)
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		if (format === 'table') {
+			spinner = startSpinner('Fetching automation logs...');
+		}
+
+		// Map user-friendly --run-id option to API's currentRunID parameter (C2: Parameter naming alignment)
+		// '0' means current run in the API
+		const params = {
+			currentRunID: options.runId || '0',
+			limit: options.limit
+		};
+
+		// Fetch automation logs
+		const logs = await automationsClient.getAutomationLogs(id, params);
+
+		// Succeed spinner
+		if (spinner) {
+			succeedSpinner(spinner, `Fetched ${Array.isArray(logs) ? logs.length : 0} log entr${Array.isArray(logs) && logs.length === 1 ? 'y' : 'ies'}`);
+		}
+
+		// Format output based on format flag (C1: Fix format flag support)
+		const output = formatOutput(
+			logs,
+			format,
+			{ colors: config.output.colors }
+		);
+
+		console.log(output);
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch automation logs');
+		}
+
+		// Provide helpful error messages
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Automation not found (404)');
+				console.error(chalk.gray(`  Automation ID: ${id}`));
+				console.error(
+					chalk.gray(
+						`  Suggestion: Run 'databasin automations list --project <id>' to see available automations`
+					)
+				);
+			} else if (error.statusCode === 403) {
+				logError('Access denied (403)');
+				console.error(chalk.gray(`  Automation ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: You don't have permission to access this automation's logs`)
+				);
+			} else {
+				logError('Error fetching automation logs', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching automation logs', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
+ * Task Logs Command
+ * View automation task execution logs
+ */
+async function taskLogsCommand(
+	id: string,
+	options: {
+		limit?: number;
+		runId?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const automationsClient: AutomationsClient = opts._clients.automations;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format (C1: Fix format flag support)
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		if (format === 'table') {
+			spinner = startSpinner('Fetching task logs...');
+		}
+
+		// Map user-friendly --run-id option to API's currentRunID parameter (C2: Parameter naming alignment)
+		// '0' means current run in the API
+		const params = {
+			currentRunID: options.runId || '0',
+			limit: options.limit
+		};
+
+		// Fetch automation task logs
+		const logs = await automationsClient.getAutomationTaskLogs(id, params);
+
+		// Succeed spinner
+		if (spinner) {
+			succeedSpinner(spinner, `Fetched ${Array.isArray(logs) ? logs.length : 0} log entr${Array.isArray(logs) && logs.length === 1 ? 'y' : 'ies'}`);
+		}
+
+		// Format output based on format flag (C1: Fix format flag support)
+		const output = formatOutput(
+			logs,
+			format,
+			{ colors: config.output.colors }
+		);
+
+		console.log(output);
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch task logs');
+		}
+
+		// Provide helpful error messages
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Automation task not found (404)');
+				console.error(chalk.gray(`  Task ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: Verify the automation task ID is correct`)
+				);
+			} else if (error.statusCode === 403) {
+				logError('Access denied (403)');
+				console.error(chalk.gray(`  Task ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: You don't have permission to access this automation task's logs`)
+				);
+			} else {
+				logError('Error fetching automation task logs', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching automation task logs', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
  * Delete Command
  * Delete automation with confirmation
  */
@@ -904,6 +1068,270 @@ async function deleteCommand(
 }
 
 /**
+ * History Command
+ * View automation run history and status changes
+ */
+async function historyCommand(
+	id: string,
+	options: {
+		count?: boolean;
+		limit?: number;
+		fields?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const automationsClient: AutomationsClient = opts._clients.automations;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		const spinnerMessage = options.count
+			? 'Fetching automation history count...'
+			: 'Fetching automation history...';
+		if (format === 'table') {
+			spinner = startSpinner(spinnerMessage);
+		}
+
+		// Build request options with proper params (M3: Token efficiency implementation)
+		const requestOptions: any = {
+			params: {}
+		};
+		if (options.limit) {
+			requestOptions.params.limit = options.limit;
+		}
+		if (options.fields) {
+			requestOptions.params.fields = options.fields;
+		}
+		if (options.count) {
+			requestOptions.params.count = true;
+		}
+
+		// Fetch automation history
+		const result = await automationsClient.getAutomationHistory(id, requestOptions);
+
+		// Handle count mode with type guard (C3: Count mode type guards)
+		if (options.count) {
+			const count = typeof result === 'object' && 'count' in result
+				? (result as { count: number }).count
+				: Array.isArray(result) ? result.length : 0;
+
+			if (spinner) {
+				succeedSpinner(spinner, `History entry count: ${count}`);
+			} else {
+				console.log(count);
+			}
+			return;
+		}
+
+		// Type guard for array mode (C3: Count mode type guards)
+		let history = Array.isArray(result) ? result : [];
+
+		// Succeed spinner with count
+		if (spinner) {
+			if (history.length === 0) {
+				succeedSpinner(spinner, 'No history entries found');
+				console.log('');
+				logInfo(`No history entries found for automation ${id}`);
+				return;
+			}
+			succeedSpinner(
+				spinner,
+				`Fetched ${history.length} history entr${history.length === 1 ? 'y' : 'ies'}`
+			);
+		}
+
+		// Parse fields option
+		const fields = parseFields(options.fields);
+
+		// Format output
+		const output = formatOutput(
+			history,
+			format,
+			{ fields, colors: config.output.colors },
+			{ warnThreshold: config.tokenEfficiency.warnThreshold, enabled: true }
+		);
+
+		console.log('\n' + output);
+
+		// Token efficiency warning (for large result sets without limit)
+		if (!options.count && !options.limit && history.length > 50) {
+			warnTokenUsage(output.length, config.tokenEfficiency.warnThreshold, [
+				'Use --count to get only the count',
+				'Use --fields to limit displayed fields',
+				'Use --limit to reduce number of results'
+			]);
+		}
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch automation history');
+		}
+
+		// Provide helpful error messages
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Automation not found (404)');
+				console.error(chalk.gray(`  Automation ID: ${id}`));
+				console.error(
+					chalk.gray(
+						`  Suggestion: Run 'databasin automations list --project <id>' to see available automations`
+					)
+				);
+			} else if (error.statusCode === 403) {
+				logError('Access denied (403)');
+				console.error(chalk.gray(`  Automation ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: You don't have permission to access this automation's history`)
+				);
+			} else {
+				logError('Error fetching automation history', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching automation history', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
+ * Task History Command
+ * View automation task execution history
+ */
+async function taskHistoryCommand(
+	id: string,
+	options: {
+		count?: boolean;
+		limit?: number;
+		fields?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const automationsClient: AutomationsClient = opts._clients.automations;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		const spinnerMessage = options.count
+			? 'Fetching task history count...'
+			: 'Fetching task history...';
+		if (format === 'table') {
+			spinner = startSpinner(spinnerMessage);
+		}
+
+		// Build request options with proper params (M3: Token efficiency implementation)
+		const requestOptions: any = {
+			params: {}
+		};
+		if (options.limit) {
+			requestOptions.params.limit = options.limit;
+		}
+		if (options.fields) {
+			requestOptions.params.fields = options.fields;
+		}
+		if (options.count) {
+			requestOptions.params.count = true;
+		}
+
+		// Fetch automation task history
+		const result = await automationsClient.getAutomationTaskHistory(id, requestOptions);
+
+		// Handle count mode with type guard (C3: Count mode type guards)
+		if (options.count) {
+			const count = typeof result === 'object' && 'count' in result
+				? (result as { count: number }).count
+				: Array.isArray(result) ? result.length : 0;
+
+			if (spinner) {
+				succeedSpinner(spinner, `History entry count: ${count}`);
+			} else {
+				console.log(count);
+			}
+			return;
+		}
+
+		// Type guard for array mode (C3: Count mode type guards)
+		let history = Array.isArray(result) ? result : [];
+
+		// Succeed spinner with count
+		if (spinner) {
+			if (history.length === 0) {
+				succeedSpinner(spinner, 'No history entries found');
+				console.log('');
+				logInfo(`No history entries found for task ${id}`);
+				return;
+			}
+			succeedSpinner(
+				spinner,
+				`Fetched ${history.length} history entr${history.length === 1 ? 'y' : 'ies'}`
+			);
+		}
+
+		// Parse fields option
+		const fields = parseFields(options.fields);
+
+		// Format output
+		const output = formatOutput(
+			history,
+			format,
+			{ fields, colors: config.output.colors },
+			{ warnThreshold: config.tokenEfficiency.warnThreshold, enabled: true }
+		);
+
+		console.log('\n' + output);
+
+		// Token efficiency warning (for large result sets without limit)
+		if (!options.count && !options.limit && history.length > 50) {
+			warnTokenUsage(output.length, config.tokenEfficiency.warnThreshold, [
+				'Use --count to get only the count',
+				'Use --fields to limit displayed fields',
+				'Use --limit to reduce number of results'
+			]);
+		}
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch task history');
+		}
+
+		// Provide helpful error messages
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Automation task not found (404)');
+				console.error(chalk.gray(`  Task ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: Verify the task ID and try again`)
+				);
+			} else if (error.statusCode === 403) {
+				logError('Access denied (403)');
+				console.error(chalk.gray(`  Task ID: ${id}`));
+				console.error(
+					chalk.gray(`  Suggestion: You don't have permission to access this task's history`)
+				);
+			} else {
+				logError('Error fetching task history', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching task history', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
  * Create automations command with all subcommands
  *
  * @returns Configured Commander Command instance
@@ -960,6 +1388,45 @@ export function createAutomationsCommand(): Command {
 		.description('Stop a running automation')
 		.argument('<id>', 'Automation ID')
 		.action(stopCommand);
+
+	// Logs command
+	automations
+		.command('logs')
+		.description('Get automation execution logs')
+		.argument('<id>', 'Automation ID')
+		.option('--limit <n>', 'Limit number of log entries', parseInt)
+		.option('--run-id <id>', 'Specific run ID (default: current run)')
+		.action(logsCommand);
+
+	// History command
+	automations
+		.command('history')
+		.description('Get automation run history and status changes')
+		.argument('<id>', 'Automation ID')
+		.option('--count', 'Return only the count of history entries')
+		.option('--limit <n>', 'Limit number of results', parseInt)
+		.option('--fields <fields>', 'Comma-separated list of fields to display')
+		.action(historyCommand);
+
+	// Tasks subcommand
+	const tasks = automations.command('tasks').description('Manage automation tasks');
+
+	tasks
+		.command('logs')
+		.description('Get automation task execution logs')
+		.argument('<id>', 'Automation task ID')
+		.option('--limit <n>', 'Limit number of log entries', parseInt)
+		.option('--run-id <id>', 'Specific run ID (default: current run)')
+		.action(taskLogsCommand);
+
+	tasks
+		.command('history')
+		.description('Get automation task execution history')
+		.argument('<id>', 'Automation task ID')
+		.option('--count', 'Return only the count of history entries')
+		.option('--limit <n>', 'Limit number of results', parseInt)
+		.option('--fields <fields>', 'Comma-separated list of fields to display')
+		.action(taskHistoryCommand);
 
 	// Delete command
 	automations

@@ -1165,6 +1165,292 @@ async function artifactsRemoveCommand(
 }
 
 /**
+ * History Command
+ * Get pipeline run history and status changes
+ */
+async function historyCommand(
+	id: string,
+	options: {
+		count?: boolean;
+		limit?: number;
+		fields?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const pipelinesClient: PipelinesClient = opts._clients.pipelines;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		const spinnerMessage = options.count
+			? 'Fetching pipeline history count...'
+			: 'Fetching pipeline history...';
+		if (format === 'table') {
+			spinner = startSpinner(spinnerMessage);
+		}
+
+		// Build request options with proper params (M3: Token efficiency implementation)
+		const requestOptions: any = {
+			params: {}
+		};
+		if (options.limit) {
+			requestOptions.params.limit = options.limit;
+		}
+		if (options.fields) {
+			requestOptions.params.fields = options.fields;
+		}
+		if (options.count) {
+			requestOptions.params.count = true;
+		}
+
+		// Fetch pipeline history
+		const history = await pipelinesClient.getPipelineHistory(id, requestOptions);
+
+		// Handle count mode
+		if (options.count) {
+			if (spinner) {
+				succeedSpinner(spinner, `Pipeline history entries: ${history.length}`);
+			} else {
+				console.log(history.length);
+			}
+			return;
+		}
+
+		// Succeed spinner with count
+		if (spinner) {
+			if (history.length === 0) {
+				succeedSpinner(spinner, 'No history entries found for this pipeline');
+				return;
+			}
+			succeedSpinner(
+				spinner,
+				`Fetched ${history.length} history entr${history.length === 1 ? 'y' : 'ies'}`
+			);
+		}
+
+		// Parse fields option
+		const fields = parseFields(options.fields);
+
+		// Format output
+		const output = formatOutput(
+			history,
+			format,
+			{ fields, colors: config.output.colors },
+			{ warnThreshold: config.tokenEfficiency.warnThreshold, enabled: true }
+		);
+
+		console.log(output);
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch pipeline history');
+		}
+
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Pipeline not found (404)');
+				console.error(chalk.gray(`  Pipeline ID: ${id}`));
+			} else {
+				logError('Error fetching pipeline history', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching pipeline history', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
+ * Artifacts Logs Command
+ * Get artifact execution logs
+ */
+async function artifactsLogsCommand(
+	id: string,
+	options: {
+		limit?: number;
+		runId?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const pipelinesClient: PipelinesClient = opts._clients.pipelines;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format (C1: Fix format flag support)
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		if (format === 'table') {
+			spinner = startSpinner('Fetching artifact logs...');
+		}
+
+		// Map user-friendly --run-id option to API's currentRunID parameter (C2: Parameter naming alignment)
+		// '0' means current run in the API
+		const params: any = {
+			currentRunID: options.runId || '0'
+		};
+		if (options.limit) {
+			params.limit = options.limit;
+		}
+
+		// Fetch artifact logs
+		const logs = await pipelinesClient.getArtifactLogs(id, params);
+
+		// Succeed spinner
+		if (spinner) {
+			succeedSpinner(spinner, `Fetched ${Array.isArray(logs) ? logs.length : 0} log entr${Array.isArray(logs) && logs.length === 1 ? 'y' : 'ies'}`);
+		}
+
+		// Format output based on format flag (C1: Fix format flag support)
+		const output = formatOutput(
+			logs,
+			format,
+			{ colors: config.output.colors }
+		);
+
+		console.log(output);
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch artifact logs');
+		}
+
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Artifact not found (404)');
+				console.error(chalk.gray(`  Artifact ID: ${id}`));
+			} else {
+				logError('Error fetching artifact logs', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching artifact logs', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
+ * Artifacts History Command
+ * Get artifact execution history
+ */
+async function artifactsHistoryCommand(
+	id: string,
+	options: {
+		count?: boolean;
+		limit?: number;
+		fields?: string;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const pipelinesClient: PipelinesClient = opts._clients.pipelines;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner (only for table format)
+		const spinnerMessage = options.count
+			? 'Fetching artifact history count...'
+			: 'Fetching artifact history...';
+		if (format === 'table') {
+			spinner = startSpinner(spinnerMessage);
+		}
+
+		// Build request options with proper params (M3: Token efficiency implementation)
+		const requestOptions: any = {
+			params: {}
+		};
+		if (options.limit) {
+			requestOptions.params.limit = options.limit;
+		}
+		if (options.fields) {
+			requestOptions.params.fields = options.fields;
+		}
+		if (options.count) {
+			requestOptions.params.count = true;
+		}
+
+		// Fetch artifact history
+		const result = await pipelinesClient.getArtifactHistory(id, requestOptions);
+
+		// Handle count mode with type guard (C3: Count mode type guards)
+		if (options.count) {
+			const count = typeof result === 'object' && 'count' in result
+				? (result as { count: number }).count
+				: Array.isArray(result) ? result.length : 0;
+
+			if (spinner) {
+				succeedSpinner(spinner, `Artifact history entries: ${count}`);
+			} else {
+				console.log(count);
+			}
+			return;
+		}
+
+		// Type guard for array mode (C3: Count mode type guards)
+		const history = Array.isArray(result) ? result : [];
+
+		// Succeed spinner with count
+		if (spinner) {
+			if (history.length === 0) {
+				succeedSpinner(spinner, 'No history entries found for this artifact');
+				return;
+			}
+			succeedSpinner(
+				spinner,
+				`Fetched ${history.length} history entr${history.length === 1 ? 'y' : 'ies'}`
+			);
+		}
+
+		// Parse fields option
+		const fields = parseFields(options.fields);
+
+		// Format output
+		const output = formatOutput(
+			history,
+			format,
+			{ fields, colors: config.output.colors },
+			{ warnThreshold: config.tokenEfficiency.warnThreshold, enabled: true }
+		);
+
+		console.log(output);
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch artifact history');
+		}
+
+		if (error instanceof ApiError) {
+			if (error.statusCode === 404) {
+				logError('Artifact not found (404)');
+				console.error(chalk.gray(`  Artifact ID: ${id}`));
+			} else {
+				logError('Error fetching artifact history', error);
+			}
+		} else if (error instanceof Error) {
+			logError('Error fetching artifact history', error);
+		}
+
+		throw error;
+	}
+}
+
+/**
  * Create pipelines command with all subcommands
  *
  * @returns Configured Commander Command instance
@@ -1237,6 +1523,15 @@ export function createPipelinesCommand(): Command {
 		.option('--limit <number>', 'Limit number of log entries', parseInt)
 		.action(logsCommand);
 
+	// History command
+	pipelines
+		.command('history <id>')
+		.description('Get pipeline run history and status changes')
+		.option('--count', 'Return only the count of history entries')
+		.option('--limit <n>', 'Limit number of results', parseInt)
+		.option('--fields <fields>', 'Comma-separated list of fields to display')
+		.action(historyCommand);
+
 	// Artifacts sub-command
 	const artifacts = pipelines.command('artifacts').description('Manage pipeline artifacts');
 
@@ -1256,6 +1551,21 @@ export function createPipelinesCommand(): Command {
 		.option('-y, --yes', 'Skip confirmation prompt')
 		.option('-p, --project <id>', 'Project ID (not used, for consistency)')
 		.action(artifactsRemoveCommand);
+
+	artifacts
+		.command('logs <id>')
+		.description('Get artifact execution logs')
+		.option('--limit <n>', 'Limit number of log entries', parseInt)
+		.option('--run-id <id>', 'Specific run ID (default: current run)')
+		.action(artifactsLogsCommand);
+
+	artifacts
+		.command('history <id>')
+		.description('Get artifact execution history')
+		.option('--count', 'Return only the count of history entries')
+		.option('--limit <n>', 'Limit number of results', parseInt)
+		.option('--fields <fields>', 'Comma-separated list of fields to display')
+		.action(artifactsHistoryCommand);
 
 	// Wizard command (Phase 3 - WS7)
 	pipelines.addCommand(createPipelineWizardCommand());

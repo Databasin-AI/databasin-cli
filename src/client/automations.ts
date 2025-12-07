@@ -23,7 +23,13 @@
 import { DatabasinClient } from './base.ts';
 import { ValidationError } from '../utils/errors.ts';
 import type { RequestOptions, TokenEfficiencyOptions } from './base.ts';
-import type { Automation } from '../types/api.ts';
+import type {
+	Automation,
+	AutomationLogEntry,
+	AutomationTaskLogEntry,
+	AutomationHistoryEntry,
+	AutomationTaskHistoryEntry
+} from '../types/api.ts';
 
 /**
  * Automation execution response
@@ -390,6 +396,212 @@ export class AutomationsClient extends DatabasinClient {
 
 		// API endpoint is /api/automations/stop (NOT /api/automations/{id}/stop)
 		return super.post<AutomationRunResponse>('/api/automations/stop', body, options);
+	}
+
+	/**
+	 * Get automation execution logs
+	 *
+	 * Retrieves log entries for an automation execution. Useful for debugging
+	 * and monitoring automation runs. By default, returns logs for the current
+	 * run (runID=0), but can retrieve logs for specific historical runs.
+	 *
+	 * @param automationId - Automation ID to get logs for
+	 * @param params - Optional parameters for filtering logs
+	 * @param params.currentRunID - Specific run ID to get logs for (default: '0' = current run)
+	 * @param params.limit - Maximum number of log entries to return
+	 * @param options - Request options
+	 * @returns Array of automation log entries
+	 * @throws {ApiError} If automation not found (404) or access denied (403)
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get logs for current automation run
+	 * const logs = await client.getAutomationLogs('auto123');
+	 * logs.forEach(entry => console.log(`[${entry.timestamp}] ${entry.message}`));
+	 *
+	 * // Get logs for specific run
+	 * const historicalLogs = await client.getAutomationLogs('auto123', {
+	 *   currentRunID: 'run456'
+	 * });
+	 *
+	 * // Limit number of log entries
+	 * const recentLogs = await client.getAutomationLogs('auto123', {
+	 *   limit: 100
+	 * });
+	 * ```
+	 */
+	async getAutomationLogs(
+		automationId: string | number,
+		params?: { currentRunID?: string; limit?: number },
+		options?: RequestOptions
+	): Promise<AutomationLogEntry[]> {
+		// Build query parameters
+		const queryParams: Record<string, string | number> = {
+			automationID: automationId,
+			currentRunID: params?.currentRunID || '0'
+		};
+
+		// Add limit if specified
+		if (params?.limit) {
+			queryParams.limit = params.limit;
+		}
+
+		return this.get<AutomationLogEntry[]>('/api/automations/logs', {
+			...options,
+			params: queryParams
+		});
+	}
+
+	/**
+	 * Get automation task execution logs
+	 *
+	 * Retrieves log entries for a specific automation task execution. Automation
+	 * tasks are individual steps within an automation (SQL scripts, pipeline runs,
+	 * etc.). This provides more granular logging than automation-level logs.
+	 *
+	 * @param automationTaskId - Automation task ID to get logs for
+	 * @param params - Optional parameters for filtering logs
+	 * @param params.currentRunID - Specific run ID to get logs for (default: '0' = current run)
+	 * @param params.limit - Maximum number of log entries to return
+	 * @param options - Request options
+	 * @returns Array of automation task log entries
+	 * @throws {ApiError} If task not found (404) or access denied (403)
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get logs for current task run
+	 * const logs = await client.getAutomationTaskLogs('task789');
+	 * logs.forEach(entry => {
+	 *   console.log(`[${entry.level}] ${entry.taskName}: ${entry.message}`);
+	 * });
+	 *
+	 * // Get logs for specific task run
+	 * const historicalLogs = await client.getAutomationTaskLogs('task789', {
+	 *   currentRunID: 'run456'
+	 * });
+	 *
+	 * // Limit number of log entries
+	 * const recentLogs = await client.getAutomationTaskLogs('task789', {
+	 *   limit: 50
+	 * });
+	 * ```
+	 */
+	async getAutomationTaskLogs(
+		automationTaskId: string | number,
+		params?: { currentRunID?: string; limit?: number },
+		options?: RequestOptions
+	): Promise<AutomationTaskLogEntry[]> {
+		// Build query parameters
+		const queryParams: Record<string, string | number> = {
+			automationTaskID: automationTaskId,
+			currentRunID: params?.currentRunID || '0'
+		};
+
+		// Add limit if specified
+		if (params?.limit) {
+			queryParams.limit = params.limit;
+		}
+
+		return this.get<AutomationTaskLogEntry[]>('/api/automations/tasks/logs', {
+			...options,
+			params: queryParams
+		});
+	}
+
+	/**
+	 * Get automation run history
+	 *
+	 * Retrieves historical execution records for an automation. Each history entry
+	 * represents a single automation run, showing status, duration, completion stats,
+	 * and metadata about who/what triggered the run.
+	 *
+	 * This is useful for:
+	 * - Tracking automation execution trends over time
+	 * - Debugging failures by examining historical runs
+	 * - Auditing when automations were triggered and by whom
+	 * - Monitoring task completion rates
+	 *
+	 * @param automationId - Automation ID to get history for
+	 * @param options - Request options including token efficiency (count, limit, fields)
+	 * @returns Array of automation history entries
+	 * @throws {ApiError} If automation not found (404) or access denied (403)
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get full history for an automation
+	 * const history = await client.getAutomationHistory('auto123');
+	 * history.forEach(entry => {
+	 *   console.log(`Run at ${entry.timestamp}: ${entry.status} (${entry.duration}ms)`);
+	 *   console.log(`  Completed: ${entry.tasksCompleted}, Failed: ${entry.tasksFailed}`);
+	 * });
+	 *
+	 * // Get count of historical runs
+	 * const count = await client.getAutomationHistory('auto123', { count: true });
+	 * // Returns: { count: 150 }
+	 *
+	 * // Limit to recent runs
+	 * const recent = await client.getAutomationHistory('auto123', { limit: 10 });
+	 *
+	 * // Get specific fields only
+	 * const summary = await client.getAutomationHistory('auto123', {
+	 *   fields: 'timestamp,status,duration'
+	 * });
+	 * ```
+	 */
+	async getAutomationHistory(
+		automationId: string | number,
+		options?: RequestOptions
+	): Promise<AutomationHistoryEntry[]> {
+		return this.get<AutomationHistoryEntry[]>(`/api/automations/history/${automationId}`, options);
+	}
+
+	/**
+	 * Get automation task execution history
+	 *
+	 * Retrieves historical execution records for a specific automation task. Each
+	 * history entry represents a single task execution, showing status, task type,
+	 * duration, results, and processing metrics.
+	 *
+	 * Automation tasks are individual steps within an automation (SQL scripts,
+	 * pipeline runs, notebook executions, etc.). This provides more granular
+	 * execution history than automation-level history.
+	 *
+	 * @param taskId - Automation task ID to get history for
+	 * @param options - Request options including token efficiency (count, limit, fields)
+	 * @returns Array of automation task history entries
+	 * @throws {ApiError} If task not found (404) or access denied (403)
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get full history for a task
+	 * const history = await client.getAutomationTaskHistory('task789');
+	 * history.forEach(entry => {
+	 *   console.log(`Task ${entry.taskType} at ${entry.timestamp}`);
+	 *   console.log(`  Status: ${entry.status}, Duration: ${entry.duration}ms`);
+	 *   console.log(`  Records processed: ${entry.recordsProcessed}`);
+	 * });
+	 *
+	 * // Get count of historical executions
+	 * const count = await client.getAutomationTaskHistory('task789', { count: true });
+	 * // Returns: { count: 200 }
+	 *
+	 * // Limit to recent executions
+	 * const recent = await client.getAutomationTaskHistory('task789', { limit: 20 });
+	 *
+	 * // Get specific fields only
+	 * const summary = await client.getAutomationTaskHistory('task789', {
+	 *   fields: 'timestamp,status,duration,recordsProcessed'
+	 * });
+	 * ```
+	 */
+	async getAutomationTaskHistory(
+		taskId: string | number,
+		options?: RequestOptions
+	): Promise<AutomationTaskHistoryEntry[]> {
+		return this.get<AutomationTaskHistoryEntry[]>(
+			`/api/automations/tasks/history/${taskId}`,
+			options
+		);
 	}
 }
 

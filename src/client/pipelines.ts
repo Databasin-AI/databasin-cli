@@ -17,7 +17,15 @@
 
 import { DatabasinClient } from './base.ts';
 import type { RequestOptions, TokenEfficiencyOptions } from './base.ts';
-import type { Pipeline, PipelineArtifact, Connector, JobDetails } from '../types/api.ts';
+import type {
+	Pipeline,
+	PipelineArtifact,
+	Connector,
+	JobDetails,
+	PipelineHistoryEntry,
+	ArtifactLogEntry,
+	ArtifactHistoryEntry
+} from '../types/api.ts';
 import { ValidationError, ApiError } from '../utils/errors.ts';
 import { getArtifactTypeFromConnectorSubType, ConnectorArtifactType } from './connector-types.ts';
 import { parseBool, parseIntSafe, ensureString } from '../utils/type-coercion.ts';
@@ -625,6 +633,107 @@ export class PipelinesClient extends DatabasinClient {
 		options?: RequestOptions
 	): Promise<void> {
 		await this.delete(`/api/pipeline/${pipelineId}/artifacts/${artifactId}`, options);
+	}
+
+	/**
+	 * Get pipeline execution history
+	 *
+	 * Retrieves the history of all executions for a specific pipeline.
+	 * Returns an array of history entries with status, duration, and metadata.
+	 *
+	 * @param pipelineId - Pipeline ID to get history for
+	 * @param options - Optional request options
+	 * @returns Array of pipeline history entries
+	 * @throws {ApiError} For HTTP errors (404 if not found, 403 if no access)
+	 *
+	 * @example
+	 * ```typescript
+	 * const history = await client.getPipelineHistory('123');
+	 * history.forEach(entry => {
+	 *   console.log(`${entry.timestamp}: ${entry.status} (${entry.duration}ms)`);
+	 * });
+	 * ```
+	 */
+	async getPipelineHistory(
+		pipelineId: string | number,
+		options?: RequestOptions
+	): Promise<PipelineHistoryEntry[]> {
+		return await this.get<PipelineHistoryEntry[]>(
+			`/api/pipeline/history/${pipelineId}`,
+			options
+		);
+	}
+
+	/**
+	 * Get artifact execution logs
+	 *
+	 * Retrieves log entries for a specific artifact execution.
+	 * Supports filtering by run ID and limiting the number of entries returned.
+	 *
+	 * @param artifactId - Artifact ID to get logs for
+	 * @param params - Optional query parameters (currentRunID, limit)
+	 * @param options - Optional request options
+	 * @returns Array of artifact log entries
+	 * @throws {ApiError} For HTTP errors (404 if not found, 403 if no access)
+	 *
+	 * @example
+	 * ```typescript
+	 * // Get logs for current run
+	 * const logs = await client.getArtifactLogs('456', { currentRunID: '0' });
+	 *
+	 * // Get logs with limit
+	 * const recentLogs = await client.getArtifactLogs('456', { limit: 100 });
+	 * ```
+	 */
+	async getArtifactLogs(
+		artifactId: string | number,
+		params?: { currentRunID?: string; limit?: number },
+		options?: RequestOptions
+	): Promise<ArtifactLogEntry[]> {
+		const queryParams: Record<string, string | number> = {
+			artifactID: String(artifactId)
+		};
+
+		if (params?.currentRunID !== undefined) {
+			queryParams.currentRunID = params.currentRunID;
+		}
+		if (params?.limit !== undefined) {
+			queryParams.limit = params.limit;
+		}
+
+		return await this.get<ArtifactLogEntry[]>('/api/artifacts/logs', {
+			...options,
+			params: queryParams
+		});
+	}
+
+	/**
+	 * Get artifact execution history
+	 *
+	 * Retrieves the history of all executions for a specific artifact.
+	 * Returns an array of history entries with status, duration, and metadata.
+	 *
+	 * @param artifactId - Artifact ID to get history for
+	 * @param options - Optional request options
+	 * @returns Array of artifact history entries
+	 * @throws {ApiError} For HTTP errors (404 if not found, 403 if no access)
+	 *
+	 * @example
+	 * ```typescript
+	 * const history = await client.getArtifactHistory('456');
+	 * history.forEach(entry => {
+	 *   console.log(`${entry.timestamp}: ${entry.status} - ${entry.recordsProcessed} records`);
+	 * });
+	 * ```
+	 */
+	async getArtifactHistory(
+		artifactId: string | number,
+		options?: RequestOptions
+	): Promise<ArtifactHistoryEntry[]> {
+		return await this.get<ArtifactHistoryEntry[]>(
+			`/api/artifacts/history/${artifactId}`,
+			options
+		);
 	}
 
 	/**

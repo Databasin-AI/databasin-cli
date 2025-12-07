@@ -383,6 +383,147 @@ export interface Automation {
 export type AutomationStatus = 'Successful' | 'Failed' | 'Running' | 'Stopped' | 'Pending';
 
 /**
+ * Automation log entry returned by /api/automations/logs
+ * Represents a single log entry from an automation execution
+ */
+export interface AutomationLogEntry {
+	/** ISO timestamp of log entry */
+	timestamp: string;
+
+	/** Log message text */
+	message: string;
+
+	/** Log level (INFO, WARN, ERROR, DEBUG) */
+	level?: string;
+
+	/** Associated task ID (if log is from a specific task) */
+	taskID?: string;
+
+	/** Task name (if log is from a specific task) */
+	taskName?: string;
+
+	/** Automation execution run ID */
+	runID?: string;
+
+	/** Automation identifier */
+	automationID?: number;
+
+	/** Additional log metadata */
+	[key: string]: unknown;
+}
+
+/**
+ * Automation task log entry returned by /api/automations/tasks/logs
+ * Represents a single log entry from a specific automation task execution
+ */
+export interface AutomationTaskLogEntry {
+	/** ISO timestamp of log entry */
+	timestamp: string;
+
+	/** Log message text */
+	message: string;
+
+	/** Log level (INFO, WARN, ERROR, DEBUG) */
+	level?: string;
+
+	/** Task name */
+	taskName?: string;
+
+	/** Task ID */
+	taskID?: string;
+
+	/** Task execution run ID */
+	runID?: string;
+
+	/** Automation identifier */
+	automationID?: number;
+
+	/** Task type (SQL, Pipeline, etc.) */
+	taskType?: string;
+
+	/** Additional log metadata */
+	[key: string]: unknown;
+}
+
+/**
+ * Automation history entry returned by /api/automations/history/:automationID
+ * Represents a single automation run in the history
+ */
+export interface AutomationHistoryEntry {
+	/** Numeric history entry identifier */
+	id: string;
+
+	/** Automation ID this history belongs to */
+	automationID: string;
+
+	/** ISO timestamp of when this run occurred */
+	timestamp: string;
+
+	/** Execution status of this run */
+	status: string;
+
+	/** Duration of execution in milliseconds */
+	duration?: number;
+
+	/** Number of tasks completed successfully */
+	tasksCompleted?: number;
+
+	/** Number of tasks that failed */
+	tasksFailed?: number;
+
+	/** User or system that triggered this run */
+	triggeredBy?: string;
+
+	/** Error message if run failed */
+	errorMessage?: string;
+
+	/** ISO timestamp when run started */
+	startTime?: string;
+
+	/** ISO timestamp when run ended */
+	endTime?: string;
+}
+
+/**
+ * Automation task history entry returned by /api/automations/tasks/history/:automationTaskID
+ * Represents a single task execution in the history
+ */
+export interface AutomationTaskHistoryEntry {
+	/** Numeric history entry identifier */
+	id: string;
+
+	/** Automation task ID this history belongs to */
+	automationTaskID: string;
+
+	/** ISO timestamp of when this task executed */
+	timestamp: string;
+
+	/** Execution status of this task */
+	status: string;
+
+	/** Type of task (e.g., 'pipeline', 'sql', 'notebook') */
+	taskType?: string;
+
+	/** Duration of task execution in milliseconds */
+	duration?: number;
+
+	/** Result data or message from task execution */
+	result?: string;
+
+	/** Error message if task failed */
+	errorMessage?: string;
+
+	/** ISO timestamp when task started */
+	startTime?: string;
+
+	/** ISO timestamp when task ended */
+	endTime?: string;
+
+	/** Number of records processed */
+	recordsProcessed?: number;
+}
+
+/**
  * SQL query result returned by /api/connector/:id/query
  * Represents the result of executing a SQL query
  */
@@ -833,4 +974,103 @@ export interface SchemasResponse {
 
 	/** Technology identifier (e.g., "postgres", "mssql", "databricks") */
 	connectorTechnology: string;
+}
+
+/**
+ * Pipeline history entry from /api/pipeline/history/:pipelineID
+ * Represents a single run in a pipeline's execution history
+ */
+export interface PipelineHistoryEntry {
+	/** History entry identifier */
+	id: string;
+
+	/** Associated pipeline ID */
+	pipelineID: string;
+
+	/** Timestamp of execution */
+	timestamp: string;
+
+	/** Execution status */
+	status: string;
+
+	/** Execution duration in milliseconds */
+	duration?: number;
+
+	/** User or system that triggered the execution */
+	triggeredBy?: string;
+
+	/** Number of records processed */
+	recordsProcessed?: number;
+
+	/** Number of errors encountered */
+	errors?: number;
+
+	/** Job ID associated with this run */
+	jobId?: string;
+
+	/** Error message if execution failed */
+	errorMessage?: string;
+}
+
+/**
+ * Artifact log entry from /api/artifacts/logs
+ * Represents a single log message from artifact execution
+ */
+export interface ArtifactLogEntry {
+	/** Log timestamp */
+	timestamp: string;
+
+	/** Log message text */
+	message: string;
+
+	/** Log level (INFO, WARN, ERROR, DEBUG) */
+	level?: string;
+
+	/** Artifact ID that generated this log */
+	artifactId?: string;
+
+	/** Run ID associated with this log */
+	runId?: string;
+
+	/** Additional log metadata */
+	metadata?: Record<string, unknown>;
+}
+
+/**
+ * Artifact history entry from /api/artifacts/history/:artifactID
+ * Represents a single execution in an artifact's history
+ */
+export interface ArtifactHistoryEntry {
+	/** History entry identifier */
+	id: string;
+
+	/** Associated artifact ID */
+	artifactID: string;
+
+	/** Execution timestamp */
+	timestamp: string;
+
+	/** Execution status */
+	status: string;
+
+	/** Number of records processed */
+	recordsProcessed?: number;
+
+	/** Number of errors encountered */
+	errors?: number;
+
+	/** Execution duration in milliseconds */
+	duration?: number;
+
+	/** Run ID */
+	runId?: string;
+
+	/** Error message if execution failed */
+	errorMessage?: string;
+
+	/** Start timestamp */
+	startedAt?: string;
+
+	/** Completion timestamp */
+	completedAt?: string;
 }
