@@ -4,6 +4,8 @@ All notable changes to Databasin CLI will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-12-07
+
 ### Added
 
 - **Observability Commands** (8 new commands)
@@ -35,14 +37,6 @@ All notable changes to Databasin CLI will be documented in this file.
 - Parameter mapping: CLI `--run-id` → API `currentRunID` (C2)
 - Type guards for count mode responses (C3)
 - Token efficiency options properly passed to API (M3)
-
-### Planned
-
-- Shell completions (bash/zsh/fish)
-- Bulk operations from CSV
-- Connector templates
-- Config file validation
-- Real-time log streaming
 
 ## [0.4.0] - 2024-12-06
 
