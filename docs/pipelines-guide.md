@@ -279,6 +279,156 @@ $ databasin pipelines create incomplete.json
 
 ---
 
+### `pipelines clone`
+
+Clone an existing pipeline with optional modifications to name, source connector, target connector, or schedule.
+
+**Usage:**
+
+```bash
+# Clone with default name (adds " (Clone)" suffix)
+databasin pipelines clone <pipeline-id>
+
+# Clone with custom name
+databasin pipelines clone <pipeline-id> --name "New Pipeline Name"
+
+# Clone with different source connector
+databasin pipelines clone <pipeline-id> --source <connector-id>
+
+# Clone with different target connector
+databasin pipelines clone <pipeline-id> --target <connector-id>
+
+# Clone with different schedule
+databasin pipelines clone <pipeline-id> --schedule "0 3 * * *"
+
+# Combine multiple overrides
+databasin pipelines clone 8901 \
+  --name "Dev Pipeline" \
+  --source 5460 \
+  --target 5766 \
+  --schedule "0 */6 * * *"
+
+# Preview changes without creating (dry-run)
+databasin pipelines clone <pipeline-id> --dry-run
+```
+
+**Arguments:**
+
+- `<pipeline-id>` - ID of the pipeline to clone
+
+**Options:**
+
+- `--name <name>` - Override pipeline name (default: original name + " (Clone)")
+- `--source <id>` - Override source connector ID
+- `--target <id>` - Override target connector ID
+- `--schedule <cron>` - Override schedule (cron expression)
+- `--dry-run` - Preview changes without creating the pipeline
+
+**Features:**
+
+1. **Smart Name Generation** - Automatically adds " (Clone)" suffix if name not specified
+2. **Configuration Validation** - Validates config before creation (connectors exist, cron valid)
+3. **Connector Caching** - Prevents duplicate API calls when fetching connector details
+4. **Clear Diff Display** - Shows exactly what changes from original
+5. **Dry-Run Mode** - Preview changes before committing
+6. **Preserves Everything** - Artifacts, job details, and all pipeline settings copied
+
+**Example Output (Dry-Run):**
+
+```
+$ databasin pipelines clone 8901 --source 5460 --dry-run
+
+✔ Source pipeline loaded: Daily User Sync (8901)
+✔ Configuration valid (with warnings)
+
+Warnings:
+  ⚠ artifacts[0]: Artifact should have targetTable defined
+
+Changes:
+  ~ Name: "Daily User Sync" → "Daily User Sync (Clone)"
+  ~ Source: StarlingPostgres (5459) → NewPostgres (5460)
+  ✓ Target: ITL TPI Databricks (5765) [unchanged]
+  ✓ Schedule: "0 2 * * *" [unchanged]
+  ✓ Artifacts: 2 items [unchanged]
+
+Preview: Pipeline would be cloned as follows
+
+Original:
+  Name: Daily User Sync
+  Source: StarlingPostgres (5459)
+  Target: ITL TPI Databricks (5765)
+  Schedule: 0 2 * * *
+  Artifacts: 2 items
+
+Cloned:
+  Name: Daily User Sync (Clone)
+  Source: NewPostgres (5460)
+  Target: ITL TPI Databricks (5765)
+  Schedule: 0 2 * * *
+  Artifacts: 2 items
+
+✓ Dry run successful
+Use --confirm (or remove --dry-run) to create this pipeline
+```
+
+**Example Output (Creation):**
+
+```
+$ databasin pipelines clone 8901 --name "Production ETL"
+
+✔ Source pipeline loaded: Daily User Sync (8901)
+✔ Configuration valid
+
+Changes:
+  ~ Name: "Daily User Sync" → "Production ETL"
+  ✓ Source: StarlingPostgres (5459) [unchanged]
+  ✓ Target: ITL TPI Databricks (5765) [unchanged]
+  ✓ Schedule: "0 2 * * *" [unchanged]
+  ✓ Artifacts: 2 items [unchanged]
+
+✔ Pipeline created: 8903
+
+Next steps:
+  $ databasin pipelines run 8903    # Test the cloned pipeline
+  $ databasin pipelines logs 8903   # View execution logs
+```
+
+**Error Handling:**
+
+```bash
+# Pipeline not found
+$ databasin pipelines clone 99999
+✖ Failed to clone pipeline
+Error: Pipeline not found
+
+# Invalid connector ID
+$ databasin pipelines clone 8901 --source 99999
+✖ Configuration validation failed
+Errors:
+  ✖ sourceConnectorId: Connector 99999 not found or not accessible
+
+# Invalid cron expression
+$ databasin pipelines clone 8901 --schedule "invalid"
+✖ Configuration validation failed
+Errors:
+  ✖ schedule: Invalid cron expression: "invalid"
+  Expected format: "minute hour day month dayOfWeek" (e.g., "0 2 * * *")
+```
+
+**Use Cases:**
+
+1. **Environment Promotion** - Clone from dev to prod with different connectors
+2. **Testing** - Clone production pipeline for testing with test connectors
+3. **Schedule Variations** - Create hourly version of daily pipeline
+4. **Backup/Template** - Clone before major modifications
+
+**See Also:**
+- `databasin pipelines create` - Create pipeline from scratch
+- `databasin pipelines validate` - Validate pipeline configuration
+- `databasin connectors inspect <id>` - View connector details
+
+---
+
 ### `pipelines run`
 
 Execute a pipeline immediately.

@@ -158,6 +158,112 @@ $ databasin connectors get conn-restricted
 
 ---
 
+### `databasin connectors inspect`
+
+Comprehensive connector analysis in a single command - connection testing, metadata, configuration, database structure, pipeline usage, and quick actions.
+
+**Usage:**
+
+```bash
+# Inspect by connector ID
+databasin connectors inspect 5459
+
+# Inspect by name (case-insensitive partial match)
+databasin connectors inspect "postgres"
+databasin connectors inspect "Starling"
+```
+
+**Arguments:**
+
+- `<id-or-name>` - Connector ID (numeric) or connector name (partial match)
+
+**Features:**
+
+1. **Connection Testing** - Tests the connector and displays status (Active/Failed/Error)
+2. **Metadata Display** - Shows ID, name, type, subtype, project ID, creation date
+3. **Configuration Details** - Displays connection settings with sensitive data sanitized
+4. **Database Structure** (SQL connectors only) - Shows databases, schemas, and tables
+5. **Pipeline Usage** - Lists all pipelines using this connector
+6. **Quick Actions** - Provides ready-to-use command suggestions
+
+**Example Output:**
+
+```
+$ databasin connectors inspect 5459
+
+✔ Connector found
+✔ Connection successful
+
+Connector: StarlingPostgres (5459)
+Type: postgres
+Subtype: PostgreSQL
+Project ID: N1r8Do
+Created: 10/15/2024
+Status: Active
+
+Connection Details:
+  Host: postgres.example.com
+  Port: 5432
+  Database: production
+  SSL: Enabled
+
+Database Structure:
+  └─ postgres (database)
+      ├─ public (schema)
+      │   ├─ users
+      │   ├─ sessions
+      │   └─ orders
+      └─ config (schema)
+          ├─ settings
+          └─ audit_log
+
+Pipeline Usage:
+  Used in 3 pipeline(s):
+    • Daily User Sync (8901) - Source
+    • Weekly Orders Export (8902) - Source
+    • Session Analytics (8903) - Source
+
+Quick Actions:
+  $ databasin sql exec 5459 "SELECT * FROM users LIMIT 5"
+  $ databasin sql discover 5459
+  $ databasin pipelines create --source 5459
+  $ databasin connectors test 5459
+  $ databasin connectors update 5459
+```
+
+**Supported SQL Connector Types:**
+- PostgreSQL, MySQL, MariaDB
+- SQL Server, Oracle
+- Snowflake, Databricks, Redshift
+- BigQuery, Trino, Presto
+- DB2, Sybase
+
+**Error Handling:**
+
+```bash
+# Connector not found
+$ databasin connectors inspect nonexistent
+✖ No connector found matching "nonexistent"
+
+# Multiple matches
+$ databasin connectors inspect "postgres"
+✖ Multiple connectors found matching "postgres"
+
+Multiple matches found:
+  • Test Postgres 1 (5459)
+  • Test Postgres 2 (5460)
+
+Please specify a more specific name or use the connector ID
+```
+
+**See Also:**
+- Full documentation: `/docs/connectors-inspect.md`
+- `databasin connectors get <id>` - Get raw connector data
+- `databasin sql discover <id>` - Detailed database structure
+- `databasin connectors test <id>` - Connection test only
+
+---
+
 ### `databasin connectors create`
 
 Create a new connector from a JSON file or through an interactive wizard.

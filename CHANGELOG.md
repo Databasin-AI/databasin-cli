@@ -94,7 +94,7 @@ All notable changes to Databasin CLI will be documented in this file.
   - Pipeline usage analysis across all accessible projects
   - Quick action suggestions with ready-to-use commands
   - Support for ID or name-based lookup
-  - See `/docs/commands/connectors-inspect.md` for full documentation
+  - See `/docs/connectors-inspect.md` for full documentation
 - **Pipeline Cloning**: `pipelines clone` command for duplicating pipelines with modifications
   - Clone existing pipelines with a single command
   - Override name, source connector, target connector, or schedule
@@ -104,6 +104,7 @@ All notable changes to Databasin CLI will be documented in this file.
   - Clear diff display showing changes from original
   - Dry-run mode (`--dry-run`) for preview without creation
   - Preserves artifacts, job details, and all pipeline settings
+  - See `/docs/pipelines-clone.md` for full documentation
 
 ### Improved
 
