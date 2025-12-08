@@ -14,10 +14,45 @@
  * @module tests/commands/pipelines-clone
  */
 
-import { describe, test, expect, mock } from 'bun:test';
+import { describe, test, expect, mock, beforeEach, afterEach } from 'bun:test';
 import { cloneCommand } from '../../src/commands/pipelines-clone.ts';
 import type { Pipeline, Connector } from '../../src/types/api.ts';
 import { Command } from 'commander';
+
+// Store original console methods and environment
+let originalConsole: {
+	log: typeof console.log;
+	error: typeof console.error;
+};
+let originalNodeEnv: string | undefined;
+
+// Mock console output to prevent test pollution
+beforeEach(() => {
+	originalConsole = {
+		log: console.log,
+		error: console.error
+	};
+	originalNodeEnv = process.env.NODE_ENV;
+
+	// Set test environment flag
+	process.env.NODE_ENV = 'test';
+
+	// Suppress console output
+	console.log = () => {};
+	console.error = () => {};
+});
+
+afterEach(() => {
+	console.log = originalConsole.log;
+	console.error = originalConsole.error;
+
+	// Restore environment
+	if (originalNodeEnv !== undefined) {
+		process.env.NODE_ENV = originalNodeEnv;
+	} else {
+		delete process.env.NODE_ENV;
+	}
+});
 
 /**
  * Create a mock pipeline for testing

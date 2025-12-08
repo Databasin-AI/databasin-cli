@@ -10,9 +10,45 @@
  * - Quick action suggestions
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach, mock } from 'bun:test';
 import { inspectCommand } from '../../src/commands/connectors-inspect';
 import type { Connector, Pipeline, Project } from '../../src/types/api';
+
+// Store original console methods and environment
+let originalConsole: {
+	log: typeof console.log;
+	error: typeof console.error;
+};
+let originalNodeEnv: string | undefined;
+
+// Suppress console output in tests
+beforeEach(() => {
+	originalConsole = {
+		log: console.log,
+		error: console.error
+	};
+	originalNodeEnv = process.env.NODE_ENV;
+
+	// Set test environment
+	process.env.NODE_ENV = 'test';
+
+	// Mock console
+	console.log = () => {};
+	console.error = () => {};
+});
+
+afterEach(() => {
+	// Restore console
+	console.log = originalConsole.log;
+	console.error = originalConsole.error;
+
+	// Restore environment
+	if (originalNodeEnv !== undefined) {
+		process.env.NODE_ENV = originalNodeEnv;
+	} else {
+		delete process.env.NODE_ENV;
+	}
+});
 
 describe('connectors inspect command', () => {
 	// Mock clients

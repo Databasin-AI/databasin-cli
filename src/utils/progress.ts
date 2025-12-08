@@ -89,6 +89,15 @@ let globalFlags: GlobalFlags = {
 };
 
 /**
+ * Detect if running in test environment
+ */
+function isTestEnvironment(): boolean {
+	return process.env.NODE_ENV === 'test' ||
+	       process.env.BUN_ENV === 'test' ||
+	       typeof (globalThis as any).Bun?.jest !== 'undefined';
+}
+
+/**
  * Set global flags for output control
  * Called by CLI commands to configure output behavior
  *
@@ -155,17 +164,22 @@ function shouldShowOutput(options?: LogOptions): boolean {
  */
 export function startSpinner(text: string, options: SpinnerOptions = {}): Ora {
 	const useColors = shouldUseColors();
+	const inTestEnv = isTestEnvironment();
 
 	const spinner = ora({
 		text,
 		color: (options.color as any) || 'cyan',
 		spinner: (options.spinner as any) || 'dots',
 		stream: options.stream || process.stdout,
-		// Disable spinner if not a TTY or colors disabled
-		isEnabled: process.stdout.isTTY && useColors
+		// Disable spinner if not a TTY, colors disabled, or in test environment
+		isEnabled: process.stdout.isTTY && useColors && !inTestEnv
 	});
 
-	spinner.start();
+	// Only start spinner if not in test environment
+	if (!inTestEnv) {
+		spinner.start();
+	}
+
 	return spinner;
 }
 
@@ -202,6 +216,12 @@ export function updateSpinner(spinner: Ora, text: string): void {
  * ```
  */
 export function succeedSpinner(spinner: Ora, text?: string): void {
+	// Skip spinner output in test environment
+	if (isTestEnvironment()) {
+		spinner.stop();
+		return;
+	}
+
 	if (text) {
 		spinner.succeed(text);
 	} else {
@@ -229,6 +249,12 @@ export function succeedSpinner(spinner: Ora, text?: string): void {
  * ```
  */
 export function failSpinner(spinner: Ora, text?: string, error?: Error): void {
+	// Skip spinner output in test environment
+	if (isTestEnvironment()) {
+		spinner.stop();
+		return;
+	}
+
 	if (text) {
 		spinner.fail(text);
 	} else {
@@ -259,6 +285,12 @@ export function failSpinner(spinner: Ora, text?: string, error?: Error): void {
  * ```
  */
 export function warnSpinner(spinner: Ora, text: string): void {
+	// Skip spinner output in test environment
+	if (isTestEnvironment()) {
+		spinner.stop();
+		return;
+	}
+
 	spinner.warn(text);
 }
 

@@ -86,7 +86,9 @@ jobs:
         run: bun run typecheck
 
       - name: Run tests
-        run: bun test
+        run: NODE_ENV=test bun test
+        env:
+          NODE_ENV: test
 
       - name: Build CLI
         run: bun run build.ts
