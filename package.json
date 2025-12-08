@@ -1,6 +1,6 @@
 {
 	"name": "@databasin/cli",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"description": "Command-line interface for Databasin data integration platform - manage projects, connectors, pipelines, and execute SQL queries",
 	"type": "module",
 	"main": "./dist/index.js",

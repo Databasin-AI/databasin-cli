@@ -4,6 +4,26 @@ All notable changes to Databasin CLI will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.3] - 2025-12-07
+
+### Added
+
+- **Connector Configuration Command**
+  - New `databasin connectors config` command to view connector configurations
+  - Shows connector category, active status, and required pipeline screens
+  - `--screens` flag displays detailed workflow screen information
+  - `--all` flag lists all 51 available connector configurations
+  - Supports table, JSON, and CSV output formats
+  - Helps understand pipeline wizard workflows for each connector type
+  - Uses cached configuration files from web app (5-minute TTL)
+
+### Changed
+
+- **Configuration Management**
+  - Added `DATABASIN_WEB_URL` environment variable for web app URL
+  - ConfigurationClient now included in default client exports
+  - Config loader supports `webUrl` in all configuration sources
+
 ## [0.6.0] - TBD
 
 ### Planned

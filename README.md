@@ -47,6 +47,7 @@ databasin projects get <project-id>
 # Connectors
 databasin connectors list --full
 databasin connectors test <connector-id>
+databasin connectors config Postgres --screens
 
 # Pipelines
 databasin pipelines list --project <project-id>

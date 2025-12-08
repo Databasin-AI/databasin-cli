@@ -167,6 +167,11 @@ export function loadConfigFromEnv(): PartialCliConfig {
 		config.apiUrl = process.env[ENV_VARS.API_URL];
 	}
 
+	// Web URL
+	if (process.env[ENV_VARS.WEB_URL]) {
+		config.webUrl = process.env[ENV_VARS.WEB_URL];
+	}
+
 	// Default project
 	if (process.env[ENV_VARS.DEFAULT_PROJECT]) {
 		config.defaultProject = process.env[ENV_VARS.DEFAULT_PROJECT];
@@ -228,6 +233,9 @@ export function mergeConfigs(...configs: PartialCliConfig[]): CliConfig {
 		// Top-level primitives
 		if (config.apiUrl !== undefined) {
 			result.apiUrl = config.apiUrl;
+		}
+		if (config.webUrl !== undefined) {
+			result.webUrl = config.webUrl;
 		}
 		if (config.defaultProject !== undefined) {
 			result.defaultProject = config.defaultProject;

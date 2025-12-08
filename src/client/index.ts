@@ -22,6 +22,7 @@ export {
 export { PipelinesClient, createPipelinesClient } from './pipelines.ts';
 export { AutomationsClient, createAutomationsClient } from './automations.ts';
 export { SqlClient, createSqlClient } from './sql.ts';
+export { ConfigurationClient, createConfigurationClient } from './configuration.ts';
 
 // Import createClient locally for use in createAllClients
 import { createClient } from './base.ts';
@@ -30,6 +31,7 @@ import { createConnectorsClient } from './connectors.ts';
 import { createPipelinesClient } from './pipelines.ts';
 import { createAutomationsClient } from './automations.ts';
 import { createSqlClient } from './sql.ts';
+import { createConfigurationClient } from './configuration.ts';
 
 // Convenience: Create all clients at once
 export function createAllClients(config?: import('../types/config.ts').CliConfig) {
@@ -39,6 +41,7 @@ export function createAllClients(config?: import('../types/config.ts').CliConfig
 		connectors: createConnectorsClient(),
 		pipelines: createPipelinesClient(),
 		automations: createAutomationsClient(),
-		sql: createSqlClient()
+		sql: createSqlClient(),
+		configuration: createConfigurationClient()
 	};
 }

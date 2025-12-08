@@ -123,6 +123,11 @@ databasin connectors create mysql-config.json
 
 # Delete connector (with confirmation)
 databasin connectors delete conn-123
+
+# Get connector configuration and workflow
+databasin connectors config Postgres
+databasin connectors config Postgres --screens
+databasin connectors config --all
 ```
 
 ### Pipelines
@@ -274,6 +279,7 @@ Create `~/.databasin/config.json`:
 
 ```bash
 export DATABASIN_API_URL="https://api.databasin.com"
+export DATABASIN_WEB_URL="https://app.databasin.com"  # For config files
 export DATABASIN_TOKEN="your-token"
 export NO_COLOR=1  # Disable colors
 ```

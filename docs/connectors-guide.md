@@ -467,6 +467,207 @@ $ databasin connectors delete conn-restricted
 
 ---
 
+### `databasin connectors test`
+
+Test a connector's connection to verify credentials and configuration.
+
+**Usage:**
+
+```bash
+# Test specific connector
+databasin connectors test conn-abc123
+
+# Interactive (prompts for connector selection)
+databasin connectors test
+
+# Filter connector list by project (for interactive mode)
+databasin connectors test --project N1r8Do
+```
+
+**Arguments:**
+
+- `[id]` - Connector ID (optional, will prompt if not provided)
+
+**Options:**
+
+- `-p, --project <id>` - Filter connector list by project (for interactive prompt)
+
+**Successful Test:**
+
+```bash
+$ databasin connectors test conn-abc123
+
+⠋ Testing connector connection...
+✔ Connection test succeeded
+
+✔ Connection successful to MySQL Production database
+
+Connection Details:
+  serverVersion: 8.0.32
+  database: production
+  uptime: 2592000
+```
+
+**Failed Test:**
+
+```bash
+$ databasin connectors test conn-abc123
+
+⠋ Testing connector connection...
+✖ Connection test failed
+
+✖ Unable to connect to database
+
+Error Details:
+  error: ECONNREFUSED
+  host: db.example.com
+  port: 3306
+  details: Connection refused by remote server
+```
+
+**Interactive Mode:**
+
+```bash
+$ databasin connectors test
+
+? Select connector to test:
+  ❯ MySQL Production (database) - conn-abc123
+    Salesforce API (app) - conn-def456
+    S3 Bucket (cloud) - conn-ghi789
+
+⠋ Testing connector connection...
+✔ Connection test succeeded
+```
+
+---
+
+### `databasin connectors config`
+
+Get connector configuration details including pipeline workflow screens, category, and requirements.
+
+**Usage:**
+
+```bash
+# Get configuration for a specific connector type
+databasin connectors config Postgres
+
+# Include detailed screen workflow information
+databasin connectors config Postgres --screens
+
+# List all available connector configurations
+databasin connectors config --all
+
+# JSON output format
+databasin connectors config Snowflake --json
+```
+
+**Arguments:**
+
+- `[subtype]` - Connector subtype name (e.g., "Postgres", "MySQL", "Snowflake")
+
+**Options:**
+
+- `--screens` - Include detailed pipeline workflow screen information
+- `--all` - List all available connector configurations
+
+**Basic Configuration:**
+
+```bash
+$ databasin connectors config Postgres
+
+⠋ Fetching configuration for Postgres...
+✔ Configuration loaded for Postgres
+
+Connector Configuration: Postgres
+
+  Category: RDBMS
+  Active: Yes
+  Required Screens: 6, 7, 2, 3, 4, 5
+
+💡 Tip: Use --screens to see detailed screen information
+💡 Tip: Use --all to list all available connector configurations
+```
+
+**With Screen Details:**
+
+```bash
+$ databasin connectors config Postgres --screens
+
+Connector Configuration: Postgres
+
+  Category: RDBMS
+  Active: Yes
+  Required Screens: 6, 7, 2, 3, 4, 5
+
+Pipeline Workflow Screens:
+  1. [6] Database
+     Please choose a database/catalog that contains the schemas you are interested in ingesting
+  2. [7] Schemas
+     Please choose a schema that contains the tables you are interested in ingesting
+  3. [2] Artifacts
+     Please select the objects you would like to include in this pipeline
+  4. [3] Columns
+     Uncheck any columns you wish to restrict from the data ingestion, for a given table
+  5. [4] Data Ingestion Options
+     Please review the information generated to ensure its accuracy and make changes before saving the pipeline
+  6. [5] Final Configuration
+     Create tags, set the pipeline schedule, and choose a workload size
+```
+
+**List All Connectors:**
+
+```bash
+$ databasin connectors config --all
+
+⠋ Fetching all connector configurations...
+✔ Fetched 51 connector configurations
+
+┌───────────────────────────────┬──────────────────┬────────┐
+│ connectorName                 │ category         │ active │
+├───────────────────────────────┼──────────────────┼────────┤
+│ Anthropic API                 │ AI & LLM         │ true   │
+│ Azure OpenAI                  │ AI & LLM         │ true   │
+│ OpenAI API                    │ AI & LLM         │ true   │
+│ CosmosDB                      │ Big Data & NoSQL │ true   │
+│ Databricks                    │ Big Data & NoSQL │ true   │
+│ Lakehouse                     │ Big Data & NoSQL │ true   │
+│ Microsoft Fabric              │ Big Data & NoSQL │ true   │
+│ MongoDB                       │ Big Data & NoSQL │ true   │
+│ Snowflake                     │ Big Data & NoSQL │ true   │
+│ ...                           │ ...              │ ...    │
+└───────────────────────────────┴──────────────────┴────────┘
+```
+
+**JSON Output:**
+
+```bash
+$ databasin connectors config Snowflake --screens --json
+
+{
+  "connectorName": "Snowflake",
+  "category": "Big Data & NoSQL",
+  "active": true,
+  "pipelineRequiredScreens": [6, 7, 2, 3, 4, 5],
+  "screenDetails": [
+    {
+      "screenID": 6,
+      "screenName": "Database",
+      "description": "Please choose a database/catalog..."
+    },
+    ...
+  ]
+}
+```
+
+**Use Cases:**
+
+1. **Understanding Pipeline Workflows** - See which screens are required for each connector type
+2. **Connector Discovery** - Find available connector types and categories
+3. **Automation** - Use JSON output to programmatically determine workflow requirements
+4. **Documentation** - Export connector configurations for reference
+
+---
+
 ## Global Options
 
 All commands support these global options:

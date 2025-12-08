@@ -20,6 +20,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import type { ConnectorsClient } from '../client/connectors.ts';
 import type { ProjectsClient } from '../client/projects.ts';
+import type { ConfigurationClient } from '../client/configuration.ts';
 import type { CliConfig } from '../types/config.ts';
 import type { Connector } from '../types/api.ts';
 import {
@@ -792,6 +793,164 @@ async function testCommand(
 }
 
 /**
+ * Config Command
+ * Get connector configuration details (screens, workflow, category)
+ */
+async function configCommand(
+	connectorSubType: string | undefined,
+	options: {
+		screens?: boolean;
+		all?: boolean;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const configClient: ConfigurationClient = opts._clients.configuration;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Handle --all flag: list all available connectors
+		if (options.all) {
+			if (format === 'table') {
+				spinner = startSpinner('Fetching all connector configurations...');
+			}
+
+			const allConnectors = await configClient.getAllConnectors();
+
+			if (spinner) {
+				succeedSpinner(spinner, `Fetched ${allConnectors.length} connector configurations`);
+			}
+
+			// Sort by category then name
+			allConnectors.sort((a, b) => {
+				const catA = String(a.category || '');
+				const catB = String(b.category || '');
+				const categoryCompare = catA.localeCompare(catB);
+				if (categoryCompare !== 0) return categoryCompare;
+				return a.connectorName.localeCompare(b.connectorName);
+			});
+
+			// Format output
+			const output = formatOutput(
+				allConnectors,
+				format,
+				{
+					fields: ['connectorName', 'category', 'active'],
+					colors: config.output.colors
+				}
+			);
+
+			console.log();
+			console.log(output);
+			return;
+		}
+
+		// Validate connector subtype provided
+		if (!connectorSubType) {
+			throw new ValidationError(
+				'Connector subtype is required',
+				'connectorSubType',
+				['Provide a connector subtype (e.g., "Postgres", "MySQL", "Snowflake")', 'Or use --all to list all available connectors']
+			);
+		}
+
+		// Fetch connector configuration
+		if (format === 'table') {
+			spinner = startSpinner(`Fetching configuration for ${connectorSubType}...`);
+		}
+
+		const connectorConfig = await configClient.getConnectorConfiguration(connectorSubType);
+
+		if (spinner) {
+			succeedSpinner(spinner, `Configuration loaded for ${connectorConfig.connectorName}`);
+		}
+
+		// If --screens flag provided, also fetch pipeline screens
+		let screenDetails;
+		if (options.screens) {
+			const pipelineScreens = await configClient.getPipelineScreenConfiguration();
+
+			// Map screen IDs to screen details
+			screenDetails = connectorConfig.pipelineRequiredScreens?.map((screenId) => {
+				const screen = pipelineScreens.pipelineRequiredScreens.find(s => s.screenID === screenId);
+				return screen ? {
+					screenID: screen.screenID,
+					screenName: screen.screenName,
+					description: screen.helpText || 'N/A'
+				} : {
+					screenID: screenId,
+					screenName: 'Unknown',
+					description: 'Screen not found'
+				};
+			});
+		}
+
+		// Build output object
+		const outputData = {
+			connectorName: connectorConfig.connectorName,
+			category: connectorConfig.category,
+			active: connectorConfig.active,
+			pipelineRequiredScreens: connectorConfig.pipelineRequiredScreens,
+			...(options.screens && screenDetails ? { screenDetails } : {})
+		};
+
+		// Format and display
+		console.log();
+		if (format === 'json') {
+			console.log(formatJson(outputData, { colors: config.output.colors }));
+		} else if (format === 'csv') {
+			console.log(formatCsv([outputData], { colors: config.output.colors }));
+		} else {
+			// Table format - use formatted output
+			console.log(chalk.cyan.bold(`Connector Configuration: ${connectorConfig.connectorName}`));
+			console.log();
+			console.log(chalk.gray(`  Category: ${connectorConfig.category || 'N/A'}`));
+			console.log(chalk.gray(`  Active: ${connectorConfig.active ? 'Yes' : 'No'}`));
+			console.log(chalk.gray(`  Required Screens: ${connectorConfig.pipelineRequiredScreens?.join(', ') || 'None'}`));
+
+			if (options.screens && screenDetails) {
+				console.log();
+				console.log(chalk.cyan('Pipeline Workflow Screens:'));
+				screenDetails.forEach((screen, index) => {
+					console.log(chalk.gray(`  ${index + 1}. [${screen.screenID}] ${screen.screenName}`));
+					if (screen.description !== 'N/A') {
+						console.log(chalk.gray(`     ${screen.description}`));
+					}
+				});
+			}
+
+			console.log();
+			console.log(chalk.gray('💡 Tip: Use --screens to see detailed screen information'));
+			console.log(chalk.gray('💡 Tip: Use --all to list all available connector configurations'));
+		}
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Failed to fetch connector configuration');
+		}
+
+		if (error instanceof ValidationError) {
+			logError('Validation error', error);
+		} else if (error instanceof Error) {
+			logError('Error fetching connector configuration', error);
+
+			// Show helpful suggestions
+			console.error(chalk.gray('\nTroubleshooting:'));
+			console.error(chalk.gray('  - Check the connector name spelling (case-insensitive)'));
+			console.error(chalk.gray('  - Use --all to see all available connectors'));
+			console.error(chalk.gray('  - Ensure configuration files are accessible'));
+		}
+
+		throw error;
+	}
+}
+
+/**
  * Create connectors command with all subcommands
  *
  * @returns Configured Commander Command instance
@@ -851,6 +1010,15 @@ export function createConnectorsCommand(): Command {
 		.argument('[id]', 'Connector ID (will prompt if not provided)')
 		.option('-p, --project <id>', 'Filter connector list by project (for interactive prompt)')
 		.action(testCommand);
+
+	// Config command
+	connectors
+		.command('config')
+		.description('Get connector configuration details (screens, workflow, category)')
+		.argument('[subtype]', 'Connector subtype (e.g., "Postgres", "MySQL", "Snowflake")')
+		.option('--screens', 'Include detailed screen information')
+		.option('--all', 'List all available connector configurations')
+		.action(configCommand);
 
 	return connectors;
 }
