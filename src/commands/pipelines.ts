@@ -42,6 +42,7 @@ import { ValidationError, ApiError } from '../utils/errors.ts';
 import { parseFields, formatSingleObject } from '../utils/command-helpers.ts';
 import { createPipelineWizardCommand } from './pipelines-wizard.ts';
 import { createPipelineTemplateCommand } from './pipelines-template.ts';
+import { cloneCommand } from './pipelines-clone.ts';
 import { resolveProjectId } from '../utils/project-id-mapper.ts';
 import { parseBulkIds, fetchBulk, formatBulkResults } from '../utils/bulk-operations.ts';
 import { filterByName } from '../utils/filters.ts';
@@ -1777,6 +1778,18 @@ export function createPipelinesCommand(): Command {
 		.command('validate <configFile>')
 		.description('Validate a pipeline configuration file')
 		.action(validateCommand);
+
+	// Clone command
+	pipelines
+		.command('clone')
+		.description('Clone an existing pipeline with optional modifications')
+		.argument('<pipeline-id>', 'Pipeline ID to clone')
+		.option('--name <name>', 'New pipeline name (default: original + " (Clone)")')
+		.option('--source <id>', 'Override source connector ID')
+		.option('--target <id>', 'Override target connector ID')
+		.option('--schedule <cron>', 'Override schedule (cron expression)')
+		.option('--dry-run', 'Preview changes without creating')
+		.action(cloneCommand);
 
 	return pipelines;
 }

@@ -218,14 +218,23 @@ export interface Pipeline {
 	/** Human-readable pipeline name */
 	pipelineName?: string;
 
-	/** Source connector identifier */
+	/** Source connector identifier (string format) */
 	sourceConnectorId?: string;
 
-	/** Target connector identifier */
+	/** Target connector identifier (string format) */
 	targetConnectorId?: string;
+
+	/** Source connector identifier (numeric format from v2 endpoint) */
+	sourceConnectorID?: number;
+
+	/** Target connector identifier (numeric format from v2 endpoint) */
+	targetConnectorID?: number;
 
 	/** Pipeline configuration object */
 	configuration?: Record<string, unknown>;
+
+	/** Job execution configuration (schedule, cluster, notifications) */
+	jobDetails?: JobDetails;
 
 	/** Pipeline operational status */
 	status?: PipelineStatus;
@@ -233,11 +242,44 @@ export interface Pipeline {
 	/** Whether pipeline is enabled */
 	enabled?: boolean;
 
+	/** Whether pipeline is private to owner (1=private, 0=public) */
+	isPrivate?: number;
+
 	/** ISO timestamp of last run */
 	lastRunDate?: string;
 
-	/** Array of pipeline artifacts */
+	/** Array of pipeline artifacts (table selections and mappings) */
 	artifacts?: PipelineArtifact[];
+
+	/** Legacy array of pipeline items/artifacts */
+	items?: unknown[];
+
+	/** Data ingestion pattern (INCREMENTAL, FULL, etc.) */
+	ingestionPattern?: string;
+
+	/** Whether to preserve source naming conventions */
+	sourceNamingConvention?: boolean;
+
+	/** Whether to create target catalogs if they don't exist */
+	createCatalogs?: boolean;
+
+	/** Target catalog/database name for pipeline output */
+	targetCatalogName?: string;
+
+	/** Target schema name for pipeline output */
+	targetSchemaName?: string;
+
+	/** Source catalog/database name */
+	sourceCatalog?: string;
+
+	/** Source schema name */
+	sourceSchema?: string;
+
+	/** Soft delete flag */
+	deleted?: boolean;
+
+	/** ISO timestamp of creation (alternative field name) */
+	createdDate?: string;
 
 	/** ISO timestamp of creation */
 	createdAt?: string;

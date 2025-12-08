@@ -55,6 +55,7 @@ import {
 } from '../utils/bulk-operations.ts';
 import { invalidateNamespace } from '../utils/cache.ts';
 import { loadContext } from '../utils/context.ts';
+import { inspectCommand } from './connectors-inspect.ts';
 
 /**
  * Prompt user to select a connector from available connectors
@@ -1307,6 +1308,13 @@ export function createConnectorsCommand(): Command {
 		.option('--screens', 'Include detailed screen information')
 		.option('--all', 'List all available connector configurations')
 		.action(configCommand);
+
+	// Inspect command
+	connectors
+		.command('inspect')
+		.description('Inspect a connector and show comprehensive information')
+		.argument('<id-or-name>', 'Connector ID or name to inspect')
+		.action(inspectCommand);
 
 	return connectors;
 }
