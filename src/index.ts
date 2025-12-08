@@ -33,6 +33,7 @@ import { createAutomationsCommand } from './commands/automations.ts';
 import { createApiCommand } from './commands/api.ts';
 import { createUpdateCommand } from './commands/update.ts';
 import { createCompletionCommand } from './commands/completion.ts';
+import { createDocsCommand } from './commands/docs.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
@@ -72,6 +73,8 @@ Examples:
   $ databasin api GET /api/health                      # Call any API endpoint
   $ databasin update                                   # Update CLI to latest version
   $ databasin completion install bash                  # Install shell completions
+  $ databasin docs                                     # List all documentation
+  $ databasin docs automations-quickstart              # View specific documentation
 
 Environment Variables:
   DATABASIN_API_URL         Override API base URL
@@ -248,6 +251,9 @@ function registerCommands(program: Command): void {
 
 	// Completion command - Shell completion support
 	program.addCommand(createCompletionCommand());
+
+	// Docs command - GitHub documentation viewer
+	program.addCommand(createDocsCommand());
 }
 
 /**

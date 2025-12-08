@@ -4,6 +4,7 @@ Real-world examples and common workflows for the Databasin CLI.
 
 ## Table of Contents
 
+- [Getting Help](#getting-help)
 - [Authentication Setup](#authentication-setup)
 - [Project Management](#project-management)
 - [Connector Management](#connector-management)
@@ -13,6 +14,31 @@ Real-world examples and common workflows for the Databasin CLI.
 - [Data Export and Integration](#data-export-and-integration)
 - [Scripting and Automation](#scripting-and-automation)
 - [CI/CD Integration](#cicd-integration)
+
+## Getting Help
+
+### View Documentation in Terminal
+
+```bash
+# List all available documentation
+databasin docs
+
+# View specific guides
+databasin docs quickstart
+databasin docs pipelines-guide
+databasin docs automations-quickstart
+databasin docs connectors-guide
+
+# View command-specific help
+databasin --help
+databasin projects --help
+databasin pipelines wizard --help
+```
+
+### Browse GitHub Documentation
+
+All documentation is also available at:
+https://github.com/Databasin-AI/databasin-cli/tree/main/docs
 
 ## Authentication Setup
 

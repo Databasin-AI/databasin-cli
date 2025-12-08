@@ -63,6 +63,12 @@ databasin sql exec <connector-id> "SELECT * FROM users LIMIT 10"
 databasin automations list --project <project-id>
 databasin automations run <automation-id>
 
+# Documentation (fetch from GitHub or local cache)
+databasin docs                                     # List all docs
+databasin docs quickstart                          # View (raw markdown)
+databasin docs quickstart --pretty                 # View with formatting
+databasin docs download                            # Download all for offline
+
 # Generic API Access
 databasin api GET /api/health
 databasin api POST /connectors '{"name": "test", "type": "postgres"}'
@@ -79,6 +85,16 @@ databasin projects list --fields id,name,status
 ```
 
 ## Documentation
+
+**View docs directly in your terminal:**
+```bash
+databasin docs                      # List all available documentation
+databasin docs quickstart           # View raw markdown (good for piping)
+databasin docs quickstart --pretty  # View with rich formatting
+databasin docs download             # Download all for offline use
+```
+
+**Or browse online:**
 
 | Guide | Description |
 |-------|-------------|
