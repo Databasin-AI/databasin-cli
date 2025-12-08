@@ -184,6 +184,7 @@ async function verifyBuild(): Promise<void> {
 	}
 }
 
+
 async function generateMetadata(): Promise<void> {
 	logStep('📝 Generating build metadata...');
 

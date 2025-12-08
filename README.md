@@ -63,11 +63,10 @@ databasin sql exec <connector-id> "SELECT * FROM users LIMIT 10"
 databasin automations list --project <project-id>
 databasin automations run <automation-id>
 
-# Documentation (fetch from GitHub or local cache)
+# Documentation (from GitHub)
 databasin docs                                     # List all docs
 databasin docs quickstart                          # View (raw markdown)
 databasin docs quickstart --pretty                 # View with formatting
-databasin docs download                            # Download all for offline
 
 # Generic API Access
 databasin api GET /api/health

@@ -10,8 +10,6 @@
  * @module client/docs
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import type { CliConfig } from '../types/config.ts';
 import { logger } from '../utils/debug.ts';
 
@@ -167,125 +165,6 @@ export class DocsClient {
 		} catch {
 			return false;
 		}
-	}
-
-	/**
-	 * Get default local docs directory
-	 *
-	 * @returns Path to ~/.databasin/docs
-	 */
-	getDefaultDocsDir(): string {
-		const home = process.env.HOME || process.env.USERPROFILE || '';
-		return path.join(home, '.databasin', 'docs');
-	}
-
-	/**
-	 * Check if local docs cache exists
-	 *
-	 * @param docsDir - Directory to check (defaults to ~/.databasin/docs)
-	 * @returns True if local docs exist
-	 */
-	hasLocalDocs(docsDir?: string): boolean {
-		const dir = docsDir || this.getDefaultDocsDir();
-		try {
-			return fs.existsSync(dir) && fs.readdirSync(dir).some(f => f.endsWith('.md'));
-		} catch {
-			return false;
-		}
-	}
-
-	/**
-	 * List local documentation files
-	 *
-	 * @param docsDir - Directory to read from (defaults to ~/.databasin/docs)
-	 * @returns Array of doc names (without .md extension)
-	 */
-	listLocalDocs(docsDir?: string): string[] {
-		const dir = docsDir || this.getDefaultDocsDir();
-		try {
-			return fs.readdirSync(dir)
-				.filter(f => f.endsWith('.md'))
-				.map(f => f.replace(/\.md$/, ''))
-				.sort();
-		} catch {
-			return [];
-		}
-	}
-
-	/**
-	 * Get documentation from local cache
-	 *
-	 * @param docName - Document name
-	 * @param docsDir - Directory to read from (defaults to ~/.databasin/docs)
-	 * @returns Raw markdown content or null if not found
-	 */
-	getLocalDoc(docName: string, docsDir?: string): string | null {
-		const dir = docsDir || this.getDefaultDocsDir();
-		const fileName = docName.endsWith('.md') ? docName : `${docName}.md`;
-		const filePath = path.join(dir, fileName);
-
-		try {
-			return fs.readFileSync(filePath, 'utf-8');
-		} catch {
-			return null;
-		}
-	}
-
-	/**
-	 * Download all documentation to local directory
-	 *
-	 * @param outputDir - Directory to save docs (defaults to ~/.databasin/docs)
-	 * @returns Number of files downloaded
-	 */
-	async downloadAllDocs(outputDir?: string): Promise<number> {
-		const dir = outputDir || this.getDefaultDocsDir();
-
-		// Ensure directory exists
-		if (!fs.existsSync(dir)) {
-			fs.mkdirSync(dir, { recursive: true });
-		}
-
-		// Get list of all docs
-		const docs = await this.listDocs();
-
-		// Download each doc
-		let count = 0;
-		for (const docName of docs) {
-			try {
-				const content = await this.getDoc(docName);
-				const fileName = `${docName}.md`;
-				const filePath = path.join(dir, fileName);
-				fs.writeFileSync(filePath, content, 'utf-8');
-				count++;
-			} catch (error) {
-				logger.debug(`[Docs] Failed to download ${docName}: ${error}`);
-			}
-		}
-
-		return count;
-	}
-
-	/**
-	 * Get documentation with automatic cache fallback
-	 *
-	 * Tries local cache first, falls back to GitHub if not found.
-	 *
-	 * @param docName - Document name
-	 * @param preferLocal - Whether to prefer local cache (default: true)
-	 * @returns Object with content and source
-	 */
-	async getDocWithCache(docName: string, preferLocal = true): Promise<{ content: string; source: 'local' | 'github' }> {
-		if (preferLocal) {
-			const localContent = this.getLocalDoc(docName);
-			if (localContent !== null) {
-				logger.debug(`[Docs] Using local cache for ${docName}`);
-				return { content: localContent, source: 'local' };
-			}
-		}
-
-		logger.debug(`[Docs] Fetching ${docName} from GitHub`);
-		const content = await this.getDoc(docName);
-		return { content, source: 'github' };
 	}
 }
 

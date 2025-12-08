@@ -1,6 +1,6 @@
 # Documentation Command
 
-View CLI documentation directly in your terminal, with support for offline caching.
+View CLI documentation directly in your terminal. Documentation is fetched from the public GitHub repository.
 
 ## Quick Reference
 
@@ -15,10 +15,6 @@ databasin docs pipelines-guide
 # View with rich formatting (good for reading)
 databasin docs quickstart --pretty
 
-# Download all docs for offline use
-databasin docs download                    # → ~/.databasin/docs
-databasin docs download /path/to/docs      # → custom location
-
 # Pipe output for scripting
 databasin docs quickstart | grep "authentication"
 databasin docs connectors-guide > guide.md
@@ -26,14 +22,11 @@ databasin docs connectors-guide > guide.md
 
 ## How It Works
 
-**Source Priority:**
-1. Local cache (`~/.databasin/docs`) - checked first
-2. GitHub repository - fetched if not in cache
-
-**Download Behavior:**
-- `databasin docs download` always fetches latest from GitHub
-- Overwrites existing local files
-- After downloading, all commands use local cache automatically
+**GitHub Documentation:**
+- All documentation is fetched from the public GitHub repository
+- Requires internet connection
+- Always shows the latest documentation
+- Fast and reliable access to any documentation file
 
 **Output Modes:**
 - **Default (raw markdown)** - Perfect for piping, scripting, saving to files
@@ -57,30 +50,16 @@ databasin docs pipelines-guide --pretty | less -R
 # Search for specific topics
 databasin docs automations-guide | grep -i "schedule"
 
-# Save for offline reference
+# Save for reference
 databasin docs quickstart > ~/quickstart-guide.md
 
 # Extract code examples
 databasin docs pipelines-quickstart | grep -A 10 "```bash"
 ```
 
-### Offline Use
-
-```bash
-# Download once
-databasin docs download
-
-# Now works offline (uses local cache)
-databasin docs quickstart
-databasin docs pipelines-guide --pretty
-
-# Update local cache when online
-databasin docs download
-```
-
 ## Tips
 
 - **Use raw output** (default) for piping and scripting
 - **Use `--pretty`** for comfortable reading in terminal
-- **Download docs** before going offline or for faster access
 - **No authentication required** - works without login
+- **Latest docs** - always shows the most recent documentation from GitHub

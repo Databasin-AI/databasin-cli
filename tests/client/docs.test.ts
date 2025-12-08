@@ -66,49 +66,4 @@ describe('DocsClient', () => {
 			await client.getDoc('this-doc-does-not-exist');
 		}).toThrow();
 	}, 10000);
-
-	test('should get default docs directory', () => {
-		const dir = client.getDefaultDocsDir();
-		expect(dir).toBeTruthy();
-		expect(dir).toContain('.databasin');
-		expect(dir).toContain('docs');
-	});
-
-	test('should download and cache documentation', async () => {
-		const testDir = '/tmp/databasin-docs-test-' + Date.now();
-
-		// Download docs
-		const count = await client.downloadAllDocs(testDir);
-
-		// Verify count
-		expect(count).toBeGreaterThan(0);
-
-		// Verify local docs exist
-		expect(client.hasLocalDocs(testDir)).toBe(true);
-
-		// Verify can list local docs
-		const localDocs = client.listLocalDocs(testDir);
-		expect(localDocs.length).toBe(count);
-
-		// Verify can read from cache
-		const localContent = client.getLocalDoc('quickstart', testDir);
-		expect(localContent).toBeTruthy();
-		expect(localContent).toContain('#');
-
-		// Clean up
-		const fs = require('fs');
-		fs.rmSync(testDir, { recursive: true, force: true });
-	}, 30000);
-
-	test('should use cache with getDocWithCache', async () => {
-		const { content, source } = await client.getDocWithCache('quickstart');
-
-		// Verify we got content
-		expect(content).toBeTruthy();
-		expect(content).toContain('#');
-
-		// Source could be either 'local' or 'github' depending on whether
-		// docs have been downloaded to ~/.databasin/docs
-		expect(['local', 'github']).toContain(source);
-	}, 30000);
 });

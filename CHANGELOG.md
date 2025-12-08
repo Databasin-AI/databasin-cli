@@ -9,11 +9,9 @@ All notable changes to Databasin CLI will be documented in this file.
 ### Added
 
 - **Documentation Command** (`databasin docs`)
-  - List all available documentation files from GitHub repository or local cache
+  - List all available documentation files from GitHub
   - Display documentation content (raw markdown by default, `--pretty` for formatted output)
-  - Download all docs to local cache: `databasin docs download [dir]`
-  - Local cache support for offline access (~/.databasin/docs)
-  - Automatic cache fallback - checks local first, fetches from GitHub if needed
+  - Fetches latest documentation from public GitHub repository
   - Raw markdown output by default (ideal for piping and scripting)
   - Optional `--pretty` flag for rich terminal formatting with:
     - Headers (with colored underlines)
@@ -22,22 +20,21 @@ All notable changes to Databasin CLI will be documented in this file.
     - Bulleted and numbered lists
     - Links and blockquotes
     - Horizontal rules
-  - No authentication required (fetches from public GitHub repo)
+  - No authentication required
   - Color-aware output (respects `--no-color` flag)
   - Examples:
     - `databasin docs` - List all available documentation
     - `databasin docs quickstart` - View raw markdown
     - `databasin docs quickstart --pretty` - View with rich formatting
-    - `databasin docs download` - Cache all docs locally
     - `databasin docs quickstart | grep "auth"` - Pipe for scripting
 
 ### Changed
 
 - **Documentation Updates**
   - Added "Getting Help" section to usage-examples.md
-  - Updated README with docs command examples and download instructions
+  - Updated README with docs command examples
   - Main help text now includes docs command examples
-  - Created comprehensive docs-command.md guide
+  - Created concise docs-command.md guide
 
 ## [0.5.3] - 2025-12-07
 
