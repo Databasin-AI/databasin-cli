@@ -45,6 +45,14 @@ import { promptForProject, promptConfirm, promptInput, promptSelect } from '../u
 import { parseFields, readJsonFile, formatSingleObject } from '../utils/command-helpers.ts';
 import { ApiError, ValidationError } from '../utils/errors.ts';
 import { resolveProjectId } from '../utils/project-id-mapper.ts';
+import { buildFilter, filterByName } from '../utils/filters.ts';
+import {
+	parseBulkIds,
+	fetchBulk,
+	formatBulkResults,
+	handleBulkErrors,
+	deleteBulk
+} from '../utils/bulk-operations.ts';
 
 /**
  * Prompt user to select a connector from available connectors
@@ -226,11 +234,15 @@ async function interactiveUpdateConnector(
 /**
  * List Command
  * Lists connectors with count mode by default for token efficiency
+ * ENHANCED - Feature 1.3: Now supports client-side filtering
  */
 async function listCommand(
 	options: {
 		project?: string;
 		full?: boolean;
+		name?: string;
+		type?: string;
+		status?: string;
 		fields?: string;
 		limit?: number;
 	},
@@ -301,17 +313,35 @@ async function listCommand(
 		}
 
 		// Handle array results
-		const connectors = Array.isArray(result) ? result : [];
+		let connectors = Array.isArray(result) ? result : [];
+		const totalFetched = connectors.length;
+
+		// Apply client-side filters if specified (Feature 1.3)
+		// TODO: migrate to API - server-side filtering would be more efficient
+		if (options.name || options.type || options.status) {
+			const filter = buildFilter({
+				name: options.name,
+				type: options.type,
+				status: options.status
+			});
+			connectors = filter(connectors) as Connector[];
+		}
 
 		// Succeed spinner with count
 		if (spinner) {
 			if (connectors.length === 0) {
-				succeedSpinner(spinner, 'No connectors found');
+				const msg = totalFetched > 0 && totalFetched !== connectors.length
+					? `No connectors match the filter criteria (searched ${totalFetched} connectors)`
+					: 'No connectors found';
+				succeedSpinner(spinner, msg);
 				return;
 			}
+			const suffix = totalFetched !== connectors.length
+				? ` (${connectors.length} match filters of ${totalFetched} total)`
+				: '';
 			succeedSpinner(
 				spinner,
-				`Fetched ${connectors.length} connector${connectors.length === 1 ? '' : 's'}`
+				`Fetched ${connectors.length} connector${connectors.length === 1 ? '' : 's'}${suffix}`
 			);
 		}
 
@@ -349,12 +379,14 @@ async function listCommand(
 /**
  * Get Command
  * Get detailed information about a specific connector
+ * ENHANCED - Phase 2A: Supports bulk IDs and name-based lookup
  */
 async function getCommand(
 	id: string | undefined,
 	options: {
 		fields?: string;
 		project?: string;
+		name?: string;
 	},
 	command: Command
 ): Promise<void> {
@@ -375,6 +407,98 @@ async function getCommand(
 		// Determine output format
 		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
 		const format = detectFormat(cliFormat, config.output.format);
+
+		// Handle name-based lookup (Phase 2A - Feature 1.6)
+		if (options.name) {
+			// Name-based lookup requires listing all connectors
+			if (format === 'table') {
+				spinner = startSpinner('Searching for connectors by name...');
+			}
+
+			const allConnectors = (await client.list(projectId, {
+				count: false,
+				fields: options.fields
+			})) as Connector[];
+
+			if (!Array.isArray(allConnectors)) {
+				throw new ValidationError('Failed to fetch connectors for name lookup');
+			}
+
+			// Filter by name (case-insensitive partial match)
+			const filtered = filterByName(allConnectors, options.name);
+
+			if (spinner) {
+				succeedSpinner(spinner, `Found ${filtered.length} connector(s) matching "${options.name}"`);
+			}
+
+			if (filtered.length === 0) {
+				throw new ValidationError(`No connector found with name matching "${options.name}"`);
+			}
+
+			// Parse fields option
+			const fields = parseFields(options.fields);
+
+			// Format and display results
+			const output = formatOutput(filtered, format, {
+				fields,
+				colors: config.output.colors
+			});
+
+			console.log();
+			console.log(output);
+
+			if (filtered.length > 1 && format === 'table') {
+				console.log();
+				logInfo(`Found ${filtered.length} connectors matching "${options.name}". Showing all matches.`);
+			}
+
+			return;
+		}
+
+		// Handle bulk IDs (Phase 2A - Feature 1.5)
+		if (id) {
+			const idList = parseBulkIds(id);
+
+			if (idList.length > 1) {
+				// Bulk operation - fetch multiple connectors
+				const results = await fetchBulk(
+					idList,
+					(connectorId) => client.getById(connectorId),
+					{
+						operation: 'Fetching connectors',
+						showProgress: format === 'table'
+					}
+				);
+
+				// Extract successful data
+				const connectors = results.filter((r) => r.success).map((r) => r.data);
+
+				// Show errors if any
+				const failed = results.filter((r) => !r.success);
+				if (failed.length > 0) {
+					console.error();
+					console.error(chalk.yellow(formatBulkResults(results, 'connector')));
+					console.error();
+				}
+
+				// Parse fields option
+				const fields = parseFields(options.fields);
+
+				// Format output
+				const output = formatOutput(connectors, format, {
+					fields,
+					colors: config.output.colors
+				});
+
+				console.log();
+				console.log(output);
+
+				return;
+			}
+
+			// Single ID - continue with existing behavior
+			id = idList[0];
+		}
 
 		// Prompt for connector ID if not provided
 		let connectorId = id;
@@ -951,6 +1075,128 @@ async function configCommand(
 }
 
 /**
+ * Search Command
+ * Search connectors by name, type, or other criteria
+ *
+ * // TODO: migrate to API - server-side search would be more efficient
+ */
+async function searchCommand(
+	query: string | undefined,
+	options: {
+		project?: string;
+		name?: string;
+		namePattern?: string;
+		type?: string;
+		status?: string;
+		ignoreCase?: boolean;
+		fields?: string;
+		limit?: number;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const client: ConnectorsClient = opts._clients.connectors;
+	const projectsClient: ProjectsClient = opts._clients.projects;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Resolve project ID if provided
+		let projectId = options.project;
+		if (projectId) {
+			projectId = await resolveProjectId(projectId, projectsClient);
+		}
+
+		// Determine output format
+		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
+		const format = detectFormat(cliFormat, config.output.format);
+
+		// Start spinner
+		if (format === 'table') {
+			spinner = startSpinner('Searching connectors...');
+		}
+
+		// Fetch all connectors (client-side filtering)
+		const allConnectors = (await client.list(projectId, {
+			count: false,
+			limit: options.limit
+		})) as Connector[];
+
+		if (!Array.isArray(allConnectors) || allConnectors.length === 0) {
+			if (spinner) {
+				succeedSpinner(spinner, 'No connectors found');
+			}
+			logInfo('No connectors available to search');
+			return;
+		}
+
+		// Build filter function
+		const filter = buildFilter({
+			name: query || options.name,
+			namePattern: options.namePattern,
+			type: options.type,
+			status: options.status,
+			project: projectId,
+			ignoreCase: options.ignoreCase !== false // Default true
+		});
+
+		// Apply filters
+		const filtered = filter(allConnectors);
+
+		// Update spinner with results
+		if (spinner) {
+			if (filtered.length === 0) {
+				succeedSpinner(
+					spinner,
+					`No connectors found matching search criteria (searched ${allConnectors.length} connectors)`
+				);
+				console.log();
+				logInfo('Try broadening your search criteria');
+				return;
+			}
+			succeedSpinner(
+				spinner,
+				`Found ${filtered.length} connector${filtered.length === 1 ? '' : 's'} (of ${allConnectors.length} total)`
+			);
+		}
+
+		// Parse fields option
+		const fields = parseFields(options.fields);
+
+		// Format output
+		const output = formatOutput(filtered, format, {
+			fields,
+			colors: config.output.colors
+		});
+
+		console.log();
+		console.log(output);
+
+		// Show search summary for table format
+		if (format === 'table' && filtered.length < allConnectors.length) {
+			console.log();
+			logInfo(`Showing ${filtered.length} of ${allConnectors.length} total connectors`);
+			if (query || options.name) {
+				logInfo(`Searched for: "${query || options.name}"`);
+			}
+			if (options.type) {
+				logInfo(`Filtered by type: ${options.type}`);
+			}
+			if (options.status) {
+				logInfo(`Filtered by status: ${options.status}`);
+			}
+		}
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Search failed');
+		}
+		logError('Error searching connectors', error instanceof Error ? error : undefined);
+		throw error;
+	}
+}
+
+/**
  * Create connectors command with all subcommands
  *
  * @returns Configured Commander Command instance
@@ -958,12 +1204,30 @@ async function configCommand(
 export function createConnectorsCommand(): Command {
 	const connectors = new Command('connectors').description('Manage data connectors');
 
-	// List command
+	// Search command (NEW - Feature 1.1)
+	connectors
+		.command('search')
+		.description('Search connectors by name, type, or other criteria')
+		.argument('[query]', 'Search query (searches connector name)')
+		.option('-p, --project <id>', 'Filter by project ID')
+		.option('--name <pattern>', 'Filter by name (substring match)')
+		.option('--name-pattern <regex>', 'Filter by name (regex pattern)')
+		.option('--type <type>', 'Filter by connector type')
+		.option('--status <status>', 'Filter by status')
+		.option('--case-sensitive', 'Case-sensitive search')
+		.option('--fields <fields>', 'Comma-separated list of fields to display')
+		.option('--limit <number>', 'Limit number of connectors to search', parseInt)
+		.action(searchCommand);
+
+	// List command (ENHANCED - Feature 1.3: now supports filters)
 	connectors
 		.command('list')
 		.description('List connectors (count mode by default for efficiency)')
 		.option('-p, --project <id>', 'Filter by project ID')
 		.option('--full', 'Fetch full connector objects (may return large response)')
+		.option('--name <pattern>', 'Filter by name (substring match, only with --full)')
+		.option('--type <type>', 'Filter by connector type (only with --full)')
+		.option('--status <status>', 'Filter by status (only with --full)')
 		.option('--fields <fields>', 'Comma-separated list of fields (only with --full)')
 		.option('--limit <number>', 'Limit number of results (only with --full)', parseInt)
 		.action(listCommand);
@@ -971,10 +1235,11 @@ export function createConnectorsCommand(): Command {
 	// Get command
 	connectors
 		.command('get')
-		.description('Get connector details')
-		.argument('[id]', 'Connector ID (will prompt if not provided)')
+		.description('Get connector details (supports bulk IDs: 123,456,789)')
+		.argument('[id]', 'Connector ID or comma-separated IDs (will prompt if not provided)')
+		.option('--name <pattern>', 'Get connector by name (case-insensitive partial match)')
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
-		.option('-p, --project <id>', 'Filter connector list by project (for interactive prompt)')
+		.option('-p, --project <id>', 'Filter connector list by project (for interactive prompt or name search)')
 		.action(getCommand);
 
 	// Create command

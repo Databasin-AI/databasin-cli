@@ -21,6 +21,7 @@ import { loadConfig } from '../config.ts';
 import { ApiError, NetworkError, createApiErrorSync } from '../utils/errors.ts';
 import type { CliConfig } from '../types/config.ts';
 import { logger } from '../utils/debug.ts';
+import { getCache, setCache } from '../utils/cache.ts';
 
 /**
  * Request options for API calls
@@ -52,6 +53,15 @@ export interface RequestOptions {
 
 	/** Internal flag: is this a retry attempt after 401? (prevents infinite retry loops) */
 	_isRetry?: boolean;
+
+	/** Enable caching for this request (default: false) */
+	cache?: boolean;
+
+	/** Cache TTL in seconds (default: 300 = 5 minutes) */
+	cacheTtl?: number;
+
+	/** Custom cache key (optional - auto-generated if not provided) */
+	cacheKey?: string;
 }
 
 /**
@@ -279,12 +289,31 @@ export class DatabasinClient {
 		const retries = options.retries ?? 0;
 		const retryDelay = options.retryDelay ?? 1000;
 
+		// Cache options
+		const cache = options.cache ?? false;
+		const cacheTtl = options.cacheTtl ?? 300;
+		const cacheKey = options.cacheKey || this.generateCacheKey(method, endpoint, options);
+
 		const startTime = Date.now();
 
 		// Debug logging
 		const debug = options.debug ?? this.config.debug;
 		if (debug) {
 			this.logRequest(method, url, body);
+		}
+
+		// Check cache if enabled (only for GET requests)
+		if (cache && method === 'GET') {
+			const cached = getCache<T>(cacheKey, { ttl: cacheTtl, namespace: 'api' });
+			if (cached !== null) {
+				if (debug) {
+					logger.debug(`[CACHE HIT] ${cacheKey}`);
+				}
+				return cached;
+			}
+			if (debug) {
+				logger.debug(`[CACHE MISS] ${cacheKey}`);
+			}
 		}
 
 		// Retry loop for network failures
@@ -357,6 +386,14 @@ export class DatabasinClient {
 					logger.debug(`[API] Array length: ${data.length}`);
 					if (data.length > 0) {
 						logger.debug(`[API] First element: ${JSON.stringify(data[0]).substring(0, 200)}`);
+					}
+				}
+
+				// Store in cache if enabled (only for GET requests)
+				if (cache && method === 'GET') {
+					setCache(cacheKey, data as T, { ttl: cacheTtl, namespace: 'api' });
+					if (debug) {
+						logger.debug(`[CACHE STORED] ${cacheKey} (TTL: ${cacheTtl}s)`);
 					}
 				}
 
@@ -639,6 +676,45 @@ export class DatabasinClient {
 	 */
 	clearToken(): void {
 		this.token = null;
+	}
+
+	/**
+	 * Generate cache key from request parameters
+	 *
+	 * Creates a deterministic cache key from HTTP method, endpoint, and options.
+	 * Uses simple hash for compact keys.
+	 *
+	 * @param method - HTTP method
+	 * @param endpoint - API endpoint
+	 * @param options - Request options
+	 * @returns Cache key string
+	 * @private
+	 */
+	private generateCacheKey(method: string, endpoint: string, options: any): string {
+		// Create deterministic key from method, endpoint, and options
+		const optionsStr = JSON.stringify(options, Object.keys(options).sort());
+		const hash = this.hashString(optionsStr);
+		return `${method}:${endpoint}:${hash}`;
+	}
+
+	/**
+	 * Simple string hash function
+	 *
+	 * Creates a compact hash for cache keys. Not cryptographically secure,
+	 * but sufficient for cache key uniqueness.
+	 *
+	 * @param str - String to hash
+	 * @returns Hash string in base36
+	 * @private
+	 */
+	private hashString(str: string): string {
+		let hash = 0;
+		for (let i = 0; i < str.length; i++) {
+			const char = str.charCodeAt(i);
+			hash = ((hash << 5) - hash) + char;
+			hash = hash & hash; // Convert to 32-bit integer
+		}
+		return Math.abs(hash).toString(36);
 	}
 }
 

@@ -69,39 +69,112 @@ export class ApiError extends CliError {
 		super(message, 1);
 		this.name = 'ApiError';
 
-		// Add helpful suggestions based on status code
-		this.suggestion = ApiError.getSuggestion(statusCode);
+		// Add helpful suggestions based on status code and endpoint
+		this.suggestion = ApiError.getSuggestion(statusCode, endpoint);
 	}
 
 	/** Additional error details from response body */
 	public details?: unknown;
 
 	/**
-	 * Get helpful suggestion based on HTTP status code
+	 * Suggestion rule for matching status codes and endpoints to helpful messages
+	 */
+	private static readonly SUGGESTION_RULES: Array<{
+		statusCode: number;
+		endpointPattern?: RegExp;
+		suggestion: string;
+	}> = [
+		// 404 errors with endpoint-specific guidance
+		{
+			statusCode: 404,
+			endpointPattern: /\/api\/connectors\//,
+			suggestion: "Connector not found. Run 'databasin connectors list --full' to see available connectors."
+		},
+		{
+			statusCode: 404,
+			endpointPattern: /\/api\/pipelines\//,
+			suggestion: "Pipeline not found. Run 'databasin pipelines list --project <id>' to see available pipelines."
+		},
+		{
+			statusCode: 404,
+			endpointPattern: /\/api\/projects\//,
+			suggestion: "Project not found. Run 'databasin projects list' to see available projects."
+		},
+		{
+			statusCode: 404,
+			endpointPattern: /\/api\/automations\//,
+			suggestion: "Automation not found. Run 'databasin automations list --project <id>' to see available automations."
+		},
+		// 403 errors with endpoint-specific guidance
+		{
+			statusCode: 403,
+			endpointPattern: /\/api\/projects\//,
+			suggestion: "Access denied to this project. Check that you're a member of the project."
+		},
+		{
+			statusCode: 403,
+			endpointPattern: /\/api\/connectors\//,
+			suggestion: "Access denied to this connector. Verify you have permission for this project's connectors."
+		},
+		{
+			statusCode: 403,
+			endpointPattern: /\/api\/pipelines\//,
+			suggestion: "Access denied to this pipeline. Verify you have permission for this project's pipelines."
+		},
+		// 400 errors with endpoint-specific guidance
+		{
+			statusCode: 400,
+			endpointPattern: /\/api\/pipelines(?!\/)/, // Matches /api/pipelines but not /api/pipelines/
+			suggestion: 'Invalid pipeline configuration. Check that all required fields are present and properly formatted.'
+		},
+		{
+			statusCode: 400,
+			endpointPattern: /\/api\/connectors(?!\/)/,
+			suggestion: 'Invalid connector configuration. Check that all required fields are present and properly formatted.'
+		},
+		// Generic status code suggestions
+		{ statusCode: 400, suggestion: 'Check your request parameters and payload syntax. Verify required fields are present.' },
+		{ statusCode: 401, suggestion: 'Your authentication token may be invalid or expired. Run: databasin auth verify' },
+		{ statusCode: 403, suggestion: 'You do not have permission to access this resource. Check your project access rights.' },
+		{ statusCode: 404, suggestion: 'The requested resource was not found. Verify the ID and try again.' },
+		{ statusCode: 409, suggestion: 'Conflict with existing resource. This name or identifier may already be in use.' },
+		{ statusCode: 422, suggestion: 'Validation failed. Check that all fields meet the required format and constraints.' },
+		{ statusCode: 429, suggestion: 'Rate limit exceeded. Please wait a moment before retrying.' },
+		{ statusCode: 500, suggestion: 'The Databasin API is experiencing issues. Please try again later.' },
+		{ statusCode: 502, suggestion: 'The Databasin API is experiencing issues. Please try again later.' },
+		{ statusCode: 503, suggestion: 'The Databasin API is experiencing issues. Please try again later.' },
+		{ statusCode: 504, suggestion: 'The Databasin API is experiencing issues. Please try again later.' }
+	];
+
+	/**
+	 * Get helpful suggestion based on HTTP status code and endpoint
+	 *
+	 * Provides context-specific suggestions based on both the error code
+	 * and the endpoint that was called. Uses a lookup table for maintainability.
 	 *
 	 * @param statusCode - HTTP status code
+	 * @param endpoint - Optional API endpoint that was called
 	 * @returns Helpful suggestion for the user
 	 */
-	static getSuggestion(statusCode: number): string {
-		switch (statusCode) {
-			case 400:
-				return 'Check your request parameters and payload syntax. Verify required fields are present.';
-			case 401:
-				return 'Your authentication token may be invalid or expired. Run: databasin auth verify';
-			case 403:
-				return 'You do not have permission to access this resource. Check your project access rights.';
-			case 404:
-				return 'The requested resource was not found. Verify the ID and try again.';
-			case 429:
-				return 'Rate limit exceeded. Please wait a moment before retrying.';
-			case 500:
-			case 502:
-			case 503:
-			case 504:
-				return 'The Databasin API is experiencing issues. Please try again later.';
-			default:
-				return 'Check the error message above for details.';
-		}
+	static getSuggestion(statusCode: number, endpoint?: string): string {
+		// Find the first matching rule
+		const rule = ApiError.SUGGESTION_RULES.find((r) => {
+			// Status code must match
+			if (r.statusCode !== statusCode) {
+				return false;
+			}
+
+			// If rule has endpoint pattern, endpoint must match
+			if (r.endpointPattern && endpoint) {
+				return r.endpointPattern.test(endpoint);
+			}
+
+			// If rule has no endpoint pattern, it's a generic rule
+			// Only match if we haven't found an endpoint-specific rule
+			return !r.endpointPattern;
+		});
+
+		return rule?.suggestion || 'Check the error message above for details.';
 	}
 
 	/**
@@ -140,26 +213,73 @@ export class AuthError extends CliError {
  * Validation Error - invalid input or configuration
  *
  * Thrown when user input fails validation or contains invalid data.
+ * Enhanced with detailed field-level validation messages and examples.
  */
 export class ValidationError extends CliError {
+	/**
+	 * Detailed validation error messages for specific fields
+	 */
+	public details?: Record<string, string>;
+
 	/**
 	 * Creates a new validation error
 	 *
 	 * @param message - Error message
 	 * @param field - Optional field name that failed validation
-	 * @param errors - Optional array of specific validation errors
+	 * @param errors - Optional array of specific validation errors (suggestions or bullet points)
+	 * @param examples - Optional array of usage examples showing correct format
 	 */
 	constructor(
 		message: string,
 		public field?: string,
-		public errors?: string[]
+		public errors?: string[],
+		public examples?: string[]
 	) {
 		super(message, 1);
 		this.name = 'ValidationError';
 
-		if (errors && errors.length > 0) {
-			this.suggestion = 'Fix the following validation errors:\n  - ' + errors.join('\n  - ');
+		// Build suggestion from errors and examples
+		this.buildSuggestion();
+	}
+
+	/**
+	 * Build comprehensive suggestion from errors and examples
+	 * @private
+	 */
+	private buildSuggestion(): void {
+		const parts: string[] = [];
+
+		if (this.errors && this.errors.length > 0) {
+			if (this.errors.length === 1) {
+				parts.push(this.errors[0]);
+			} else {
+				parts.push('Fix the following validation errors:');
+				parts.push('  - ' + this.errors.join('\n  - '));
+			}
 		}
+
+		if (this.examples && this.examples.length > 0) {
+			if (parts.length > 0) {
+				parts.push('');
+			}
+			parts.push('Examples:');
+			for (const example of this.examples) {
+				parts.push(`  $ ${example}`);
+			}
+		}
+
+		if (parts.length > 0) {
+			this.suggestion = parts.join('\n');
+		}
+	}
+
+	/**
+	 * Set field-specific validation details
+	 *
+	 * @param details - Record of field names to error messages
+	 */
+	setDetails(details: Record<string, string>): void {
+		this.details = details;
 	}
 
 	/**
@@ -169,13 +289,93 @@ export class ValidationError extends CliError {
 	 */
 	toString(): string {
 		let output = `Validation Error: ${this.message}`;
+
 		if (this.field) {
 			output += ` (field: ${this.field})`;
 		}
+
+		// Show field-specific details if available
+		if (this.details && Object.keys(this.details).length > 0) {
+			output += '\n\nValidation errors:';
+			for (const [field, error] of Object.entries(this.details)) {
+				output += `\n  - ${field}: ${error}`;
+			}
+		}
+
 		if (this.suggestion) {
 			output += `\n\n${this.suggestion}`;
 		}
+
 		return output;
+	}
+}
+
+/**
+ * Missing Argument Error - required CLI argument not provided
+ *
+ * Thrown when a required command argument or option is missing.
+ * Provides contextual help showing available values.
+ */
+export class MissingArgumentError extends CliError {
+	/**
+	 * Creates a new missing argument error
+	 *
+	 * @param argumentName - Name of the missing argument (e.g., "--project", "<id>")
+	 * @param commandName - Name of the command where argument is missing
+	 * @param availableValues - Optional list of available values for the argument
+	 * @param examples - Optional usage examples
+	 */
+	constructor(
+		public argumentName: string,
+		public commandName: string,
+		public availableValues?: Array<{ id: string; name?: string }>,
+		public examples?: string[]
+	) {
+		super(`Missing required argument: ${argumentName}`, 1);
+		this.name = 'MissingArgumentError';
+
+		// Build helpful suggestion
+		this.buildSuggestion();
+	}
+
+	/**
+	 * Build comprehensive suggestion from available values and examples
+	 * @private
+	 */
+	private buildSuggestion(): void {
+		const parts: string[] = [];
+
+		// Show command usage
+		parts.push(`Usage: databasin ${this.commandName} ${this.argumentName} [options]`);
+
+		// Show available values if provided
+		if (this.availableValues && this.availableValues.length > 0) {
+			parts.push('');
+			parts.push('Available values:');
+			const maxShow = 10;
+			const values = this.availableValues.slice(0, maxShow);
+			for (const value of values) {
+				if (value.name) {
+					parts.push(`  - ${value.id} (${value.name})`);
+				} else {
+					parts.push(`  - ${value.id}`);
+				}
+			}
+			if (this.availableValues.length > maxShow) {
+				parts.push(`  ... and ${this.availableValues.length - maxShow} more`);
+			}
+		}
+
+		// Show examples
+		if (this.examples && this.examples.length > 0) {
+			parts.push('');
+			parts.push('Examples:');
+			for (const example of this.examples) {
+				parts.push(`  $ ${example}`);
+			}
+		}
+
+		this.suggestion = parts.join('\n');
 	}
 }
 

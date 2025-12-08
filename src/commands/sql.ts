@@ -32,9 +32,10 @@ import {
 	formatDuration,
 	type Ora
 } from '../utils/progress.ts';
-import { ApiError, FileSystemError, formatError } from '../utils/errors.ts';
+import { ApiError, FileSystemError, formatError, MissingArgumentError } from '../utils/errors.ts';
 import { parseFields } from '../utils/command-helpers.ts';
 import { promptForTables } from '../utils/prompts.ts';
+import { loadContext } from '../utils/context.ts';
 import CliTable from 'cli-table3';
 import chalk from 'chalk';
 
@@ -834,6 +835,211 @@ async function execCommand(
 }
 
 /**
+ * Database structure for discover output
+ */
+interface DatabaseStructure {
+	catalogs: Array<{
+		name: string;
+		schemas: Array<{
+			name: string;
+			tables: Array<{
+				name: string;
+				metadata?: {
+					rowCount: number | null;
+					columns: number | null;
+				};
+			}>;
+		}>;
+	}>;
+}
+
+/**
+ * Discover database structure
+ *
+ * Recursively fetches catalogs, schemas, and tables with optional filtering.
+ *
+ * @param client - SQL client instance
+ * @param connectorId - Connector ID
+ * @param options - Discovery options
+ * @returns Database structure
+ */
+async function discoverDatabaseStructure(
+	client: SqlClient,
+	connectorId: string,
+	options: {
+		catalog?: string;
+		schema?: string;
+		tablePattern?: string;
+		maxDepth?: string;
+		metadata?: boolean;
+	}
+): Promise<DatabaseStructure> {
+	const maxDepth = parseInt(options.maxDepth || '3', 10);
+	const result: DatabaseStructure = { catalogs: [] };
+
+	// 1. Fetch catalogs
+	const catalogsResponse = await client.getCatalogs(connectorId);
+	const catalogsList = catalogsResponse.objects || [];
+	const catalogs = Array.isArray(catalogsList) ? catalogsList : [catalogsList];
+
+	for (const catalogItem of catalogs) {
+		const catalogName = typeof catalogItem === 'string' ? catalogItem : (catalogItem as any).name;
+
+		// Apply catalog filter
+		if (options.catalog && catalogName !== options.catalog) continue;
+
+		const catalogNode: DatabaseStructure['catalogs'][0] = {
+			name: catalogName,
+			schemas: []
+		};
+
+		if (maxDepth >= 2) {
+			// 2. Fetch schemas
+			const schemasResponse = await client.getSchemas(connectorId, catalogName);
+			const schemasList = schemasResponse.objects || [];
+			const schemas = Array.isArray(schemasList) ? schemasList : [schemasList];
+
+			for (const schemaItem of schemas) {
+				const schemaName = typeof schemaItem === 'string' ? schemaItem : (schemaItem as any).name;
+
+				// Apply schema filter
+				if (options.schema && schemaName !== options.schema) continue;
+
+				const schemaNode: DatabaseStructure['catalogs'][0]['schemas'][0] = {
+					name: schemaName,
+					tables: []
+				};
+
+				if (maxDepth >= 3) {
+					// 3. Fetch tables
+					const tablesList = await client.listTables(connectorId, catalogName, schemaName);
+					const tables = Array.isArray(tablesList) ? tablesList : [tablesList];
+
+					for (const tableItem of tables) {
+						const tableName = typeof tableItem === 'string' ? tableItem : (tableItem as any).name;
+
+						// Apply table pattern filter
+						if (options.tablePattern) {
+							const regex = new RegExp(options.tablePattern, 'i');
+							if (!regex.test(tableName)) continue;
+						}
+
+						const tableNode: DatabaseStructure['catalogs'][0]['schemas'][0]['tables'][0] = {
+							name: tableName
+						};
+
+						// Optionally fetch metadata
+						if (options.metadata) {
+							// TODO: Add metadata fetching if API supports it
+							tableNode.metadata = { rowCount: null, columns: null };
+						}
+
+						schemaNode.tables.push(tableNode);
+					}
+				}
+
+				if (schemaNode.tables.length > 0 || maxDepth < 3) {
+					catalogNode.schemas.push(schemaNode);
+				}
+			}
+		}
+
+		if (catalogNode.schemas.length > 0 || maxDepth < 2) {
+			result.catalogs.push(catalogNode);
+		}
+	}
+
+	return result;
+}
+
+/**
+ * Discover Command
+ * Discovers and displays database structure (catalogs, schemas, tables)
+ */
+async function discoverCommand(
+	connectorId: string | undefined,
+	options: {
+		catalog?: string;
+		schema?: string;
+		tablePattern?: string;
+		maxDepth?: string;
+		metadata?: boolean;
+	},
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const client: SqlClient = opts._clients.sql;
+
+	// Get connector from arg or context
+	if (!connectorId) {
+		const context = loadContext();
+		connectorId = context.connector;
+	}
+
+	if (!connectorId) {
+		throw new MissingArgumentError('connectorId', 'sql discover', undefined, [
+			'databasin sql discover 5459',
+			'databasin use connector 5459 && databasin sql discover'
+		]);
+	}
+
+	const spinner = startSpinner('Discovering database structure...');
+
+	try {
+		// Fetch hierarchy
+		const structure = await discoverDatabaseStructure(client, connectorId, options);
+
+		succeedSpinner(spinner, 'Discovery complete');
+
+		// Output format
+		const format = detectFormat(config.output.format);
+
+		if (format === 'json') {
+			console.log(formatOutput(structure, format));
+		} else {
+			// Tree-like output for table format
+			console.log(chalk.bold('\nDatabase Structure:\n'));
+
+			for (const catalog of structure.catalogs) {
+				console.log(chalk.cyan(`📁 ${catalog.name}`));
+
+				for (const schema of catalog.schemas) {
+					console.log(`  ${chalk.yellow(`📁 ${schema.name}`)}`);
+
+					for (const table of schema.tables) {
+						console.log(`    ${chalk.green(`📄 ${table.name}`)}`);
+						if (table.metadata) {
+							if (table.metadata.rowCount !== null) {
+								console.log(`      ${chalk.dim(`Rows: ${table.metadata.rowCount}`)}`);
+							}
+							if (table.metadata.columns !== null) {
+								console.log(`      ${chalk.dim(`Columns: ${table.metadata.columns}`)}`);
+							}
+						}
+					}
+
+					if (schema.tables.length === 0) {
+						console.log(`    ${chalk.dim('(no tables)')}`);
+					}
+				}
+
+				if (catalog.schemas.length === 0) {
+					console.log(`  ${chalk.dim('(no schemas)')}`);
+				}
+			}
+
+			if (structure.catalogs.length === 0) {
+				console.log(chalk.yellow('No catalogs found'));
+			}
+		}
+	} catch (error) {
+		failSpinner(spinner, 'Discovery failed');
+		throw error;
+	}
+}
+
+/**
  * Create SQL command with all subcommands
  *
  * @returns Configured SQL command
@@ -903,6 +1109,17 @@ export function createSqlCommand(): Command {
 		.option('--interactive', 'Interactively select tables')
 		.option('-o, --output <format>', 'Output format (table|json|csv)', 'table')
 		.action(ingestionTypesCommand);
+
+	// Discover command (Phase 2B)
+	sql
+		.command('discover [connector-id]')
+		.description('Discover database structure (catalogs, schemas, tables)')
+		.option('--catalog <catalog>', 'Filter to specific catalog')
+		.option('--schema <schema>', 'Filter to specific schema')
+		.option('--table-pattern <pattern>', 'Filter tables by pattern (regex)')
+		.option('--max-depth <depth>', 'Maximum depth (1=catalogs, 2=schemas, 3=tables)', '3')
+		.option('--metadata', 'Include table metadata (row counts, columns)')
+		.action(discoverCommand);
 
 	return sql;
 }

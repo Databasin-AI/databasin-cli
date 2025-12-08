@@ -43,6 +43,9 @@ import { parseFields, formatSingleObject } from '../utils/command-helpers.ts';
 import { createPipelineWizardCommand } from './pipelines-wizard.ts';
 import { createPipelineTemplateCommand } from './pipelines-template.ts';
 import { resolveProjectId } from '../utils/project-id-mapper.ts';
+import { parseBulkIds, fetchBulk, formatBulkResults } from '../utils/bulk-operations.ts';
+import { filterByName } from '../utils/filters.ts';
+import { validatePipelineConfig, type PipelineConfig } from '../utils/pipeline-validator.ts';
 
 /**
  * Prompt user to select a pipeline from a list
@@ -234,12 +237,14 @@ async function listCommand(
 /**
  * Get Command
  * Get detailed information about a specific pipeline
+ * ENHANCED - Phase 2A: Supports bulk IDs and name-based lookup
  */
 async function getCommand(
 	id: string | undefined,
 	options: {
 		project?: string;
 		fields?: string;
+		name?: string;
 	},
 	command: Command
 ): Promise<void> {
@@ -254,6 +259,103 @@ async function getCommand(
 		// Determine output format
 		const cliFormat = opts.json ? 'json' : opts.csv ? 'csv' : undefined;
 		const format = detectFormat(cliFormat, config.output.format);
+
+		// Handle name-based lookup (Phase 2A - Feature 1.6)
+		if (options.name) {
+			// Name-based lookup requires listing all pipelines
+			let projectId = options.project;
+			if (!projectId) {
+				projectId = await promptForProject(projectsClient, 'Select a project for pipeline search');
+			} else {
+				// Resolve project ID
+				projectId = await resolveProjectId(projectId, projectsClient);
+			}
+
+			if (format === 'table') {
+				spinner = startSpinner('Searching for pipelines by name...');
+			}
+
+			const allPipelines = (await pipelinesClient.list(projectId)) as Pipeline[];
+
+			if (!Array.isArray(allPipelines)) {
+				throw new ValidationError('Failed to fetch pipelines for name lookup');
+			}
+
+			// Filter by name (case-insensitive partial match)
+			const filtered = filterByName(allPipelines, options.name);
+
+			if (spinner) {
+				succeedSpinner(spinner, `Found ${filtered.length} pipeline(s) matching "${options.name}"`);
+			}
+
+			if (filtered.length === 0) {
+				throw new ValidationError(`No pipeline found with name matching "${options.name}"`);
+			}
+
+			// Parse fields option
+			const fields = parseFields(options.fields);
+
+			// Format and display results
+			const output = formatOutput(filtered, format, {
+				fields,
+				colors: config.output.colors
+			});
+
+			console.log();
+			console.log(output);
+
+			if (filtered.length > 1 && format === 'table') {
+				console.log();
+				logInfo(`Found ${filtered.length} pipelines matching "${options.name}". Showing all matches.`);
+			}
+
+			return;
+		}
+
+		// Handle bulk IDs (Phase 2A - Feature 1.5)
+		if (id) {
+			const idList = parseBulkIds(id);
+
+			if (idList.length > 1) {
+				// Bulk operation - fetch multiple pipelines
+				const results = await fetchBulk(
+					idList,
+					(pipelineId) => pipelinesClient.getById(pipelineId),
+					{
+						operation: 'Fetching pipelines',
+						showProgress: format === 'table'
+					}
+				);
+
+				// Extract successful data
+				const pipelines = results.filter((r) => r.success).map((r) => r.data);
+
+				// Show errors if any
+				const failed = results.filter((r) => !r.success);
+				if (failed.length > 0) {
+					console.error();
+					console.error(chalk.yellow(formatBulkResults(results, 'pipeline')));
+					console.error();
+				}
+
+				// Parse fields option
+				const fields = parseFields(options.fields);
+
+				// Format output
+				const output = formatOutput(pipelines, format, {
+					fields,
+					colors: config.output.colors
+				});
+
+				console.log();
+				console.log(output);
+
+				return;
+			}
+
+			// Single ID - continue with existing behavior
+			id = idList[0];
+		}
 
 		// Prompt for pipeline ID if not provided
 		let pipelineId = id;
@@ -1451,6 +1553,80 @@ async function artifactsHistoryCommand(
 }
 
 /**
+ * Validate Command
+ * Validates a pipeline configuration file without creating it
+ */
+async function validateCommand(
+	configFile: string,
+	options: any,
+	command: Command
+): Promise<void> {
+	const opts = command.optsWithGlobals();
+	const config: CliConfig = opts._config;
+	const connectorsClient = opts._clients.connectors;
+
+	let spinner: Ora | undefined;
+
+	try {
+		// Read config file
+		const fileContent = readFileSync(configFile, 'utf-8');
+		const pipelineConfig: PipelineConfig = JSON.parse(fileContent);
+
+		spinner = startSpinner('Validating pipeline configuration...');
+
+		// Validate the configuration
+		const result = await validatePipelineConfig(pipelineConfig, {
+			connectors: connectorsClient
+		});
+
+		if (result.valid) {
+			succeedSpinner(spinner, 'Pipeline configuration is valid');
+
+			if (result.warnings.length > 0) {
+				console.log(chalk.yellow('\nWarnings:'));
+				for (const warning of result.warnings) {
+					console.log(`  ${chalk.yellow('⚠')}  ${warning.field}: ${warning.message}`);
+				}
+			}
+
+			logInfo('\nConfiguration can be used to create a pipeline:');
+			console.log(`  databasin pipelines create ${configFile}`);
+		} else {
+			failSpinner(spinner, 'Pipeline configuration is invalid');
+
+			console.log(chalk.red('\nErrors:'));
+			for (const error of result.errors) {
+				console.log(`  ${chalk.red('✖')}  ${error.field}: ${error.message}`);
+			}
+
+			if (result.warnings.length > 0) {
+				console.log(chalk.yellow('\nWarnings:'));
+				for (const warning of result.warnings) {
+					console.log(`  ${chalk.yellow('⚠')}  ${warning.field}: ${warning.message}`);
+				}
+			}
+
+			process.exit(1);
+		}
+	} catch (error) {
+		if (spinner) {
+			failSpinner(spinner, 'Validation failed');
+		}
+
+		if (error instanceof SyntaxError) {
+			throw new ValidationError(
+				`Invalid JSON in config file: ${error.message}`,
+				'configFile',
+				['Ensure the file contains valid JSON'],
+				[`cat ${configFile}`]
+			);
+		}
+
+		throw error;
+	}
+}
+
+/**
  * Create pipelines command with all subcommands
  *
  * @returns Configured Commander Command instance
@@ -1472,9 +1648,10 @@ export function createPipelinesCommand(): Command {
 	// Get command
 	pipelines
 		.command('get')
-		.description('Get detailed pipeline information')
-		.argument('[id]', 'Pipeline ID (will prompt if not provided)')
-		.option('-p, --project <id>', 'Project ID (for interactive selection)')
+		.description('Get detailed pipeline information (supports bulk IDs: 123,456,789)')
+		.argument('[id]', 'Pipeline ID or comma-separated IDs (will prompt if not provided)')
+		.option('--name <pattern>', 'Get pipeline by name (case-insensitive partial match)')
+		.option('-p, --project <id>', 'Project ID (for interactive selection or name search)')
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
 		.action(getCommand);
 
@@ -1572,6 +1749,12 @@ export function createPipelinesCommand(): Command {
 
 	// Template commands (Phase 3 - WS9)
 	pipelines.addCommand(createPipelineTemplateCommand());
+
+	// Validate command (Phase 2B)
+	pipelines
+		.command('validate <configFile>')
+		.description('Validate a pipeline configuration file')
+		.action(validateCommand);
 
 	return pipelines;
 }

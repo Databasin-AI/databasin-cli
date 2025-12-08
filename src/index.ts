@@ -22,6 +22,7 @@ import packageJson from '../package.json' assert { type: 'json' };
 import { loadConfig } from './config.ts';
 import { createAllClients } from './client/index.ts';
 import { formatError, getExitCode, CliError } from './utils/errors.ts';
+import { enhanceError } from './utils/error-enhancement.ts';
 import type { CliConfig, PartialCliConfig } from './types/config.ts';
 import { setGlobalFlags } from './utils/progress.ts';
 import { createAuthCommand, loginAction } from './commands/auth.ts';
@@ -34,6 +35,9 @@ import { createApiCommand } from './commands/api.ts';
 import { createUpdateCommand } from './commands/update.ts';
 import { createCompletionCommand } from './commands/completion.ts';
 import { createDocsCommand } from './commands/docs.ts';
+import { createUseCommand } from './commands/use.ts';
+import { createContextCommand } from './commands/context.ts';
+import { createCacheCommand } from './commands/cache.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
@@ -254,13 +258,22 @@ function registerCommands(program: Command): void {
 
 	// Docs command - GitHub documentation viewer
 	program.addCommand(createDocsCommand());
+
+	// Use command - Set working context
+	program.addCommand(createUseCommand());
+
+	// Context command - Manage working context
+	program.addCommand(createContextCommand());
+
+	// Cache command - Manage API cache
+	program.addCommand(createCacheCommand());
 }
 
 /**
  * Main CLI entry point
  *
  * Creates and configures the CLI program, then parses command-line arguments.
- * Handles global error catching with user-friendly messages.
+ * Handles global error catching with user-friendly messages and command suggestions.
  */
 async function main(): Promise<void> {
 	try {
@@ -271,35 +284,40 @@ async function main(): Promise<void> {
 		await program.parseAsync(process.argv);
 	} catch (error) {
 		// Global error handler for uncaught errors
-		// CliErrors are already formatted, others need wrapping
-		if (error instanceof CliError) {
-			console.error('\n' + chalk.red(formatError(error)));
-		} else if (error instanceof Error) {
-			console.error('\n' + chalk.red('Error: ' + error.message));
+		// Enhance errors with command suggestions if applicable
+		const enhancedError = enhanceError(error);
+
+		// Format and display the error
+		if (enhancedError instanceof CliError) {
+			console.error('\n' + chalk.red(formatError(enhancedError)));
+		} else if (enhancedError instanceof Error) {
+			console.error('\n' + chalk.red('Error: ' + enhancedError.message));
 
 			// Show stack trace in debug mode
 			if (process.env.DATABASIN_DEBUG === 'true') {
 				console.error('\nDebug stack trace:');
-				console.error(chalk.dim(error.stack));
+				console.error(chalk.dim(enhancedError.stack));
 			}
 		} else {
-			console.error('\n' + chalk.red('Unknown error: ' + String(error)));
+			console.error('\n' + chalk.red('Unknown error: ' + String(enhancedError)));
 		}
 
 		// Exit with appropriate code
-		const exitCode = getExitCode(error);
+		const exitCode = getExitCode(enhancedError);
 		process.exit(exitCode);
 	}
 }
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason) => {
-	console.error('\n' + chalk.red('Unhandled Promise Rejection:'));
-	console.error(chalk.red(formatError(reason)));
+	const enhancedError = enhanceError(reason);
 
-	if (process.env.DATABASIN_DEBUG === 'true' && reason instanceof Error) {
+	console.error('\n' + chalk.red('Unhandled Promise Rejection:'));
+	console.error(chalk.red(formatError(enhancedError)));
+
+	if (process.env.DATABASIN_DEBUG === 'true' && enhancedError instanceof Error) {
 		console.error('\nDebug stack trace:');
-		console.error(chalk.dim(reason.stack));
+		console.error(chalk.dim(enhancedError.stack));
 	}
 
 	process.exit(1);
@@ -307,12 +325,14 @@ process.on('unhandledRejection', (reason) => {
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-	console.error('\n' + chalk.red('Uncaught Exception:'));
-	console.error(chalk.red(formatError(error)));
+	const enhancedError = enhanceError(error);
 
-	if (process.env.DATABASIN_DEBUG === 'true') {
+	console.error('\n' + chalk.red('Uncaught Exception:'));
+	console.error(chalk.red(formatError(enhancedError)));
+
+	if (process.env.DATABASIN_DEBUG === 'true' && enhancedError instanceof Error) {
 		console.error('\nDebug stack trace:');
-		console.error(chalk.dim(error.stack));
+		console.error(chalk.dim(enhancedError.stack));
 	}
 
 	process.exit(1);
