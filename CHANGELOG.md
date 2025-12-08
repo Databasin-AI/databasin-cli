@@ -14,6 +14,16 @@ All notable changes to Databasin CLI will be documented in this file.
 - Config file validation
 - Real-time log streaming
 
+## [0.5.2] - 2025-12-07
+
+### Fixed
+
+- **Self-Update Cross-Device Move Error**
+  - Fixed `EXDEV: cross-device link not permitted` error when updating CLI
+  - Added `safeMove()` helper that handles cross-filesystem moves (e.g., `/tmp` to `/home`)
+  - Update command now uses copy+delete fallback when rename fails across devices
+  - All file move operations in update flow now work across different filesystems
+
 ## [0.5.1] - 2025-12-07
 
 ### Added
