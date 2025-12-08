@@ -8,7 +8,7 @@
  */
 
 import { Command } from 'commander';
-import { createWriteStream, existsSync, unlinkSync, renameSync, chmodSync } from 'fs';
+import { createWriteStream, existsSync, unlinkSync, renameSync, chmodSync, copyFileSync } from 'fs';
 import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import { tmpdir } from 'os';
@@ -186,6 +186,25 @@ function isStandaloneBinary(): boolean {
 }
 
 /**
+ * Safely move a file, handling cross-device moves
+ * Uses rename when possible, falls back to copy+delete for cross-device moves
+ */
+function safeMove(source: string, destination: string): void {
+	try {
+		// Try rename first (fastest, atomic)
+		renameSync(source, destination);
+	} catch (error) {
+		// If rename fails due to cross-device link (EXDEV), use copy+delete
+		if (error instanceof Error && 'code' in error && error.code === 'EXDEV') {
+			copyFileSync(source, destination);
+			unlinkSync(source);
+		} else {
+			throw error;
+		}
+	}
+}
+
+/**
  * Create update command
  */
 export function createUpdateCommand(): Command {
@@ -307,11 +326,11 @@ export function createUpdateCommand(): Command {
 			try {
 				// Backup current executable
 				if (existsSync(currentExePath)) {
-					renameSync(currentExePath, backupPath);
+					safeMove(currentExePath, backupPath);
 				}
 
 				// Move new binary to destination
-				renameSync(tempPath, currentExePath);
+				safeMove(tempPath, currentExePath);
 
 				// Make executable
 				chmodSync(currentExePath, 0o755);
@@ -331,7 +350,7 @@ export function createUpdateCommand(): Command {
 						if (existsSync(currentExePath)) {
 							unlinkSync(currentExePath);
 						}
-						renameSync(backupPath, currentExePath);
+						safeMove(backupPath, currentExePath);
 						console.log(chalk.dim('  Restored previous version'));
 					} catch (restoreError) {
 						logError('Failed to restore backup. Manual reinstallation may be required.');
