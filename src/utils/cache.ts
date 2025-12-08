@@ -337,6 +337,72 @@ export function clearCache(key?: string, namespace?: string): void {
 }
 
 /**
+ * Invalidate all cache entries in a namespace
+ *
+ * Call this after mutations (create, update, delete) to prevent stale cache.
+ * Can optionally filter by pattern to invalidate only matching entries.
+ *
+ * @param namespace - Cache namespace to invalidate
+ * @param pattern - Optional pattern to match (e.g., 'connectors' to clear connector caches)
+ *
+ * @example
+ * ```typescript
+ * // After creating a connector, invalidate connector list cache
+ * invalidateNamespace('api', 'connectors');
+ *
+ * // After deleting a pipeline, invalidate all API caches
+ * invalidateNamespace('api');
+ * ```
+ */
+export function invalidateNamespace(namespace: string, pattern?: string): void {
+	try {
+		const namespaceDir = join(getCacheDir(), namespace);
+		if (!existsSync(namespaceDir)) {
+			return; // Nothing to invalidate
+		}
+
+		const files = readdirSync(namespaceDir);
+		let cleared = 0;
+
+		for (const file of files) {
+			if (!file.endsWith('.json')) continue;
+
+			// If pattern provided, only clear matching keys
+			if (pattern) {
+				try {
+					const content = readFileSync(join(namespaceDir, file), 'utf-8');
+					const entry = JSON.parse(content);
+					if (!entry.key || !entry.key.includes(pattern)) {
+						continue;
+					}
+				} catch {
+					// Skip corrupted files - will be cleaned up eventually
+					continue;
+				}
+			}
+
+			try {
+				unlinkSync(join(namespaceDir, file));
+				cleared++;
+			} catch {
+				// Ignore deletion errors - file may have been removed already
+			}
+		}
+
+		if (process.env.DATABASIN_DEBUG) {
+			console.error(
+				`[CACHE] Invalidated ${cleared} entries in namespace '${namespace}'${pattern ? ` matching '${pattern}'` : ''}`
+			);
+		}
+	} catch (error: any) {
+		// Silent failure - cache invalidation shouldn't break operations
+		if (process.env.DATABASIN_DEBUG) {
+			console.error(`[CACHE] Failed to invalidate namespace: ${error.message}`);
+		}
+	}
+}
+
+/**
  * Cache status information
  */
 export interface CacheStatus {

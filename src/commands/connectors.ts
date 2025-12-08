@@ -53,6 +53,8 @@ import {
 	handleBulkErrors,
 	deleteBulk
 } from '../utils/bulk-operations.ts';
+import { invalidateNamespace } from '../utils/cache.ts';
+import { loadContext } from '../utils/context.ts';
 
 /**
  * Prompt user to select a connector from available connectors
@@ -256,8 +258,17 @@ async function listCommand(
 	let spinner: Ora | undefined;
 
 	try {
-		// Resolve project ID if provided (map numeric ID to internal ID)
+		// Priority: CLI flag > Context > Prompt
 		let projectId = options.project;
+		if (!projectId) {
+			const context = loadContext();
+			projectId = context.project;
+			if (projectId && opts.debug) {
+				console.error(`[CONTEXT] Using project from context: ${projectId}`);
+			}
+		}
+
+		// Resolve project ID if provided (map numeric ID to internal ID)
 		if (projectId) {
 			projectId = await resolveProjectId(projectId, projectsClient);
 		}
@@ -636,6 +647,10 @@ async function createCommand(
 		// Create connector
 		spinner = startSpinner('Creating connector...');
 		const created = await client.create(connectorData);
+
+		// Invalidate connector list cache
+		invalidateNamespace('api', 'connectors');
+
 		succeedSpinner(spinner, 'Connector created successfully');
 
 		// Display created connector info
@@ -711,6 +726,10 @@ async function updateCommand(
 		// Update connector
 		spinner = startSpinner('Updating connector...');
 		const updated = await client.update(id, updateData);
+
+		// Invalidate connector list cache
+		invalidateNamespace('api', 'connectors');
+
 		succeedSpinner(spinner, 'Connector updated successfully');
 
 		// Display updated connector info
@@ -793,6 +812,10 @@ async function deleteCommand(
 		// Delete connector
 		spinner = startSpinner('Deleting connector...');
 		await client.deleteById(id);
+
+		// Invalidate connector list cache
+		invalidateNamespace('api', 'connectors');
+
 		succeedSpinner(spinner, 'Connector deleted successfully');
 
 		console.log();
@@ -1223,7 +1246,7 @@ export function createConnectorsCommand(): Command {
 	connectors
 		.command('list')
 		.description('List connectors (count mode by default for efficiency)')
-		.option('-p, --project <id>', 'Filter by project ID')
+		.option('-p, --project <id>', 'Filter by project ID (or use context via "databasin use project <id>")')
 		.option('--full', 'Fetch full connector objects (may return large response)')
 		.option('--name <pattern>', 'Filter by name (substring match, only with --full)')
 		.option('--type <type>', 'Filter by connector type (only with --full)')

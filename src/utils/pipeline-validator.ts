@@ -217,23 +217,119 @@ export async function validatePipelineConfig(
 }
 
 /**
- * Validate cron expression format
+ * Validate cron expression format and field values
  *
- * Checks if a string is a valid cron expression (5 or 6 fields).
- * Does not validate actual field values, just counts fields.
+ * Supports standard 5-field cron: minute hour day month weekday
+ * Optional 6th field for year is also supported
+ *
+ * Validates:
+ * - Field count (5 or 6)
+ * - Field value ranges (0-59 for minutes, 0-23 for hours, etc.)
+ * - Wildcards, ranges (1-5), steps (star/5), and lists (1,3,5)
  *
  * @param expr - Cron expression to validate
- * @returns True if valid format
+ * @returns True if valid, false otherwise
  *
  * @example
  * ```typescript
- * isValidCronExpression('0 0 * * *')      // true - 5 fields
- * isValidCronExpression('0 0 * * * 2024') // true - 6 fields
- * isValidCronExpression('invalid')        // false
+ * isValidCronExpression('0 0 * * *')            // true - daily at midnight
+ * isValidCronExpression('0/15 9-17 * * 1-5')    // true - every 15 min, business hours, weekdays
+ * isValidCronExpression('0 0 * * * 2024')       // true - with year field
+ * isValidCronExpression('60 * * * *')           // false - minute out of range
+ * isValidCronExpression('invalid')              // false - invalid format
  * ```
  */
 export function isValidCronExpression(expr: string): boolean {
-	// Simple cron validation: must have 5 or 6 whitespace-separated fields
 	const parts = expr.trim().split(/\s+/);
-	return parts.length === 5 || parts.length === 6;
+
+	// Must be 5 or 6 fields
+	if (parts.length !== 5 && parts.length !== 6) {
+		return false;
+	}
+
+	// Field validators: [min, max] for each position
+	const validators = [
+		{ min: 0, max: 59, name: 'minute' }, // 0-59
+		{ min: 0, max: 23, name: 'hour' }, // 0-23
+		{ min: 1, max: 31, name: 'day' }, // 1-31
+		{ min: 1, max: 12, name: 'month' }, // 1-12
+		{ min: 0, max: 6, name: 'weekday' }, // 0-6 (Sunday=0)
+		{ min: 1970, max: 3000, name: 'year' } // Optional year
+	];
+
+	for (let i = 0; i < parts.length; i++) {
+		if (!isValidCronField(parts[i], validators[i])) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Validate a single cron field
+ *
+ * Supports:
+ * - Wildcard: star
+ * - Ranges: 1-5
+ * - Steps: star/5 or 10-20/2
+ * - Lists: 1,3,5
+ *
+ * @param field - Field value to validate
+ * @param range - Valid range for this field
+ * @returns True if valid
+ */
+function isValidCronField(
+	field: string,
+	range: { min: number; max: number; name: string }
+): boolean {
+	// Wildcard
+	if (field === '*') {
+		return true;
+	}
+
+	// List (e.g., "1,3,5")
+	if (field.includes(',')) {
+		const parts = field.split(',');
+		return parts.every((part) => isValidCronField(part.trim(), range));
+	}
+
+	// Step (e.g., "*/5" or "10-20/2")
+	if (field.includes('/')) {
+		const [rangeOrWildcard, step] = field.split('/');
+
+		// Validate step value
+		const stepNum = parseInt(step, 10);
+		if (isNaN(stepNum) || stepNum < 1) {
+			return false;
+		}
+
+		// Validate range part
+		if (rangeOrWildcard === '*') {
+			return true;
+		}
+		return isValidCronField(rangeOrWildcard, range);
+	}
+
+	// Range (e.g., "10-20")
+	if (field.includes('-')) {
+		const [start, end] = field.split('-').map((s) => parseInt(s, 10));
+		if (isNaN(start) || isNaN(end)) {
+			return false;
+		}
+		return (
+			start >= range.min &&
+			start <= range.max &&
+			end >= range.min &&
+			end <= range.max &&
+			start <= end
+		);
+	}
+
+	// Single number
+	const num = parseInt(field, 10);
+	if (isNaN(num)) {
+		return false;
+	}
+	return num >= range.min && num <= range.max;
 }

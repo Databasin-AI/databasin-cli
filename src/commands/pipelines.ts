@@ -46,6 +46,8 @@ import { resolveProjectId } from '../utils/project-id-mapper.ts';
 import { parseBulkIds, fetchBulk, formatBulkResults } from '../utils/bulk-operations.ts';
 import { filterByName } from '../utils/filters.ts';
 import { validatePipelineConfig, type PipelineConfig } from '../utils/pipeline-validator.ts';
+import { invalidateNamespace } from '../utils/cache.ts';
+import { loadContext } from '../utils/context.ts';
 
 /**
  * Prompt user to select a pipeline from a list
@@ -101,8 +103,17 @@ async function listCommand(
 	let spinner: Ora | undefined;
 
 	try {
-		// Get projectId (from option or prompt, resolving numeric IDs to internal IDs)
+		// Priority: CLI flag > Context > Prompt
 		let projectId = options.project;
+		if (!projectId) {
+			const context = loadContext();
+			projectId = context.project;
+			if (projectId && opts.debug) {
+				console.error(`[CONTEXT] Using project from context: ${projectId}`);
+			}
+		}
+
+		// Get projectId (from option or prompt, resolving numeric IDs to internal IDs)
 		if (!projectId) {
 			try {
 				projectId = await promptForProject(projectsClient, 'Select project to list pipelines');
@@ -542,6 +553,9 @@ async function createCommand(
 		// Create pipeline
 		const createdPipeline = await pipelinesClient.create(pipelineData);
 
+		// Invalidate pipeline list cache
+		invalidateNamespace('api', 'pipelines');
+
 		// Succeed spinner
 		succeedSpinner(spinner, 'Pipeline created successfully');
 
@@ -866,6 +880,10 @@ async function updateCommand(
 		// Update pipeline
 		spinner = startSpinner('Updating pipeline...');
 		const updated = await pipelinesClient.update(id, updateData);
+
+		// Invalidate pipeline list cache
+		invalidateNamespace('api', 'pipelines');
+
 		succeedSpinner(spinner, 'Pipeline updated successfully');
 
 		// Display updated pipeline info
@@ -965,6 +983,10 @@ async function deleteCommand(
 		// Delete pipeline
 		spinner = startSpinner('Deleting pipeline...');
 		await pipelinesClient.deleteById(id);
+
+		// Invalidate pipeline list cache
+		invalidateNamespace('api', 'pipelines');
+
 		succeedSpinner(spinner, 'Pipeline deleted successfully');
 
 		console.log();
@@ -1638,7 +1660,7 @@ export function createPipelinesCommand(): Command {
 	pipelines
 		.command('list')
 		.description('List pipelines in a project')
-		.option('-p, --project <id>', 'Project ID (required)')
+		.option('-p, --project <id>', 'Project ID (required, or use context via "databasin use project <id>")')
 		.option('--count', 'Return only the count of pipelines')
 		.option('--limit <number>', 'Limit number of results', parseInt)
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
