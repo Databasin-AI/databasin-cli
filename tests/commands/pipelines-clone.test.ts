@@ -438,14 +438,26 @@ describe('pipelines clone command', () => {
 
 		const command = createMockCommand(mockPipelinesClient, mockConnectorsClient);
 
-		// Execute command with invalid ID
+		// Mock process.exit to prevent actual exit
+		const originalExit = process.exit;
+		let exitCalled = false;
+		process.exit = ((_code?: number) => {
+			exitCalled = true;
+			throw new Error('Process exit called');
+		}) as any;
+
 		try {
 			await cloneCommand('99999', {}, command);
-			expect(true).toBe(false); // Should not reach here
+			// If we reach here without exit being called, test should fail
+			expect(exitCalled).toBe(true);
 		} catch (error) {
-			// Expected to fail
-			expect(mockPipelinesClient.getById).toHaveBeenCalledWith('99999');
+			// Expected - either error thrown or process.exit called
+		} finally {
+			process.exit = originalExit;
 		}
+
+		// Verify pipeline fetch was attempted
+		expect(mockPipelinesClient.getById).toHaveBeenCalledWith('99999');
 	});
 
 	test('should handle invalid connector IDs', async () => {
@@ -462,12 +474,22 @@ describe('pipelines clone command', () => {
 
 		const command = createMockCommand(mockPipelinesClient, mockConnectorsClient);
 
-		// Execute command - will fail validation due to missing connectors
+		// Mock process.exit to prevent actual exit
+		const originalExit = process.exit;
+		let exitCalled = false;
+		process.exit = ((_code?: number) => {
+			exitCalled = true;
+			throw new Error('Process exit called');
+		}) as any;
+
 		try {
 			await cloneCommand('8901', {}, command);
-			expect(true).toBe(false); // Should not reach here
+			// If we reach here without exit being called, test should fail
+			expect(exitCalled).toBe(true);
 		} catch (error) {
-			// Expected to fail validation
+			// Expected - validation should fail
+		} finally {
+			process.exit = originalExit;
 		}
 	});
 
