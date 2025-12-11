@@ -26,8 +26,8 @@ function displayContext(): void {
 	if (!context.project && !context.connector) {
 		console.log(chalk.yellow('No working context set.'));
 		console.log('\nSet context with:');
-		console.log('  databasin use project <projectId>');
-		console.log('  databasin use connector <connectorId>');
+		console.log('  databasin set project <projectId>');
+		console.log('  databasin set connector <connectorId>');
 		return;
 	}
 
@@ -92,7 +92,7 @@ Examples:
   $ databasin context clear connector   # Clear only connector context
 
 Context is stored in ~/.databasin/context.json and persists across sessions.
-Use 'databasin use' to set context values.
+Use 'databasin set' to set context values.
 `
 		);
 

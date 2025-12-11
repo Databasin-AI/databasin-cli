@@ -22,11 +22,11 @@ This document provides comprehensive examples for all CLI features.
 ### Setting Context
 ```bash
 # Set working project (validates it exists)
-databasin use project N1r8Do
+databasin set project N1r8Do
 # Output: ✓ Working project set to: Datalake Project (N1r8Do)
 
 # Set working connector (validates it exists)
-databasin use connector 5459
+databasin set connector 5459
 # Output: ✓ Working connector set to: PostgreSQL Production (5459)
 ```
 
@@ -54,14 +54,14 @@ databasin context clear
 ### Using Context in Commands
 ```bash
 # Set context once
-databasin use project N1r8Do
+databasin set project N1r8Do
 
 # These commands now use context automatically
 databasin connectors list        # Uses context.project
 databasin pipelines list         # Uses context.project
 
 # Set connector context
-databasin use connector 5459
+databasin set connector 5459
 
 # SQL commands use connector context
 databasin sql catalogs          # Uses context.connector
@@ -352,7 +352,7 @@ databasin sql discover
 ### Step-by-Step Exploration
 ```bash
 # Set connector context
-databasin use connector 5459
+databasin set connector 5459
 
 # List catalogs
 databasin sql catalogs
@@ -487,7 +487,7 @@ databasin connectors get 5459,9999,5765
 ### Pipeline Creation Workflow
 ```bash
 # 1. Set project context
-databasin use project N1r8Do
+databasin set project N1r8Do
 
 # 2. Find source connector
 databasin connectors search "postgres"
@@ -519,12 +519,12 @@ databasin pipelines create pipeline-config.json
 ### Multi-Project Workflow
 ```bash
 # Work with Project A
-databasin use project PROJECT_A_ID
+databasin set project PROJECT_A_ID
 databasin connectors list
 databasin pipelines list
 
 # Switch to Project B
-databasin use project PROJECT_B_ID
+databasin set project PROJECT_B_ID
 databasin connectors list
 databasin pipelines list
 
@@ -575,7 +575,7 @@ $ databasin pipelines list
 # Usage: databasin pipelines list --project <projectId>
 #
 # Or set context:
-#   $ databasin use project <projectId>
+#   $ databasin set project <projectId>
 #   $ databasin pipelines list
 #
 # Run 'databasin projects list' to see available projects.
@@ -614,7 +614,7 @@ databasin pipelines list --project N1r8Do
 databasin automations list --project N1r8Do
 
 # Good - set context once
-databasin use project N1r8Do
+databasin set project N1r8Do
 databasin connectors list
 databasin pipelines list
 databasin automations list
@@ -693,7 +693,7 @@ databasin connectors list --no-cache  # Bypass cache
 ```bash
 # Not using context?
 databasin context              # Check what's set
-databasin use project <id>     # Set project
+databasin set project <id>     # Set project
 export DATABASIN_DEBUG=1       # Enable debug logging
 ```
 
@@ -794,8 +794,8 @@ databasin automations delete <id>                 # Delete automation
 
 ### Context & Cache
 ```bash
-databasin use project <id>                        # Set project context
-databasin use connector <id>                      # Set connector context
+databasin set project <id>                        # Set project context
+databasin set connector <id>                      # Set connector context
 databasin context                                 # View context
 databasin context clear [key]                     # Clear context
 databasin cache status                            # View cache

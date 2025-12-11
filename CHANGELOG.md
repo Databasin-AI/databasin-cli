@@ -34,8 +34,8 @@ All notable changes to Databasin CLI will be documented in this file.
 ### Added - Phase 2 (Core Improvements)
 
 - **Context Management**: Persistent working context for projects and connectors
-  - `databasin use project <id>` - Set working project (validates existence)
-  - `databasin use connector <id>` - Set working connector (validates existence)
+  - `databasin set project <id>` - Set working project (validates existence)
+  - `databasin set connector <id>` - Set working connector (validates existence)
   - `databasin context` - View current context with timestamps
   - `databasin context clear [key]` - Clear all or specific context
   - Context stored in `~/.databasin/context.json` and persists across sessions

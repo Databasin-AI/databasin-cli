@@ -1,14 +1,14 @@
 /**
- * Use Command - Set working context for CLI commands
+ * Set Command - Set working context for CLI commands
  *
  * Allows users to set default project and connector context that will be used
  * by subsequent commands unless overridden by explicit flags.
  *
  * Usage:
- *   databasin use project <projectId>
- *   databasin use connector <connectorId>
+ *   databasin set project <projectId>
+ *   databasin set connector <connectorId>
  *
- * @module commands/use
+ * @module commands/set
  */
 
 import { Command } from 'commander';
@@ -87,26 +87,26 @@ async function setConnectorContext(connectorId: string, options: any, command: C
 }
 
 /**
- * Create use command
+ * Create set command
  *
- * Creates the main 'use' command with subcommands for project and connector.
+ * Creates the main 'set' command with subcommands for project and connector.
  *
  * @returns Configured Commander command
  */
-export function createUseCommand(): Command {
-	const useCmd = new Command('use')
+export function createSetCommand(): Command {
+	const setCmd = new Command('set')
 		.description('Set working context for commands')
 		.addHelpText(
 			'after',
 			`
 Examples:
-  $ databasin use project abc123        # Set working project
-  $ databasin use connector 5459        # Set working connector
+  $ databasin set project abc123        # Set working project
+  $ databasin set connector 5459        # Set working connector
   $ databasin context                   # View current context
   $ databasin context clear             # Clear all context
 
 Context allows you to set defaults for commands without repeating flags:
-  $ databasin use project abc123
+  $ databasin set project abc123
   $ databasin pipelines list            # Uses project abc123
   $ databasin connectors list           # Uses project abc123
 
@@ -115,16 +115,16 @@ Context is stored in ~/.databasin/context.json and persists across sessions.
 		);
 
 	// Project subcommand
-	useCmd
+	setCmd
 		.command('project <projectId>')
 		.description('Set the working project context')
 		.action(setProjectContext);
 
 	// Connector subcommand
-	useCmd
+	setCmd
 		.command('connector <connectorId>')
 		.description('Set the working connector context')
 		.action(setConnectorContext);
 
-	return useCmd;
+	return setCmd;
 }

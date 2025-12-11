@@ -107,7 +107,7 @@ async function catalogsCommand(
 				'connectorId',
 				'sql catalogs',
 				undefined,
-				['databasin sql catalogs 5459', 'databasin use connector 5459 && databasin sql catalogs']
+				['databasin sql catalogs 5459', 'databasin set connector 5459 && databasin sql catalogs']
 			);
 		}
 
@@ -205,7 +205,7 @@ async function schemasCommand(
 				'connectorId',
 				'sql schemas',
 				undefined,
-				['databasin sql schemas 5459 --catalog my_catalog', 'databasin use connector 5459 && databasin sql schemas --catalog my_catalog']
+				['databasin sql schemas 5459 --catalog my_catalog', 'databasin set connector 5459 && databasin sql schemas --catalog my_catalog']
 			);
 		}
 
@@ -301,7 +301,7 @@ async function tablesCommand(
 				'connectorId',
 				'sql tables',
 				undefined,
-				['databasin sql tables 5459 --catalog my_catalog --schema my_schema', 'databasin use connector 5459 && databasin sql tables --catalog my_catalog --schema my_schema']
+				['databasin sql tables 5459 --catalog my_catalog --schema my_schema', 'databasin set connector 5459 && databasin sql tables --catalog my_catalog --schema my_schema']
 			);
 		}
 
@@ -1034,7 +1034,7 @@ async function discoverCommand(
 	if (!connectorId) {
 		throw new MissingArgumentError('connectorId', 'sql discover', undefined, [
 			'databasin sql discover 5459',
-			'databasin use connector 5459 && databasin sql discover'
+			'databasin set connector 5459 && databasin sql discover'
 		]);
 	}
 
@@ -1105,7 +1105,7 @@ export function createSqlCommand(): Command {
 	sql
 		.command('catalogs')
 		.description('List catalogs for a connector')
-		.argument('[connector-id]', 'Connector ID (or use context via "databasin use connector <id>")')
+		.argument('[connector-id]', 'Connector ID (or use context via "databasin set connector <id>")')
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
 		.action(catalogsCommand);
 
@@ -1113,7 +1113,7 @@ export function createSqlCommand(): Command {
 	sql
 		.command('schemas')
 		.description('List schemas in a catalog')
-		.argument('[connector-id]', 'Connector ID (or use context via "databasin use connector <id>")')
+		.argument('[connector-id]', 'Connector ID (or use context via "databasin set connector <id>")')
 		.requiredOption('-c, --catalog <name>', 'Catalog name')
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
 		.action(schemasCommand);
@@ -1122,7 +1122,7 @@ export function createSqlCommand(): Command {
 	sql
 		.command('tables')
 		.description('List tables in a schema')
-		.argument('[connector-id]', 'Connector ID (or use context via "databasin use connector <id>")')
+		.argument('[connector-id]', 'Connector ID (or use context via "databasin set connector <id>")')
 		.requiredOption('-c, --catalog <name>', 'Catalog name')
 		.requiredOption('-s, --schema <name>', 'Schema name')
 		.option('--fields <fields>', 'Comma-separated list of fields to display')

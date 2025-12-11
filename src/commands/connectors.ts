@@ -1247,7 +1247,7 @@ export function createConnectorsCommand(): Command {
 	connectors
 		.command('list')
 		.description('List connectors (count mode by default for efficiency)')
-		.option('-p, --project <id>', 'Filter by project ID (or use context via "databasin use project <id>")')
+		.option('-p, --project <id>', 'Filter by project ID (or use context via "databasin set project <id>")')
 		.option('--full', 'Fetch full connector objects (may return large response)')
 		.option('--name <pattern>', 'Filter by name (substring match, only with --full)')
 		.option('--type <type>', 'Filter by connector type (only with --full)')

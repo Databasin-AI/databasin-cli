@@ -35,7 +35,7 @@ import { createApiCommand } from './commands/api.ts';
 import { createUpdateCommand } from './commands/update.ts';
 import { createCompletionCommand } from './commands/completion.ts';
 import { createDocsCommand } from './commands/docs.ts';
-import { createUseCommand } from './commands/use.ts';
+import { createSetCommand } from './commands/set.ts';
 import { createContextCommand } from './commands/context.ts';
 import { createCacheCommand } from './commands/cache.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
@@ -259,8 +259,8 @@ function registerCommands(program: Command): void {
 	// Docs command - GitHub documentation viewer
 	program.addCommand(createDocsCommand());
 
-	// Use command - Set working context
-	program.addCommand(createUseCommand());
+	// Set command - Set working context
+	program.addCommand(createSetCommand());
 
 	// Context command - Manage working context
 	program.addCommand(createContextCommand());

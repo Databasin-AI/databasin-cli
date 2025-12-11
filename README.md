@@ -76,8 +76,8 @@ databasin completion install
 
 ```bash
 # Set your working context
-databasin use project <your-project-id>
-databasin use connector <your-connector-id>
+databasin set project <your-project-id>
+databasin set connector <your-connector-id>
 
 # Now commands use context automatically
 databasin connectors list
@@ -99,7 +99,7 @@ databasin pipelines validate pipeline-config.json
 **Pipeline Creation Workflow**:
 ```bash
 # 1. Set project context
-databasin use project <project-id>
+databasin set project <project-id>
 
 # 2. Search for connectors
 databasin connectors search "postgres"    # Note source ID
@@ -127,7 +127,7 @@ databasin connectors inspect <id-or-name>
 **Data Exploration**:
 ```bash
 # Set connector context
-databasin use connector <connector-id>
+databasin set connector <connector-id>
 
 # Discover full database structure
 databasin sql discover
@@ -194,8 +194,8 @@ databasin automations list --project <project-id>
 databasin automations run <automation-id>
 
 # Context Management
-databasin use project <project-id>                 # Set working project
-databasin use connector <connector-id>             # Set working connector
+databasin set project <project-id>                 # Set working project
+databasin set connector <connector-id>             # Set working connector
 databasin context                                  # View current context
 databasin context clear                            # Clear all context
 
@@ -251,8 +251,8 @@ databasin docs download             # Download all for offline use
 ### Use Context for Repeated Operations
 ```bash
 # Set context once
-databasin use project <project-id>
-databasin use connector <connector-id>
+databasin set project <project-id>
+databasin set connector <connector-id>
 
 # Then omit flags
 databasin connectors list     # Uses project context

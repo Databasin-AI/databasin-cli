@@ -1661,7 +1661,7 @@ export function createPipelinesCommand(): Command {
 	pipelines
 		.command('list')
 		.description('List pipelines in a project')
-		.option('-p, --project <id>', 'Project ID (required, or use context via "databasin use project <id>")')
+		.option('-p, --project <id>', 'Project ID (required, or use context via "databasin set project <id>")')
 		.option('--count', 'Return only the count of pipelines')
 		.option('--limit <number>', 'Limit number of results', parseInt)
 		.option('--fields <fields>', 'Comma-separated list of fields to display')
