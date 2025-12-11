@@ -60,8 +60,11 @@ Requires [Bun](https://bun.sh) v1.3+.
 ## Getting Started
 
 ```bash
-# Authenticate via browser
+# Authenticate via browser (opens web login page)
 databasin login
+
+# Or login to a custom instance
+databasin login databasin.example.com
 
 # Verify authentication
 databasin auth whoami
@@ -291,11 +294,17 @@ databasin update            # Update to latest
 ## Troubleshooting
 
 ```bash
-# Re-authenticate
+# Re-authenticate (opens browser)
 databasin login
 
-# Verify token
+# Login to a specific instance
+databasin login https://your-instance.databasin.com
+
+# Verify token validity
 databasin auth verify
+
+# Check current user context
+databasin auth whoami
 
 # Debug mode
 DATABASIN_DEBUG=true databasin <command>

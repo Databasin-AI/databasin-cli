@@ -714,7 +714,10 @@ databasin connectors get <targetId>
 ```bash
 # Token expired?
 databasin auth verify          # Check token validity
-databasin login                # Re-authenticate
+databasin login                # Re-authenticate (opens browser)
+
+# Login to a custom instance
+databasin login https://your-instance.databasin.com
 
 # Check current user
 databasin auth whoami
@@ -804,9 +807,10 @@ databasin cache clear [key]                       # Clear cache
 
 ### Utilities
 ```bash
-databasin login                                   # Authenticate
-databasin auth whoami                             # Current user
-databasin auth verify                             # Verify token
+databasin login                                   # Authenticate (browser)
+databasin login databasin.example.com             # Login to custom instance
+databasin auth whoami                             # Current user context
+databasin auth verify                             # Verify token validity
 databasin update                                  # Update CLI
 databasin docs [name]                             # View documentation
 databasin completion install [shell]              # Install completions

@@ -97,6 +97,12 @@ async function listCommand(options: {}, command: Command) {
 }
 ```
 
+**Authentication**: The CLI supports multiple authentication methods:
+- `databasin login` - Browser-based login (recommended, saves to ~/.databasin/.token)
+- `databasin login <web-url>` - Login to custom instance with API config discovery
+- `DATABASIN_TOKEN` environment variable
+- Token file at `~/.databasin/.token`
+
 **Output Formatting**: Three formats supported (table, JSON, CSV):
 ```typescript
 import { formatOutput, formatTable, formatJson, formatCsv } from './utils/formatters';

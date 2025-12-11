@@ -46,8 +46,15 @@ https://github.com/Databasin-AI/databasin-cli/tree/main/docs
 
 ```bash
 # Method 1: Browser login (recommended)
-databasin auth login
+databasin login
 # Opens browser, authenticates, and saves token to ~/.databasin/.token
+
+# Login to a custom instance
+databasin login databasin.example.com
+# Saves web URL and attempts to fetch API config from {WEB_URL}/config/api.json
+
+# Login with custom port for callback
+databasin login --port 4000
 
 # Method 2: Environment variable (for CI/CD or scripting)
 export DATABASIN_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

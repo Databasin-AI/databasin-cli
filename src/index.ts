@@ -226,10 +226,11 @@ function registerCommands(program: Command): void {
 
 	// Login command (top-level alias for `auth login`)
 	program
-		.command('login')
+		.command('login [web-url]')
 		.description('Login via browser and save authentication token (alias for auth login)')
 		.option('--port <port>', 'Local server port for callback (default: 3333)', '3333')
 		.option('--no-verify', 'Skip token verification after login')
+		.option('--no-api-config', 'Skip fetching API configuration from web instance')
 		.action(loginAction);
 
 	// Projects commands - IMPLEMENTED

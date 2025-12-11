@@ -543,12 +543,12 @@ Re-authenticate or check your token:
 
 ```bash
 # Re-authenticate via browser
-databasin auth login
+databasin login
 
 # Or verify existing token
 databasin auth verify
 
-# View current user
+# View current user context
 databasin auth whoami
 ```
 
@@ -589,7 +589,7 @@ For issues, questions, or feature requests:
 
 ## Related Commands
 
-- `databasin auth login` - Authenticate via browser
+- `databasin login` - Authenticate via browser (opens web login)
 - `databasin auth verify` - Check token validity
 - `databasin auth whoami` - View current user context
 - `databasin connectors` - Manage project connectors

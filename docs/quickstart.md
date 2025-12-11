@@ -48,15 +48,33 @@ The easiest way to authenticate is via browser:
 
 ```bash
 # Opens your browser to sign in to Databasin
-databasin auth login
+databasin login
 ```
 
 This will:
 1. Open the Databasin login page in your browser
 2. After you sign in, redirect the token back to the CLI
 3. Save the token to `~/.databasin/.token`
+4. Verify the token and display your user information
 
-Alternatively, set a token manually:
+**Login to a custom instance:**
+
+```bash
+# Login to a custom Databasin instance
+databasin login databasin.example.com
+
+# Or with explicit protocol
+databasin login https://databasin.example.com
+```
+
+The CLI will:
+- Attempt to fetch API configuration from `{WEB_URL}/config/api.json`
+- Save both the web URL and API URL to `~/.databasin/config.json`
+- If API config is not found, you can set it manually with `DATABASIN_API_URL`
+
+**Alternative: Set token manually**
+
+For CI/CD or scripting, you can set the token directly:
 
 ```bash
 export DATABASIN_TOKEN="your-jwt-token-here"
@@ -278,9 +296,14 @@ Create `~/.databasin/config.json`:
 ### Environment Variables
 
 ```bash
+# API configuration (usually auto-configured via login)
 export DATABASIN_API_URL="https://api.databasin.com"
-export DATABASIN_WEB_URL="https://app.databasin.com"  # For config files
+export DATABASIN_WEB_URL="https://app.databasin.com"
+
+# Authentication token
 export DATABASIN_TOKEN="your-token"
+
+# Output preferences
 export NO_COLOR=1  # Disable colors
 ```
 
@@ -370,7 +393,7 @@ bun run verify
 ✖ No authentication token found
 ```
 
-**Solution**: Run `databasin auth login` to authenticate via browser
+**Solution**: Run `databasin login` to authenticate via browser (or `DATABASIN_TOKEN` env var)
 
 ### Connection Refused
 

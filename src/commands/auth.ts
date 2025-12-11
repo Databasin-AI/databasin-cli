@@ -4,6 +4,7 @@
  * Provides commands for verifying and displaying authentication status:
  * - auth verify: Verify token validity by calling /api/ping
  * - auth whoami: Display current authenticated user information
+ * - auth login: Login via browser with optional web URL parameter
  *
  * @module commands/auth
  */
@@ -14,7 +15,6 @@ import type { DatabasinClient } from '../client/index.ts';
 import type { ProjectsClient } from '../client/projects.ts';
 import { formatOutput } from '../utils/formatters.ts';
 import {
-	logSuccess,
 	logError,
 	startSpinner,
 	succeedSpinner,
@@ -24,7 +24,8 @@ import type { CliConfig } from '../types/config.ts';
 import type { User } from '../types/api.ts';
 import { ApiError, NetworkError } from '../utils/errors.ts';
 import { saveToken } from '../utils/auth.ts';
-import { parseFields, filterFields } from '../utils/command-helpers.ts';
+import { filterFields } from '../utils/command-helpers.ts';
+import { loadConfigFile, saveConfig } from '../config.ts';
 import chalk from 'chalk';
 
 // Embed assets at build time - these get bundled into the executable
@@ -39,6 +40,94 @@ const logoBase64 = _logoBase64 as unknown as string;
 
 // Pre-compute the logo data URI for embedding in HTML
 const logoDataUri = `data:image/png;base64,${logoBase64}`;
+
+/**
+ * Normalize a URL to have https:// protocol if not present
+ *
+ * @param input - User-provided URL (may be missing protocol)
+ * @returns Normalized URL with protocol
+ */
+function normalizeWebUrl(input: string): string {
+	if (!input) {
+		return '';
+	}
+
+	// Remove trailing slashes
+	input = input.trim().replace(/\/+$/, '');
+
+	// Add https:// if no protocol specified
+	if (!input.includes('://')) {
+		return `https://${input}`;
+	}
+
+	return input;
+}
+
+/**
+ * Validate a URL is properly formatted
+ *
+ * @param url - URL to validate
+ * @returns True if valid, throws error otherwise
+ * @throws Error if URL is invalid
+ */
+function validateUrl(url: string): boolean {
+	try {
+		const parsed = new URL(url);
+		if (!['http:', 'https:'].includes(parsed.protocol)) {
+			throw new Error('URL must use HTTP or HTTPS protocol');
+		}
+		return true;
+	} catch (error) {
+		throw new Error(`Invalid URL: ${error instanceof Error ? error.message : String(error)}`);
+	}
+}
+
+/**
+ * Fetch API configuration from a web instance
+ *
+ * @param webUrl - Base URL of the web instance
+ * @returns API base URL if found, null otherwise
+ */
+async function fetchApiConfig(webUrl: string): Promise<string | null> {
+	const configUrl = `${webUrl}/config/api.json`;
+
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 10000);
+
+		try {
+			const response = await fetch(configUrl, {
+				method: 'GET',
+				headers: {
+					'Accept': 'application/json'
+				},
+				signal: controller.signal
+			});
+
+			clearTimeout(timeout);
+
+			if (!response.ok) {
+				return null;
+			}
+
+			const data = await response.json() as any;
+
+			// Look for baseUrl or baseURL (case insensitive)
+			const baseUrl = data.baseUrl || data.baseURL || data.baseurl;
+
+			if (typeof baseUrl === 'string') {
+				return baseUrl;
+			}
+
+			return null;
+		} finally {
+			clearTimeout(timeout);
+		}
+	} catch (error) {
+		// Silently fail - API config is optional
+		return null;
+	}
+}
 
 /**
  * Render login response HTML from template
@@ -353,10 +442,26 @@ export function createAuthCommand(): Command {
 	// ========================================
 
 	auth
-		.command('login')
+		.command('login [web-url]')
 		.description('Login via browser and save authentication token')
 		.option('--port <port>', 'Local server port for callback (default: 3333)', '3333')
 		.option('--no-verify', 'Skip token verification after login')
+		.option('--no-api-config', 'Skip fetching API configuration from web instance')
+		.addHelpText(
+			'after',
+			`
+Examples:
+  $ databasin login                              # Login using default web URL
+  $ databasin login databasin.example.com        # Login using custom web URL
+  $ databasin login https://databasin.example.co # Login with explicit protocol
+  $ databasin login --port 4000                  # Use custom callback port
+
+When providing a custom web URL:
+  - The CLI will attempt to fetch API configuration from {WEB_URL}/config/api.json
+  - If found, the API base URL will be saved to ~/.databasin/config.json
+  - If not found, you may need to manually set the API URL via --api-url flag
+`
+		)
 		.action(loginAction);
 
 	return auth;
@@ -368,10 +473,16 @@ export function createAuthCommand(): Command {
  * Used by both `databasin login` and `databasin auth login` commands.
  * Opens browser for authentication, receives token via callback, and saves it.
  *
+ * If a web URL is provided:
+ * - Updates config to use that web URL
+ * - Attempts to fetch API config from {WEB_URL}/config/api.json
+ * - Saves API base URL to config if found
+ *
+ * @param webUrl - Optional custom web URL (e.g., "databasin.example.com")
  * @param options - Command options
  * @param command - Commander command instance
  */
-export async function loginAction(options: any, command: Command): Promise<void> {
+export async function loginAction(webUrl: string | undefined, options: any, command: Command): Promise<void> {
 	const opts = command.optsWithGlobals();
 	const config: CliConfig = opts._config;
 	const client: DatabasinClient = opts._clients.base;
@@ -381,7 +492,63 @@ export async function loginAction(options: any, command: Command): Promise<void>
 	// MUST REMAIN LOCALHOST - enables local authentication flow
 	const callbackUrl = `http://localhost:${port}/callback`;
 
+	// Variables to track configuration changes
+	let configUpdated = false;
+	let resolvedWebUrl = config.webUrl;
+	let resolvedApiUrl = config.apiUrl;
+
 	console.log(chalk.bold('\n🔐 Databasin CLI Login\n'));
+
+	// Handle custom web URL if provided
+	if (webUrl) {
+		console.log('Processing custom web URL...\n');
+
+		try {
+			// Normalize the URL
+			resolvedWebUrl = normalizeWebUrl(webUrl);
+
+			// Validate it's a proper URL
+			validateUrl(resolvedWebUrl);
+
+			console.log(chalk.dim(`Web URL: ${resolvedWebUrl}`));
+
+			// Try to fetch API configuration if requested
+			if (options.apiConfig !== false) {
+				const configSpinner = startSpinner('Fetching API configuration...');
+
+				try {
+					const apiUrl = await fetchApiConfig(resolvedWebUrl);
+
+					if (apiUrl) {
+						// Validate the API URL
+						validateUrl(apiUrl);
+						resolvedApiUrl = apiUrl;
+						succeedSpinner(configSpinner, `API URL configured: ${apiUrl}`);
+						configUpdated = true;
+					} else {
+						failSpinner(configSpinner, 'API configuration not found');
+						console.log(chalk.dim(`  Checked: ${resolvedWebUrl}/config/api.json\n`));
+						console.log(
+							chalk.yellow(
+								'  Note: If you know the API URL, you can set it manually with DATABASIN_API_URL environment variable\n'
+							)
+						);
+					}
+				} catch (error) {
+					failSpinner(configSpinner, 'Failed to fetch API configuration');
+					if (config.debug && error instanceof Error) {
+						console.log(chalk.dim(`  Error: ${error.message}\n`));
+					}
+				}
+			}
+
+			configUpdated = true;
+		} catch (error) {
+			logError(`Invalid web URL: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(`Invalid web URL: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+
 	console.log('Opening browser for authentication...\n');
 
 	// Track if we received a token
@@ -425,7 +592,7 @@ export async function loginAction(options: any, command: Command): Promise<void>
 		console.log(chalk.dim(`Local server started on http://localhost:${port}`));
 
 		// Open browser to login page with callback URL
-		const loginUrl = `${config.webUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}`;
+		const loginUrl = `${resolvedWebUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}`;
 
 		// Open browser (cross-platform)
 		const { spawn } = await import('child_process');
@@ -482,6 +649,35 @@ export async function loginAction(options: any, command: Command): Promise<void>
 				throw error;
 			}
 			throw new Error('Failed to save token');
+		}
+
+		// Save configuration updates if web URL was customized
+		if (configUpdated) {
+			const configSpinner = startSpinner('Updating configuration...');
+
+			try {
+				const currentConfig = loadConfigFile();
+				const updatedConfig = {
+					...currentConfig,
+					webUrl: resolvedWebUrl
+				};
+
+				// Only update API URL if we successfully fetched it
+				if (resolvedApiUrl !== config.apiUrl) {
+					updatedConfig.apiUrl = resolvedApiUrl;
+				}
+
+				saveConfig(updatedConfig);
+				succeedSpinner(configSpinner, 'Configuration updated');
+				console.log(chalk.dim(`  Location: ~/.databasin/config.json\n`));
+			} catch (error) {
+				failSpinner(configSpinner, 'Failed to save configuration');
+				console.log(chalk.yellow('  Warning: Token was saved but configuration could not be updated'));
+				if (error instanceof Error) {
+					logError(error.message);
+				}
+				// Don't throw - token was saved successfully
+			}
 		}
 
 		// Verify token if requested

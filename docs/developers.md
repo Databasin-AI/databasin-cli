@@ -449,6 +449,9 @@ bun run typecheck  # See detailed errors
 # Ensure token is set
 echo $DATABASIN_TOKEN
 
+# Or login via browser
+bun run dev -- login
+
 # Verify token works
 bun run dev -- auth verify
 ```

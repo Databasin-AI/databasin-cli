@@ -1049,7 +1049,7 @@ databasin connectors delete conn-abc123
 1. Verify you have access to the project
 2. Check your user role (admin/user/viewer)
 3. Contact project administrator for access
-4. Re-authenticate: `databasin auth login`
+4. Re-authenticate: `databasin login`
 
 ---
 
@@ -1057,7 +1057,7 @@ databasin connectors delete conn-abc123
 
 - `databasin projects list` - List projects to get project IDs
 - `databasin pipelines list` - List pipelines using connectors
-- `databasin auth login` - Authenticate via browser
+- `databasin login` - Authenticate via browser (opens web login)
 - `databasin auth verify` - Check authentication status
 - `databasin auth whoami` - View current user context
 
