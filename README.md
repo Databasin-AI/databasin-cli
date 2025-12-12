@@ -317,6 +317,9 @@ databasin cache clear
 
 # View context
 databasin context
+
+# View current configuration
+databasin config
 ```
 
 ## Support

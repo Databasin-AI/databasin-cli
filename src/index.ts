@@ -38,6 +38,7 @@ import { createDocsCommand } from './commands/docs.ts';
 import { createSetCommand } from './commands/set.ts';
 import { createContextCommand } from './commands/context.ts';
 import { createCacheCommand } from './commands/cache.ts';
+import { createConfigCommand } from './commands/config.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
@@ -268,6 +269,9 @@ function registerCommands(program: Command): void {
 
 	// Cache command - Manage API cache
 	program.addCommand(createCacheCommand());
+
+	// Config command - Display current configuration
+	program.addCommand(createConfigCommand());
 }
 
 /**

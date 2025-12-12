@@ -728,8 +728,14 @@ databasin auth whoami
 # Connection problems?
 databasin api GET /api/health  # Test API connectivity
 
-# Check API URL
-cat ~/.databasin/config.json | grep apiUrl
+# View current configuration
+databasin config
+
+# Check specific config value
+databasin config | grep apiUrl
+
+# Save configuration to file
+databasin config > my-config.json
 
 # Override API URL
 export DATABASIN_API_URL=https://api.databasin.ai
@@ -811,6 +817,7 @@ databasin login                                   # Authenticate (browser)
 databasin login databasin.example.com             # Login to custom instance
 databasin auth whoami                             # Current user context
 databasin auth verify                             # Verify token validity
+databasin config                                  # Display current configuration
 databasin update                                  # Update CLI
 databasin docs [name]                             # View documentation
 databasin completion install [shell]              # Install completions

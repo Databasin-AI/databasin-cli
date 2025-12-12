@@ -89,7 +89,7 @@ function validateUrl(url: string): boolean {
  * @returns API base URL if found, null otherwise
  */
 async function fetchApiConfig(webUrl: string): Promise<string | null> {
-	const configUrl = `${webUrl}/config/api.json`;
+	const configUrl = `${webUrl}/config`;
 
 	try {
 		const controller = new AbortController();
@@ -112,8 +112,7 @@ async function fetchApiConfig(webUrl: string): Promise<string | null> {
 
 			const data = await response.json() as any;
 
-			// Look for baseUrl or baseURL (case insensitive)
-			const baseUrl = data.baseUrl || data.baseURL || data.baseurl;
+			const baseUrl = data.apiUrl;
 
 			if (typeof baseUrl === 'string') {
 				return baseUrl;
@@ -124,8 +123,7 @@ async function fetchApiConfig(webUrl: string): Promise<string | null> {
 			clearTimeout(timeout);
 		}
 	} catch (error) {
-		// Silently fail - API config is optional
-		return null;
+		throw new Error(`Failed to fetch API configuration: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -510,7 +508,8 @@ export async function loginAction(webUrl: string | undefined, options: any, comm
 			// Validate it's a proper URL
 			validateUrl(resolvedWebUrl);
 
-			console.log(chalk.dim(`Web URL: ${resolvedWebUrl}`));
+			if (config.debug)
+				console.log(chalk.dim(`Web URL: ${resolvedWebUrl}`));
 
 			// Try to fetch API configuration if requested
 			if (options.apiConfig !== false) {
@@ -523,16 +522,20 @@ export async function loginAction(webUrl: string | undefined, options: any, comm
 						// Validate the API URL
 						validateUrl(apiUrl);
 						resolvedApiUrl = apiUrl;
+						if (config.debug)
+							console.debug(chalk.dim(`Fetched API URL: ${apiUrl}`));
 						succeedSpinner(configSpinner, `API URL configured: ${apiUrl}`);
 						configUpdated = true;
 					} else {
 						failSpinner(configSpinner, 'API configuration not found');
-						console.log(chalk.dim(`  Checked: ${resolvedWebUrl}/config/api.json\n`));
+						console.log(chalk.dim(`Checked: ${resolvedWebUrl}/config\n`));
+						console.log(chalk.red('Error: Could not automatically configure API URL'));
 						console.log(
-							chalk.yellow(
-								'  Note: If you know the API URL, you can set it manually with DATABASIN_API_URL environment variable\n'
+							chalk.red(
+								'Note: If you know the API URL, you can set it manually with DATABASIN_API_URL environment variable\n'
 							)
 						);
+						return;
 					}
 				} catch (error) {
 					failSpinner(configSpinner, 'Failed to fetch API configuration');
