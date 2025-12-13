@@ -304,7 +304,7 @@ databasin connectors create --project N1r8Do
 {
 	"connectorName": "MySQL Production Database",
 	"connectorType": "database",
-	"internalID": "proj-123",
+	"internalID": "5QiuoY0J",
 	"configuration": {
 		"host": "db.example.com",
 		"port": 3306,
@@ -812,7 +812,7 @@ databasin connectors create config.json --verbose
 #!/bin/bash
 # Count connectors in each project
 
-for project in proj-123 proj-456 proj-789; do
+for project in 5QiuoY0J proj-456 proj-789; do
   count=$(databasin connectors list --project $project)
   echo "Project $project: $count connectors"
 done

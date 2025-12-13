@@ -131,7 +131,7 @@ Full config file options (`~/.databasin/config.json`):
 ```json
 {
   "apiUrl": "https://api.databasin.com",
-  "defaultProject": "proj-123",
+  "defaultProject": "5QiuoY0J",
   "output": {
     "format": "table",
     "colors": true,
@@ -193,7 +193,7 @@ const config = {
 // Projects
 const projects = createProjectsClient(config);
 const myProjects = await projects.list();
-const project = await projects.get('proj-123');
+const project = await projects.get('5QiuoY0J');
 
 // Connectors
 const connectors = createConnectorsClient(config);
@@ -202,7 +202,7 @@ const testResult = await connectors.test('conn-456');
 
 // Pipelines
 const pipelines = createPipelinesClient(config);
-const pipelineList = await pipelines.list('proj-123');
+const pipelineList = await pipelines.list('5QiuoY0J');
 await pipelines.run('pipeline-789');
 const logs = await pipelines.getLogs('pipeline-789');
 ```
@@ -220,7 +220,7 @@ const pipelines = createPipelinesClient({
 });
 
 async function runDailyPipelines() {
-  const projectId = 'proj-123';
+  const projectId = '5QiuoY0J';
   const pipelineList = await pipelines.list(projectId);
 
   for (const pipeline of pipelineList) {

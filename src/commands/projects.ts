@@ -118,9 +118,22 @@ async function listCommand(
 		// Parse fields option
 		const fields = parseFields(options.fields);
 
+		// Reorder project data to show internalId as primary ID
+		// Remove numeric id from output unless specifically requested
+		const reorderedProjects = projects.map((p: Project) => {
+			const { id, internalId, ...rest } = p;
+			// If fields explicitly requested and includes 'id', keep it
+			const shouldIncludeNumericId = fields && fields.includes('id');
+			if (shouldIncludeNumericId) {
+				return { internalId, ...rest, id };
+			}
+			// Otherwise, use internalId only
+			return { internalId, ...rest };
+		});
+
 		// Format output
 		const output = formatOutput(
-			projects,
+			reorderedProjects,
 			format,
 			{ fields, colors: config.output.colors },
 			{ warnThreshold: config.tokenEfficiency.warnThreshold, enabled: true }
@@ -189,20 +202,27 @@ async function getCommand(
 		// Parse fields option
 		const fields = parseFields(options.fields);
 
+		// Reorder project to show internalId first, remove numeric id unless requested
+		const { id: numericId, internalId, ...rest } = project;
+		const shouldIncludeNumericId = fields && fields.includes('id');
+		const reorderedProject = shouldIncludeNumericId
+			? { internalId, ...rest, id: numericId }
+			: { internalId, ...rest };
+
 		// Format output based on format
 		let output: string;
 		if (format === 'json') {
 			// For JSON, filter fields if specified
 			const filteredProject = fields
-				? Object.fromEntries(Object.entries(project).filter(([key]) => fields.includes(key)))
-				: project;
+				? Object.fromEntries(Object.entries(reorderedProject).filter(([key]) => fields.includes(key)))
+				: reorderedProject;
 			output = formatJson(filteredProject, { colors: config.output.colors });
 		} else if (format === 'csv') {
 			// For CSV, use array format
-			output = formatCsv([project], { fields, colors: config.output.colors });
+			output = formatCsv([reorderedProject], { fields, colors: config.output.colors });
 		} else {
 			// For table, use transposed key-value format
-			output = formatSingleObject(project, fields);
+			output = formatSingleObject(reorderedProject, fields);
 		}
 
 		console.log(output);

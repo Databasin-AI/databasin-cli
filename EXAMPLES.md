@@ -572,10 +572,10 @@ $ databasin pipelines list
 # Output:
 # ✖ Missing required argument: --project
 #
-# Usage: databasin pipelines list --project <projectId>
+# Usage: databasin pipelines list --project <internalId>
 #
 # Or set context:
-#   $ databasin set project <projectId>
+#   $ databasin set project 5QiuoY0J
 #   $ databasin pipelines list
 #
 # Run 'databasin projects list' to see available projects.

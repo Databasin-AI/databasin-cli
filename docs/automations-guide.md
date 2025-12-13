@@ -32,25 +32,25 @@ databasin automations list [--project <projectId>]
 databasin automations list
 
 # List automations in specific project
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 
 # Get count only (efficient)
-databasin automations list --project proj-123 --count
+databasin automations list --project 5QiuoY0J --count
 
 # Filter to active automations
-databasin automations list --project proj-123 --active
+databasin automations list --project 5QiuoY0J --active
 
 # Filter to running automations
-databasin automations list --project proj-123 --running
+databasin automations list --project 5QiuoY0J --running
 
 # Limit fields and results (token efficiency)
-databasin automations list --project proj-123 --fields "automationID,name,status" --limit 10
+databasin automations list --project 5QiuoY0J --fields "automationID,name,status" --limit 10
 
 # Output as JSON
-databasin automations list --project proj-123 --json
+databasin automations list --project 5QiuoY0J --json
 
 # Output as CSV
-databasin automations list --project proj-123 --csv
+databasin automations list --project 5QiuoY0J --csv
 ```
 
 **Output:**
@@ -108,7 +108,7 @@ databasin automations get
 # Prompts for project, then automation
 
 # With project specified for interactive selection
-databasin automations get --project proj-123
+databasin automations get --project 5QiuoY0J
 
 # Specific fields only
 databasin automations get auto-123 --fields "automationID,name,status,schedule"
@@ -304,7 +304,7 @@ databasin automations create
 # Prompts for: project, name, schedule, tasks
 
 # Interactive with project specified
-databasin automations create --project proj-123
+databasin automations create --project 5QiuoY0J
 ```
 
 **Configuration File Format:**
@@ -312,7 +312,7 @@ databasin automations create --project proj-123
 ```json
 {
   "name": "Nightly ETL Automation",
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "enabled": true,
   "schedule": "0 2 * * *",
   "tasks": [
@@ -491,7 +491,7 @@ Automation commands support token efficiency options to reduce API response size
 Get just the count without fetching full data:
 
 ```bash
-databasin automations list --project proj-123 --count
+databasin automations list --project 5QiuoY0J --count
 # Output: 15
 ```
 
@@ -500,7 +500,7 @@ databasin automations list --project proj-123 --count
 Fetch only specific fields:
 
 ```bash
-databasin automations list --project proj-123 --fields "automationID,name,status"
+databasin automations list --project 5QiuoY0J --fields "automationID,name,status"
 ```
 
 ### Result Limiting
@@ -508,13 +508,13 @@ databasin automations list --project proj-123 --fields "automationID,name,status
 Limit number of results:
 
 ```bash
-databasin automations list --project proj-123 --limit 10
+databasin automations list --project 5QiuoY0J --limit 10
 ```
 
 ### Combined Optimization
 
 ```bash
-databasin automations list --project proj-123 \
+databasin automations list --project 5QiuoY0J \
   --fields "automationID,name" \
   --limit 5 \
   --active
@@ -531,7 +531,7 @@ All commands support multiple output formats:
 Human-readable table format:
 
 ```bash
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 ```
 
 ### JSON
@@ -539,7 +539,7 @@ databasin automations list --project proj-123
 Machine-readable JSON:
 
 ```bash
-databasin automations list --project proj-123 --json
+databasin automations list --project 5QiuoY0J --json
 ```
 
 ### CSV
@@ -547,7 +547,7 @@ databasin automations list --project proj-123 --json
 Spreadsheet-compatible CSV:
 
 ```bash
-databasin automations list --project proj-123 --csv
+databasin automations list --project 5QiuoY0J --csv
 ```
 
 ---
@@ -574,7 +574,7 @@ done
 databasin automations create my-automation.json
 
 # Extract automation ID from output
-AUTO_ID=$(databasin automations list --project proj-123 --json | \
+AUTO_ID=$(databasin automations list --project 5QiuoY0J --json | \
   jq -r '.[] | select(.name=="My Automation") | .automationID')
 
 # Run the automation
@@ -601,7 +601,7 @@ fi
 # Monitor all running automations
 
 # Get running automations
-RUNNING=$(databasin automations list --project proj-123 --running --json)
+RUNNING=$(databasin automations list --project 5QiuoY0J --running --json)
 
 echo "Currently running automations:"
 echo "$RUNNING" | jq -r '.[] | "\(.automationID): \(.name)"'
@@ -618,7 +618,7 @@ done
 
 ```bash
 # Export all automations to JSON
-databasin automations list --project proj-123 --json > automations-backup.json
+databasin automations list --project 5QiuoY0J --json > automations-backup.json
 
 # Export specific automation
 databasin automations get auto-123 --json > automation-123.json
@@ -650,7 +650,7 @@ check_automation_health() {
 }
 
 # Get all automations
-AUTOMATIONS=$(databasin automations list --project proj-123 --json)
+AUTOMATIONS=$(databasin automations list --project 5QiuoY0J --json)
 
 # Check each
 echo "$AUTOMATIONS" | jq -r '.[] | "\(.automationID) \(.name)"' | while read id name; do
@@ -712,7 +712,7 @@ databasin automations list --project correct-project-id
 
 ```bash
 # List automations to find valid IDs
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 ```
 
 ### "Access denied" error
@@ -748,9 +748,9 @@ databasin automations update auto-123 updated-config.json
 
 ```bash
 # Use token efficiency options
-databasin automations list --project proj-123 --limit 20
-databasin automations list --project proj-123 --fields "automationID,name"
-databasin automations list --project proj-123 --count
+databasin automations list --project 5QiuoY0J --limit 20
+databasin automations list --project 5QiuoY0J --fields "automationID,name"
+databasin automations list --project 5QiuoY0J --count
 ```
 
 ---

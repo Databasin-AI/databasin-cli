@@ -2,11 +2,13 @@
 
 ## Overview
 
-The Databasin CLI now automatically maps between numeric project IDs and internal project IDs. This enhancement allows users to use either ID format interchangeably, improving usability and reducing errors.
+The Databasin CLI uses **internal project IDs** (e.g., `5QiuoY0J`, `N1r8Do`) as the primary identifier in all command outputs. For convenience, the CLI automatically maps between numeric project IDs and internal project IDs, allowing users to use either ID format interchangeably in command inputs.
+
+> **Note**: As of recent versions, all CLI output displays `internalId` as the primary project identifier. Numeric IDs are hidden by default but can be requested with `--fields id`.
 
 ## Problem Statement
 
-Users were often passing numeric project IDs (e.g., `123`) to commands instead of internal IDs (e.g., `N1r8Do`). This caused API errors because most endpoints expect internal IDs.
+Users were often passing numeric project IDs (e.g., `123`) to commands instead of internal IDs (e.g., `5QiuoY0J`). This caused API errors because most endpoints expect internal IDs. Additionally, showing numeric IDs in output was inconsistent with internal IDs used in API calls.
 
 ## Solution
 

@@ -1138,6 +1138,8 @@ export interface UsageSummary {
 	// Project-specific fields
 	/** Project ID (for project metrics) */
 	projectId?: number;
+	/** Project internal ID (enriched client-side from projects list) */
+	projectInternalId?: string;
 	/** Project name (for project metrics) */
 	projectName?: string;
 	/** Institution ID (for project/institution metrics) */

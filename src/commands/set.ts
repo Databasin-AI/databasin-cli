@@ -117,7 +117,7 @@ Context is stored in ~/.databasin/context.json and persists across sessions.
 	// Project subcommand
 	setCmd
 		.command('project <projectId>')
-		.description('Set the working project context')
+		.description('Set the working project context (use internalId from projects list)')
 		.action(setProjectContext);
 
 	// Connector subcommand

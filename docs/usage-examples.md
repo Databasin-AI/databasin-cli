@@ -113,16 +113,16 @@ databasin projects list --full
 
 ```bash
 # Get specific project details
-databasin projects get proj-abc123
+databasin projects get 5QiuoY0J
 
 # Get only specific fields
-databasin projects get proj-abc123 --fields id,name,description,status
+databasin projects get 5QiuoY0J --fields id,name,description,status
 
 # Get project statistics
-databasin projects stats proj-abc123
+databasin projects stats 5QiuoY0J
 
 # Monitor multiple projects
-for project in proj-001 proj-002 proj-003; do
+for project in 5QiuoY0J VsqMvImE 1JdRH004 proj-002 proj-003; do
   echo "Stats for $project:"
   databasin projects stats $project
   echo "---"
@@ -136,7 +136,7 @@ done
 ```bash
 cat > mysql-production.json <<EOF
 {
-  "projectId": "proj-abc123",
+  "projectId": "5QiuoY0J",
   "name": "Production MySQL Database",
   "description": "Main production MySQL instance",
   "type": "MySQL",
@@ -159,7 +159,7 @@ databasin connectors create --file mysql-production.json
 ```bash
 cat > postgres-analytics.json <<EOF
 {
-  "projectId": "proj-abc123",
+  "projectId": "5QiuoY0J",
   "name": "Analytics PostgreSQL",
   "type": "PostgreSQL",
   "config": {
@@ -182,7 +182,7 @@ databasin connectors create --file postgres-analytics.json
 ```bash
 cat > snowflake-warehouse.json <<EOF
 {
-  "projectId": "proj-abc123",
+  "projectId": "5QiuoY0J",
   "name": "Snowflake Data Warehouse",
   "type": "Snowflake",
   "config": {
@@ -207,7 +207,7 @@ databasin connectors create --file snowflake-warehouse.json
 ```bash
 cat > simple-etl-pipeline.json <<EOF
 {
-  "projectId": "proj-abc123",
+  "projectId": "5QiuoY0J",
   "name": "Daily Sales ETL",
   "description": "Extract sales data from MySQL to Snowflake",
   "config": {

@@ -114,14 +114,14 @@ databasin pipelines list --project your-project-id
 # List all projects
 databasin projects list
 
-# Get project details
-databasin projects get proj-123
+# Get project details (using internal ID)
+databasin projects get 5QiuoY0J
 
 # View project users
-databasin projects users proj-123
+databasin projects users 5QiuoY0J
 
 # View project statistics
-databasin projects stats proj-123
+databasin projects stats 5QiuoY0J
 ```
 
 ### Connectors
@@ -154,8 +154,8 @@ databasin connectors config --all
 # List pipelines (interactive project selection)
 databasin pipelines list
 
-# List with specific project
-databasin pipelines list --project proj-123
+# List with specific project (using internal ID)
+databasin pipelines list --project 5QiuoY0J
 
 # Get pipeline details
 databasin pipelines get pipe-456
@@ -195,8 +195,8 @@ databasin sql exec conn-123 "SELECT * FROM products" --csv > products.csv
 ### Automations
 
 ```bash
-# List automations (with project filter)
-databasin automations list --project proj-123
+# List automations (with project filter, using internal ID)
+databasin automations list --project 5QiuoY0J
 
 # Get automation details
 databasin automations get auto-789
@@ -332,7 +332,7 @@ Limit results for faster queries:
 
 ```bash
 databasin connectors list --full --limit 20
-databasin pipelines list --project proj-123 --limit 10
+databasin pipelines list --project 5QiuoY0J --limit 10
 ```
 
 ### Disable Colors

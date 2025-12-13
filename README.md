@@ -73,13 +73,15 @@ databasin auth whoami
 databasin completion install
 ```
 
+> **📋 Note on Project IDs**: The CLI uses **internal project IDs** (e.g., `5QiuoY0J`, `VsqMvImE`) as the primary identifier. These are shown in the `internalId` column when you run `databasin projects list`. For convenience, commands also accept numeric project IDs which are automatically resolved to internal IDs.
+
 ## Quick Start
 
 ### Basic Workflow with Context
 
 ```bash
-# Set your working context
-databasin set project <your-project-id>
+# Set your working context (use internal IDs from 'databasin projects list')
+databasin set project 5QiuoY0J
 databasin set connector <your-connector-id>
 
 # Now commands use context automatically

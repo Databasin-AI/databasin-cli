@@ -33,7 +33,7 @@ databasin connectors delete conn-123
 databasin connectors list
 
 # Count connectors in project
-databasin connectors list --project proj-123
+databasin connectors list --project 5QiuoY0J
 ```
 
 ### 2. Find connector by name
@@ -56,7 +56,7 @@ databasin connectors list --full --fields "connectorID,connectorName,connectorTy
 ### 4. List connectors in project
 
 ```bash
-databasin connectors list --project proj-123 --full
+databasin connectors list --project 5QiuoY0J --full
 ```
 
 ### 5. Get connector details
@@ -70,7 +70,7 @@ databasin connectors get conn-123
 ```bash
 cat > mysql-prod.json << 'EOF'
 {
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "name": "Production MySQL",
   "type": "MySQL",
   "config": {
@@ -132,7 +132,7 @@ databasin connectors list --full \
   --limit 20
 
 # Filter by project first
-databasin connectors list --project proj-123 --full \
+databasin connectors list --project 5QiuoY0J --full \
   --fields "connectorID,connectorName"
 
 # DO NOT do this (200K+ tokens):
@@ -167,7 +167,7 @@ databasin connectors list --full --fields "connectorID,connectorName,connectorTy
 databasin connectors list --full --limit 5
 
 # Or filter by project
-databasin connectors list --project proj-123 --full
+databasin connectors list --project 5QiuoY0J --full
 ```
 
 ### "Connector not found"
@@ -181,7 +181,7 @@ databasin connectors list --full --json | jq '.[].connectorID'
 
 ```bash
 # Solution: Check project access
-databasin projects get proj-123
+databasin projects get 5QiuoY0J
 ```
 
 ## Scripting Examples
@@ -270,7 +270,7 @@ echo "Total: $(echo "$CONNECTORS" | jq 'length') connectors"
 
 ```json
 {
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "name": "My MySQL Database",
   "type": "MySQL",
   "config": {
@@ -288,7 +288,7 @@ echo "Total: $(echo "$CONNECTORS" | jq 'length') connectors"
 
 ```json
 {
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "name": "My PostgreSQL Database",
   "type": "PostgreSQL",
   "config": {
@@ -307,7 +307,7 @@ echo "Total: $(echo "$CONNECTORS" | jq 'length') connectors"
 
 ```json
 {
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "name": "My Snowflake Warehouse",
   "type": "Snowflake",
   "config": {
@@ -332,7 +332,7 @@ echo "Total: $(echo "$CONNECTORS" | jq 'length') connectors"
 | Create | `databasin connectors create config.json` |
 | Update | `databasin connectors update conn-123 config.json` |
 | Delete | `databasin connectors delete conn-123` |
-| Filter by project | `databasin connectors list --project proj-123 --full` |
+| Filter by project | `databasin connectors list --project 5QiuoY0J --full` |
 | Limited fields | `databasin connectors list --full --fields "id,name,type"` |
 | Export | `databasin connectors list --full --json > backup.json` |
 

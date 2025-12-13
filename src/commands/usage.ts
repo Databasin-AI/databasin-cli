@@ -145,14 +145,26 @@ Examples:
 			const opts = cmd.optsWithGlobals();
 			const config: CliConfig = opts._config;
 			const client: UsageMetricsClient = opts._clients.usageMetrics;
+			const projectsClient = opts._clients.projects;
 
 			let spinner: Ora | null = null;
 			try {
 				spinner = startSpinner('Fetching usage metrics...');
 				const usages = await client.getAllProjectUsage();
+				
+				// Fetch projects to get internalIds
+				const projects = await projectsClient.list();
+				const projectMap = new Map(Array.isArray(projects) ? projects.map(p => [p.id, p.internalId]) : []);
+				
+				// Enrich usage data with internalIds
+				const enrichedUsages = usages.map(usage => ({
+					...usage,
+					projectInternalId: usage.projectId ? projectMap.get(usage.projectId) : undefined
+				}));
+				
 				succeedSpinner(spinner, `Fetched ${usages.length} project usage record(s)`);
 
-				displayUsageList(usages, 'project', config);
+				displayUsageList(enrichedUsages, 'project', config);
 			} catch (error) {
 				if (spinner) failSpinner(spinner, 'Failed to fetch usage metrics');
 				throw error;
@@ -430,7 +442,8 @@ function displayUsageList(usages: UsageSummary[], entityType: string, config: Cl
 			name = usage.fullName || usage.email || 'N/A';
 			isUser = true;
 		} else if (usage.projectId !== undefined) {
-			id = usage.projectId;
+			// Use internalId if available, otherwise fall back to numeric ID
+			id = usage.projectInternalId || usage.projectId;
 			name = usage.projectName || 'N/A';
 		} else if (usage.institutionId !== undefined) {
 			id = usage.institutionId;

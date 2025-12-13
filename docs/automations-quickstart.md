@@ -6,7 +6,7 @@ Fast reference for using Databasin CLI automation commands.
 
 ```bash
 # List automations in a project
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 
 # Get automation details
 databasin automations get auto-456
@@ -26,26 +26,26 @@ databasin automations history auto-456
 ### 1. Find an automation by name
 
 ```bash
-databasin automations list --project proj-123 --json | \
+databasin automations list --project 5QiuoY0J --json | \
   jq '.[] | select(.name | contains("ETL"))'
 ```
 
 ### 2. List only active automations
 
 ```bash
-databasin automations list --project proj-123 --active
+databasin automations list --project 5QiuoY0J --active
 ```
 
 ### 3. List running automations
 
 ```bash
-databasin automations list --project proj-123 --running
+databasin automations list --project 5QiuoY0J --running
 ```
 
 ### 4. Get automation count
 
 ```bash
-databasin automations list --project proj-123 --count
+databasin automations list --project 5QiuoY0J --count
 ```
 
 ### 5. Create automation from file
@@ -54,7 +54,7 @@ databasin automations list --project proj-123 --count
 cat > my-automation.json << 'EOF'
 {
   "name": "My Automation",
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "enabled": true,
   "schedule": "0 2 * * *",
   "tasks": [
@@ -88,7 +88,7 @@ databasin automations get auto-456 --fields "status,lastRunStatus"
 ### 7. Export all automations
 
 ```bash
-databasin automations list --project proj-123 --json > automations-backup.json
+databasin automations list --project 5QiuoY0J --json > automations-backup.json
 ```
 
 ### 8. Monitor automation execution
@@ -123,16 +123,16 @@ databasin automations run
 
 ```bash
 # Get count only (fast)
-databasin automations list --project proj-123 --count
+databasin automations list --project 5QiuoY0J --count
 
 # Limit fields (reduce data)
-databasin automations list --project proj-123 --fields "automationID,name,status"
+databasin automations list --project 5QiuoY0J --fields "automationID,name,status"
 
 # Limit results (paginate)
-databasin automations list --project proj-123 --limit 10
+databasin automations list --project 5QiuoY0J --limit 10
 
 # Combine all
-databasin automations list --project proj-123 \
+databasin automations list --project 5QiuoY0J \
   --fields "automationID,name" \
   --limit 5 \
   --active
@@ -142,13 +142,13 @@ databasin automations list --project proj-123 \
 
 ```bash
 # Table (default)
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 
 # JSON (for scripts)
-databasin automations list --project proj-123 --json
+databasin automations list --project 5QiuoY0J --json
 
 # CSV (for spreadsheets)
-databasin automations list --project proj-123 --csv
+databasin automations list --project 5QiuoY0J --csv
 ```
 
 ## Error Recovery
@@ -164,14 +164,14 @@ databasin automations create automation-config.json
 
 ```bash
 # Solution: List automations first
-databasin automations list --project proj-123
+databasin automations list --project 5QiuoY0J
 ```
 
 ### "Access denied"
 
 ```bash
 # Solution: Check project access
-databasin projects get proj-123
+databasin projects get 5QiuoY0J
 ```
 
 ### "Automation is not enabled"
@@ -197,16 +197,16 @@ done
 
 ```bash
 # Active automations
-databasin automations list --project proj-123 --active --json
+databasin automations list --project 5QiuoY0J --active --json
 
 # Running automations
-databasin automations list --project proj-123 --running --json
+databasin automations list --project 5QiuoY0J --running --json
 ```
 
 ### Count automations by status
 
 ```bash
-PROJECT="proj-123"
+PROJECT="5QiuoY0J"
 echo "Active: $(databasin automations list --project $PROJECT --active --count)"
 echo "Running: $(databasin automations list --project $PROJECT --running --count)"
 ```
@@ -277,7 +277,7 @@ done
 #!/bin/bash
 # export-automation-stats.sh
 
-PROJECT="proj-123"
+PROJECT="5QiuoY0J"
 OUTPUT_FILE="automation-stats-$(date +%Y%m%d).json"
 
 # Get all automations
@@ -330,7 +330,7 @@ done
 #!/bin/bash
 # daily-automation-report.sh - Generate daily automation report
 
-PROJECT="proj-123"
+PROJECT="5QiuoY0J"
 DATE=$(date +%Y-%m-%d)
 
 echo "Automation Report - $DATE"
@@ -378,7 +378,7 @@ Minimal:
 ```json
 {
   "name": "My Automation",
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "enabled": true,
   "schedule": "0 2 * * *",
   "tasks": []
@@ -389,7 +389,7 @@ Complete:
 ```json
 {
   "name": "Nightly ETL Automation",
-  "projectId": "proj-123",
+  "projectId": "5QiuoY0J",
   "enabled": true,
   "schedule": "0 2 * * *",
   "tasks": [
