@@ -24,6 +24,7 @@ export { AutomationsClient, createAutomationsClient } from './automations.ts';
 export { SqlClient, createSqlClient } from './sql.ts';
 export { ConfigurationClient, createConfigurationClient } from './configuration.ts';
 export { DocsClient, createDocsClient } from './docs.ts';
+export { UsageMetricsClient, createUsageMetricsClient } from './usage-metrics.ts';
 
 // Import createClient locally for use in createAllClients
 import { createClient } from './base.ts';
@@ -34,6 +35,7 @@ import { createAutomationsClient } from './automations.ts';
 import { createSqlClient } from './sql.ts';
 import { createConfigurationClient } from './configuration.ts';
 import { createDocsClient } from './docs.ts';
+import { createUsageMetricsClient } from './usage-metrics.ts';
 
 // Convenience: Create all clients at once
 export function createAllClients(config?: import('../types/config.ts').CliConfig) {
@@ -45,6 +47,7 @@ export function createAllClients(config?: import('../types/config.ts').CliConfig
 		automations: createAutomationsClient(),
 		sql: createSqlClient(),
 		configuration: createConfigurationClient(),
-		docs: createDocsClient(config)
+		docs: createDocsClient(config),
+		usageMetrics: createUsageMetricsClient()
 	};
 }

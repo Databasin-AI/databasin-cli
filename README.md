@@ -196,6 +196,13 @@ databasin sql exec <connector-id> "SELECT * FROM users LIMIT 10"
 databasin automations list --project <project-id>
 databasin automations run <automation-id>
 
+# Usage Metrics
+databasin usage me                                 # View my usage
+databasin usage users                              # View all user usage
+databasin usage project <project-id>               # View project usage
+databasin usage projects                           # View all project usage
+databasin usage institution <org-id>               # View org usage
+
 # Context Management
 databasin set project <project-id>                 # Set working project
 databasin set connector <connector-id>             # Set working connector
@@ -245,6 +252,7 @@ databasin docs download             # Download all for offline use
 | [Connectors Guide](./docs/connectors-guide.md) | Data connector operations |
 | [Pipelines Guide](./docs/pipelines-guide.md) | Pipeline creation and execution |
 | [Automations Guide](./docs/automations-guide.md) | Automation workflows |
+| [Usage Metrics Guide](./docs/usage-guide.md) | Usage tracking and analytics |
 | [Observability Guide](./docs/observability-guide.md) | Logs, history, and monitoring |
 | [Shell Completions](./docs/shell-completion.md) | Bash/Zsh/Fish setup |
 | [Developer Guide](./docs/developers.md) | Local dev, SDK usage, releases |

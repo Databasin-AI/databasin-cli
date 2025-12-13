@@ -688,3 +688,60 @@ export function formatOutput(
 
 	return output;
 }
+
+/**
+ * Format a duration in seconds to human-readable format
+ *
+ * Displays in the most appropriate unit(s):
+ * - Under 60s: "45s"
+ * - Under 60min: "12m 34s"
+ * - Under 24h: "3h 25m"
+ * - 24h or more: "2d 5h 30m"
+ *
+ * @param seconds - Duration in seconds (can be decimal)
+ * @returns Human-readable duration string
+ *
+ * @example
+ * formatDuration(45.5) // "45s"
+ * formatDuration(754) // "12m 34s"
+ * formatDuration(12345) // "3h 25m"
+ * formatDuration(186330) // "2d 3h 45m"
+ */
+export function formatDuration(seconds: number): string {
+	if (seconds < 0) return '0s';
+
+	const days = Math.floor(seconds / 86400);
+	const hours = Math.floor((seconds % 86400) / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = Math.floor(seconds % 60);
+
+	const parts: string[] = [];
+
+	if (days > 0) {
+		parts.push(`${days}d`);
+	}
+	if (hours > 0 || days > 0) {
+		parts.push(`${hours}h`);
+	}
+	if (minutes > 0 || hours > 0 || days > 0) {
+		// Only show minutes if we have hours/days, or if it's the largest unit
+		if (days > 0) {
+			// For days, show hours and minutes
+			parts.push(`${minutes}m`);
+		} else if (hours > 0) {
+			// For hours, show minutes
+			parts.push(`${minutes}m`);
+		} else if (minutes > 0) {
+			// Just minutes, show seconds too
+			parts.push(`${minutes}m`);
+			if (secs > 0) {
+				parts.push(`${secs}s`);
+			}
+		}
+	} else {
+		// Less than a minute
+		parts.push(`${secs}s`);
+	}
+
+	return parts.slice(0, 3).join(' ') || '0s'; // Show max 3 units
+}

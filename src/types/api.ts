@@ -1116,3 +1116,111 @@ export interface ArtifactHistoryEntry {
 	/** Completion timestamp */
 	completedAt?: string;
 }
+
+/**
+ * Usage metrics summary returned by /api/usage-metrics/*
+ * Represents usage statistics for users, projects, or institutions
+ *
+ * Note: API returns different field names for different entity types:
+ * - User: userId, fullName, email
+ * - Project: projectId, projectName, institutionId, institutionName
+ * - Institution: institutionId, institutionName
+ */
+export interface UsageSummary {
+	// User-specific fields
+	/** User ID (for user metrics) */
+	userId?: number;
+	/** User's full name (for user metrics) */
+	fullName?: string;
+	/** User's email (for user metrics) */
+	email?: string;
+
+	// Project-specific fields
+	/** Project ID (for project metrics) */
+	projectId?: number;
+	/** Project name (for project metrics) */
+	projectName?: string;
+	/** Institution ID (for project/institution metrics) */
+	institutionId?: number;
+	/** Institution name (for project/institution metrics) */
+	institutionName?: string;
+	/** Administrator ID (for project metrics) */
+	administratorId?: number;
+	/** Administrator name (for project metrics) */
+	administratorName?: string;
+
+	// Institution-specific fields (reuses institutionId/institutionName above)
+	/** Short name for institution */
+	shortName?: string;
+	/** Whether institution is enabled */
+	enabled?: boolean;
+
+	// Common count fields
+	/** Total number of users */
+	totalUsers?: number;
+	/** Number of active users */
+	activeUsers?: number;
+	/** Total number of projects */
+	totalProjects?: number;
+	/** Number of active projects */
+	activeProjects?: number;
+
+	// Pipeline metrics
+	/** Total pipelines owned/created */
+	totalPipelinesOwned?: number;
+	/** Total pipelines in the entity */
+	totalPipelines?: number;
+	/** Number of active pipelines */
+	activePipelines?: number;
+	/** Total number of pipeline runs */
+	totalPipelineRuns?: number;
+	/** Number of successful pipeline runs */
+	successfulPipelineRuns?: number;
+	/** Number of failed pipeline runs */
+	failedPipelineRuns?: number;
+	/** Total pipeline runtime in seconds */
+	totalPipelineRuntimeSeconds?: number;
+	/** Total artifacts processed */
+	totalArtifactsProcessed?: number;
+	/** Total records ingested */
+	totalRecordsIngested?: number;
+
+	// Automation metrics
+	/** Total automations owned/created */
+	totalAutomationsOwned?: number;
+	/** Total automations in the entity */
+	totalAutomations?: number;
+	/** Number of active automations */
+	activeAutomations?: number;
+	/** Total number of automation runs */
+	totalAutomationRuns?: number;
+	/** Number of successful automation runs */
+	successfulAutomationRuns?: number;
+	/** Number of failed automation runs */
+	failedAutomationRuns?: number;
+	/** Total automation runtime in seconds */
+	totalAutomationRuntimeSeconds?: number;
+
+	// Connection metrics
+	/** Total number of connections/connectors */
+	totalConnections?: number;
+
+	// LLM/Token metrics
+	/** Total prompt tokens used */
+	totalPromptTokens?: number;
+	/** Total completion tokens generated */
+	totalCompletionTokens?: number;
+	/** Total tokens (prompt + completion) */
+	totalTokens?: number;
+	/** Total LLM cost in dollars */
+	totalLlmCost?: number;
+	/** Total number of LLM requests */
+	totalLlmRequests?: number;
+
+	// Activity timestamps
+	/** Last activity timestamp */
+	lastActivityDate?: string;
+
+	/** Additional usage metrics */
+	[key: string]: unknown;
+}

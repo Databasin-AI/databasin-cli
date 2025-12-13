@@ -39,6 +39,7 @@ import { createSetCommand } from './commands/set.ts';
 import { createContextCommand } from './commands/context.ts';
 import { createCacheCommand } from './commands/cache.ts';
 import { createConfigCommand } from './commands/config.ts';
+import { createUsageCommand } from './commands/usage.ts';
 import { checkForUpdates, formatUpdateNotification } from './utils/update-checker.ts';
 
 // Get package.json version for --version flag (embedded at build time)
@@ -75,6 +76,8 @@ Examples:
   $ databasin sql exec <connector-id> "SELECT ..."     # Run SQL query
   $ databasin sql tables <connector-id>                # List tables in connector
   $ databasin automations list --project <id>          # List automations
+  $ databasin usage me                                 # View my usage metrics
+  $ databasin usage projects                           # View all project usage
   $ databasin api GET /api/health                      # Call any API endpoint
   $ databasin update                                   # Update CLI to latest version
   $ databasin completion install bash                  # Install shell completions
@@ -272,6 +275,9 @@ function registerCommands(program: Command): void {
 
 	// Config command - Display current configuration
 	program.addCommand(createConfigCommand());
+
+	// Usage command - View usage metrics
+	program.addCommand(createUsageCommand());
 }
 
 /**
