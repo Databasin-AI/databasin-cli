@@ -26,6 +26,7 @@ import { enhanceError } from './utils/error-enhancement.ts';
 import type { CliConfig, PartialCliConfig } from './types/config.ts';
 import { setGlobalFlags } from './utils/progress.ts';
 import { createAuthCommand, loginAction } from './commands/auth.ts';
+import { deleteToken, getTokenSource } from './utils/auth.ts';
 import { createProjectsCommand } from './commands/projects.ts';
 import { createConnectorsCommand } from './commands/connectors.ts';
 import { createPipelinesCommand } from './commands/pipelines.ts';
@@ -237,6 +238,24 @@ function registerCommands(program: Command): void {
 		.option('--no-verify', 'Skip token verification after login')
 		.option('--no-api-config', 'Skip fetching API configuration from web instance')
 		.action(loginAction);
+
+    // Logout command
+    program
+        .command('logout')
+        .description('Remove stored authentication token')
+        .action(() => {
+            const source = getTokenSource();
+            try {
+                deleteToken();
+                console.log('Logged out successfully');
+                if (source) {
+                    console.log(`Removed token from: ${source}`);
+                }
+            } catch (error) {
+                console.error('Failed to remove token');
+                throw error;
+            }
+        });
 
 	// Projects commands - IMPLEMENTED
 	program.addCommand(createProjectsCommand());
