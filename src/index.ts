@@ -232,6 +232,7 @@ function registerCommands(program: Command): void {
 	program
 		.command('login [web-url]')
 		.description('Login via browser and save authentication token (alias for auth login)')
+		.option('--token <token>', 'Provide authentication token manually')
 		.option('--port <port>', 'Local server port for callback (default: 3333)', '3333')
 		.option('--no-verify', 'Skip token verification after login')
 		.option('--no-api-config', 'Skip fetching API configuration from web instance')

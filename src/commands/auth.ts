@@ -222,6 +222,25 @@ export function createAuthCommand(): Command {
 	const auth = new Command('auth').description('Authentication and token management');
 
 	// ========================================
+	// TOKEN COMMAND
+	// ========================================
+
+	auth
+		.command('token <token>')
+		.description('Set authentication token manually and save to ~/.databasin/.token')
+		.action((token: string) => {
+			console.log(chalk.bold('\n🔐 Databasin CLI Token Setup\n'));
+			try {
+				saveToken(token);
+				console.log('Token saved successfully');
+				console.log(chalk.dim(`  Location: ~/.databasin/.token\n`));
+			} catch (error) {
+				logError('Failed to save token');
+				throw error instanceof Error ? error : new Error('Failed to save token');
+			}
+		});
+
+	// ========================================
 	// VERIFY COMMAND
 	// ========================================
 
@@ -485,6 +504,20 @@ export async function loginAction(webUrl: string | undefined, options: any, comm
 	const config: CliConfig = opts._config;
 	const client: DatabasinClient = opts._clients.base;
 	const projectsClient: ProjectsClient = opts._clients.projects;
+
+	// Manual token login shortcut
+	if (options.token) {
+		console.log(chalk.bold('\n🔐 Databasin CLI Login (Manual Token)\n'));
+		try {
+			saveToken(options.token);
+			console.log('Token saved successfully');
+			console.log(chalk.dim(`  Location: ~/.databasin/.token\n`));
+			return;
+		} catch (error) {
+			logError('Failed to save provided token');
+			throw error instanceof Error ? error : new Error('Failed to save token');
+		}
+	}
 
 	const port = parseInt(options.port, 10);
 	// MUST REMAIN LOCALHOST - enables local authentication flow
