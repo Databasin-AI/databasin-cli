@@ -146,13 +146,30 @@ export function loadToken(): string {
 	}
 
 	// No token found in any location
+	// Interactive fallback: prompt user to enter token
+	try {
+		const stdin = process.stdin;
+		const stdout = process.stdout;
+		if (stdin.isTTY) {
+			stdout.write('\nNo Databasin token found.\n');
+			stdout.write('Paste your token (or press Enter to cancel): ');
+
+			const buf = readFileSync(0, 'utf8').trim();
+			if (buf) {
+				saveToken(buf);
+				stdout.write('Token saved to ~/.databasin/.token\n');
+				return buf;
+			}
+		}
+	} catch {}
+
 	throw new AuthError(
 		'No authentication token found',
 		`Token must be provided via:\n` +
 			`  1. Environment variable: ${ENV_VARS.TOKEN}\n` +
 			`  2. Project token file: ${join(cwd(), '.token')}\n` +
 			`  3. User token file: ${getDefaultTokenPath()}\n\n` +
-			`Run 'databasin auth login' to authenticate.`
+			`Run 'databasin auth login' or 'databasin auth token <token>' to authenticate.`
 	);
 }
 
