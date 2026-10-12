@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+V3 development follows the [canonical documentation index](https://dev.azure.com/TPIDAI/databasin/_git/databasin-meta?path=/.plans/V3-MIGRATION-INDEX.md&version=GBdocs/v3-unified-mcp) and its rules. This repository owns local commands and contracts; it does not define a competing migration architecture.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -70,12 +72,14 @@ src/
 ### Key Patterns
 
 **Configuration Priority Cascade**:
+
 1. CLI flags (highest)
-2. Environment variables (DATABASIN_*)
+2. Environment variables (DATABASIN\_\*)
 3. Config file (~/.databasin/config.json)
 4. Defaults (lowest)
 
 **Client Pattern**: All API clients extend the base `DatabasinClient`:
+
 ```typescript
 // src/client/base.ts - Core HTTP client with:
 // - Automatic token injection
@@ -83,35 +87,44 @@ src/
 // - Token efficiency (count, fields, limit)
 // - Debug logging
 const client = createClient(config);
-const data = await client.get<Project[]>('/api/my/projects', { limit: 10 });
+const data = await client.get<Project[]>("/api/my/projects", { limit: 10 });
 ```
 
 **Command Pattern**: Commands use Commander.js with global options:
+
 ```typescript
 // Access config and clients in commands via optsWithGlobals()
 async function listCommand(options: {}, command: Command) {
-    const opts = command.optsWithGlobals();
-    const config: CliConfig = opts._config;
-    const client: ProjectsClient = opts._clients.projects;
-    // ...
+  const opts = command.optsWithGlobals();
+  const config: CliConfig = opts._config;
+  const client: ProjectsClient = opts._clients.projects;
+  // ...
 }
 ```
 
 **Authentication**: The CLI supports multiple authentication methods:
+
 - `databasin login` - Browser-based login (recommended, saves to ~/.databasin/.token)
 - `databasin login <web-url>` - Login to custom instance with API config discovery
 - `DATABASIN_TOKEN` environment variable
 - Token file at `~/.databasin/.token`
 
 **Output Formatting**: Three formats supported (table, JSON, CSV):
+
 ```typescript
-import { formatOutput, formatTable, formatJson, formatCsv } from './utils/formatters';
+import {
+  formatOutput,
+  formatTable,
+  formatJson,
+  formatCsv,
+} from "./utils/formatters";
 console.log(formatOutput(data, format, { fields, colors }));
 ```
 
 ### Token Efficiency
 
 The CLI implements token efficiency features to reduce API response sizes:
+
 - `--count`: Return only count instead of full data
 - `--limit <n>`: Limit number of results
 - `--fields <a,b,c>`: Filter to specific fields
@@ -120,17 +133,18 @@ Warnings appear when responses exceed threshold (default 50000 chars).
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASIN_TOKEN` | JWT authentication token |
-| `DATABASIN_API_URL` | API base URL (default: http://localhost:9000) |
-| `DATABASIN_DEBUG` | Enable debug mode with stack traces |
-| `DATABASIN_CONFIG_PATH` | Override config file location |
-| `NO_COLOR` | Disable colored output |
+| Variable                | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `DATABASIN_TOKEN`       | JWT authentication token                      |
+| `DATABASIN_API_URL`     | API base URL (default: http://localhost:9000) |
+| `DATABASIN_DEBUG`       | Enable debug mode with stack traces           |
+| `DATABASIN_CONFIG_PATH` | Override config file location                 |
+| `NO_COLOR`              | Disable colored output                        |
 
 ## Testing
 
 Tests use Bun's built-in test runner:
+
 ```bash
 bun run test                          # All tests
 bun run test:unit                     # Unit tests only
@@ -139,6 +153,7 @@ bun test --watch                      # Watch mode
 ```
 
 Integration tests require a valid `DATABASIN_TOKEN`:
+
 ```bash
 export DATABASIN_TOKEN="your-token"
 bun run test:integration
@@ -147,6 +162,7 @@ bun run test:integration
 ## Build Process
 
 The build script (`build.ts`) creates:
+
 1. JavaScript bundle (`dist/index.js`)
 2. Platform executables:
    - `dist/linux-x64/databasin`

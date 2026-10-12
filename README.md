@@ -1,10 +1,13 @@
 # Databasin CLI
 
+V3 development follows the [canonical documentation index](https://dev.azure.com/TPIDAI/databasin/_git/databasin-meta?path=/.plans/V3-MIGRATION-INDEX.md&version=GBdocs/v3-unified-mcp) and its rules. This repository owns local commands and contracts; it does not define a competing migration architecture.
+
 A command-line interface for managing Databasin projects, connectors, pipelines, and data workflows.
 
 ## Features
 
 ### Smart Search & Discovery
+
 - **Connector Search**: Find connectors by name, type, or pattern
 - **Connector Inspection**: Comprehensive connector analysis with connection testing, structure discovery, and pipeline usage
 - **Bulk Operations**: Get or delete multiple resources at once with comma-separated IDs
@@ -12,25 +15,30 @@ A command-line interface for managing Databasin projects, connectors, pipelines,
 - **SQL Discover**: Explore entire database structure in one command
 
 ### Pipeline Management
+
 - **Pipeline Cloning**: Duplicate pipelines with modifications (name, source, target, schedule)
 - **Pipeline Validation**: Validate configs before creation with detailed error messages
 
 ### Context Management
+
 - **Persistent State**: Set working project/connector once, use everywhere
 - **Auto-Resolution**: Commands automatically use context when available
 - **Quick Switching**: Easily switch between projects and connectors
 
 ### Performance Optimization
+
 - **Smart Caching**: Automatic caching reduces API calls by 70%
 - **Cache Control**: View status, clear cache when needed
 - **Token Efficiency**: Field selection and limits reduce API token usage by 75%
 
 ### Safety & Validation
+
 - **Pipeline Validation**: Validate configs before creation with detailed error messages
 - **Enhanced Error Messages**: "Did you mean?" suggestions for typos and mistakes
 - **Helpful Examples**: Every error shows how to fix it
 
 ### Enhanced Output
+
 - **Multiple Formats**: Table, JSON, CSV output for all commands
 - **Field Selection**: Show only the fields you need with `--fields`
 - **Tree View**: Visual database structure display for SQL discovery
@@ -102,6 +110,7 @@ databasin pipelines validate pipeline-config.json
 ### Examples by Use Case
 
 **Pipeline Creation Workflow**:
+
 ```bash
 # 1. Set project context
 databasin set project <project-id>
@@ -121,6 +130,7 @@ databasin pipelines create config.json
 ```
 
 **Connector Analysis**:
+
 ```bash
 # Comprehensive connector inspection (all-in-one)
 databasin connectors inspect <id-or-name>
@@ -130,6 +140,7 @@ databasin connectors inspect <id-or-name>
 ```
 
 **Data Exploration**:
+
 ```bash
 # Set connector context
 databasin set connector <connector-id>
@@ -144,6 +155,7 @@ databasin sql tables --catalog production --schema public
 ```
 
 **Pipeline Cloning**:
+
 ```bash
 # Clone a pipeline with same configuration
 databasin pipelines clone <pipeline-id>
@@ -156,6 +168,7 @@ databasin pipelines clone 8901 --dry-run
 ```
 
 **Bulk Operations**:
+
 ```bash
 # Get multiple connectors at once
 databasin connectors get 5459,5765,5543
@@ -237,6 +250,7 @@ databasin projects list --fields id,name,status
 ## Documentation
 
 **View docs directly in your terminal:**
+
 ```bash
 databasin docs                      # List all available documentation
 databasin docs quickstart           # View raw markdown (good for piping)
@@ -246,22 +260,23 @@ databasin docs download             # Download all for offline use
 
 **Or browse online:**
 
-| Guide | Description |
-|-------|-------------|
-| [Quickstart](./docs/quickstart.md) | Get up and running |
-| [Examples](./EXAMPLES.md) | Comprehensive usage examples |
-| [Projects Guide](./docs/projects-guide.md) | Project management |
-| [Connectors Guide](./docs/connectors-guide.md) | Data connector operations |
-| [Pipelines Guide](./docs/pipelines-guide.md) | Pipeline creation and execution |
-| [Automations Guide](./docs/automations-guide.md) | Automation workflows |
-| [Usage Metrics Guide](./docs/usage-guide.md) | Usage tracking and analytics |
-| [Observability Guide](./docs/observability-guide.md) | Logs, history, and monitoring |
-| [Shell Completions](./docs/shell-completion.md) | Bash/Zsh/Fish setup |
-| [Developer Guide](./docs/developers.md) | Local dev, SDK usage, releases |
+| Guide                                                | Description                     |
+| ---------------------------------------------------- | ------------------------------- |
+| [Quickstart](./docs/quickstart.md)                   | Get up and running              |
+| [Examples](./EXAMPLES.md)                            | Comprehensive usage examples    |
+| [Projects Guide](./docs/projects-guide.md)           | Project management              |
+| [Connectors Guide](./docs/connectors-guide.md)       | Data connector operations       |
+| [Pipelines Guide](./docs/pipelines-guide.md)         | Pipeline creation and execution |
+| [Automations Guide](./docs/automations-guide.md)     | Automation workflows            |
+| [Usage Metrics Guide](./docs/usage-guide.md)         | Usage tracking and analytics    |
+| [Observability Guide](./docs/observability-guide.md) | Logs, history, and monitoring   |
+| [Shell Completions](./docs/shell-completion.md)      | Bash/Zsh/Fish setup             |
+| [Developer Guide](./docs/developers.md)              | Local dev, SDK usage, releases  |
 
 ## Performance Tips
 
 ### Use Context for Repeated Operations
+
 ```bash
 # Set context once
 databasin set project <project-id>
@@ -274,6 +289,7 @@ databasin sql discover        # Uses connector context
 ```
 
 ### Leverage Caching
+
 ```bash
 # Caching is automatic (5-minute TTL by default)
 databasin connectors list     # Fetches from API
@@ -284,6 +300,7 @@ databasin connectors list --no-cache
 ```
 
 ### Use Bulk Operations
+
 ```bash
 # Bad - multiple sequential calls
 databasin connectors get 5459
